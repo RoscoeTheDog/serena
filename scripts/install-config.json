@@ -1,0 +1,8 @@
+{
+  "embeddingProvider": "OpenAI",
+  "embeddingModel": "text-embedding-3-small",
+  "apiKeys": {
+    "openai": ""
+  },
+  "verbose": false
+}
