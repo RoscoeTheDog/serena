@@ -1,113 +1,49 @@
-# CLAUDE.md
+# MCP:CC+S+N (i:155f,2997c,sync+) (s:4mem,proj+,onb+) (n:f73af845-8eef-40c9-a0e4-fcd7def413fa)
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+**CMD**: cc:search/index/clear/status s:project/symbol/file/memory/shell/workflow n:search/page/db/comment/content/block
+**SYNC**: cc:sync+/sync-/sync?/sync! perf:ok s:lsp/restart
+**OPS**: s:find/refs/insert/replace/regex/execute cc:stats/perf/health/history n:create/update/track/comment
+**MAINT**: cc:status→sync? s:memories n:search <50t/cycle  
 
-## Development Commands
+**WORKFLOWS**:
+- Index: cc:search→results (READY)
+- Project: s:activate→onboard→memory→overview (ACTIVE)
+- Symbol: s:find→refs→overview→insert/replace
+- Refactor: s:symbol→cc:search→s:replace→test→cc:sync!
+- Debug: cc:search("error")→s:find→refs→fix→s:shell→cc:sync!
+- Memory: s:read→analyze→write→persist (4 available)
+- LSP: s:restart→find→overview→edit
+- Monitor: cc:health→perf→history→s:memory→stats
+- Content: n:search→comment→track
+- Database: n:search→db→entry→update
+- Integration: n:search→workspace
+- Docs: cc:change→s:impact→n:update
 
-**Essential Commands (use these exact commands):**
-- `uv run poe format` - Format code (BLACK + RUFF) - ONLY allowed formatting command
-- `uv run poe type-check` - Run mypy type checking - ONLY allowed type checking command  
-- `uv run poe test` - Run tests with default markers (excludes java/rust by default)
-- `uv run poe test -m "python or go"` - Run specific language tests
-- `uv run poe lint` - Check code style without fixing
+**SAFETY**: Read→exists→glob→search→backup  
+**ERR**: file_not_read→cascade permission→0.1s→retry busy→0.2s→retry
+**AUTO**: DB=f73af845-8eef-40c9-a0e4-fcd7def413fa sync=on filter≤10 cache=15m O(1)
+**PATTERNS**: lib=adding_new_language_support_guide perf=serena_core_concepts_and_architecture
 
-**Test Markers:**
-Available pytest markers for selective testing:
-- `python`, `go`, `java`, `rust`, `typescript`, `php`, `csharp`, `elixir`, `terraform`, `clojure`, `swift`, `bash`, `ruby`, `ruby_solargraph`
-- `snapshot` - for symbolic editing operation tests
+**EXEC**:
+- discovery: cc:search→results (155f indexed)
+- indexing: cc:status→sync+ (COMPLETE)
+- realtime: cc:sync+→sync?→sync! (ENABLED)
+- monitor: cc:health→perf→stats→history
+- project: s:activate→onboard→config→prepare (READY)
+- symbol: s:find→refs→overview→insert→replace
+- file: s:create→read→find→search→regex→list
+- memory: s:list→read→write→delete→persist (4mem)
+- shell: s:execute→test→build→run
+- workflow: s:modes→thinking→conversation→summary
+- lsp: s:restart→recover→optimize
+- docs: n:search→comment→track
+- safety: file→validate→retry
+- context: n:search(workspace)→content→load
+- notion: n:search→db→comment→block
 
-**Project Management:**
-- `uv run serena-mcp-server` - Start MCP server from project root
-- `uv run index-project` - Index project for faster tool performance
-
-**Always run format, type-check, and test before completing any task.**
-
-## Architecture Overview
-
-Serena is a dual-layer coding agent toolkit:
-
-### Core Components
-
-**1. SerenaAgent (`src/serena/agent.py`)**
-- Central orchestrator managing projects, tools, and user interactions
-- Coordinates language servers, memory persistence, and MCP server interface
-- Manages tool registry and context/mode configurations
-
-**2. SolidLanguageServer (`src/solidlsp/ls.py`)**  
-- Unified wrapper around Language Server Protocol (LSP) implementations
-- Provides language-agnostic interface for symbol operations
-- Handles caching, error recovery, and multiple language server lifecycle
-
-**3. Tool System (`src/serena/tools/`)**
-- **file_tools.py** - File system operations, search, regex replacements
-- **symbol_tools.py** - Language-aware symbol finding, navigation, editing
-- **memory_tools.py** - Project knowledge persistence and retrieval
-- **config_tools.py** - Project activation, mode switching
-- **workflow_tools.py** - Onboarding and meta-operations
-
-**4. Configuration System (`src/serena/config/`)**
-- **Contexts** - Define tool sets for different environments (desktop-app, agent, ide-assistant)
-- **Modes** - Operational patterns (planning, editing, interactive, one-shot)
-- **Projects** - Per-project settings and language server configs
-
-### Language Support Architecture
-
-Each supported language has:
-1. **Language Server Implementation** in `src/solidlsp/language_servers/`
-2. **Runtime Dependencies** - Automatic language server downloads when needed
-3. **Test Repository** in `test/resources/repos/<language>/`
-4. **Test Suite** in `test/solidlsp/<language>/`
-
-### Memory & Knowledge System
-
-- **Markdown-based storage** in `.serena/memories/` directories
-- **Project-specific knowledge** persistence across sessions
-- **Contextual retrieval** based on relevance
-- **Onboarding support** for new projects
-
-## Development Patterns
-
-### Adding New Languages
-1. Create language server class in `src/solidlsp/language_servers/`
-2. Add to Language enum in `src/solidlsp/ls_config.py` 
-3. Update factory method in `src/solidlsp/ls.py`
-4. Create test repository in `test/resources/repos/<language>/`
-5. Write test suite in `test/solidlsp/<language>/`
-6. Add pytest marker to `pyproject.toml`
-
-### Adding New Tools
-1. Inherit from `Tool` base class in `src/serena/tools/tools_base.py`
-2. Implement required methods and parameter validation
-3. Register in appropriate tool registry
-4. Add to context/mode configurations
-
-### Testing Strategy
-- Language-specific tests use pytest markers
-- Symbolic editing operations have snapshot tests
-- Integration tests in `test_serena_agent.py`
-- Test repositories provide realistic symbol structures
-
-## Configuration Hierarchy
-
-Configuration is loaded from (in order of precedence):
-1. Command-line arguments to `serena-mcp-server`
-2. Project-specific `.serena/project.yml`
-3. User config `~/.serena/serena_config.yml`
-4. Active modes and contexts
-
-## Key Implementation Notes
-
-- **Symbol-based editing** - Uses LSP for precise code manipulation
-- **Caching strategy** - Reduces language server overhead
-- **Error recovery** - Automatic language server restart on crashes
-- **Multi-language support** - 16+ languages with LSP integration
-- **MCP protocol** - Exposes tools to AI agents via Model Context Protocol
-- **Async operation** - Non-blocking language server interactions
-
-## Working with the Codebase
-
-- Project uses Python 3.11 with `uv` for dependency management
-- Strict typing with mypy, formatted with black + ruff
-- Language servers run as separate processes with LSP communication
-- Memory system enables persistent project knowledge
-- Context/mode system allows workflow customization
+**CONSTRAINTS**: no-create-files edit-existing-only no-proactive-docs
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
