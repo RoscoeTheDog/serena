@@ -98,7 +98,7 @@ class SerenaInstaller {
 
         try {
             // Test server startup with --help flag
-            const result = execSync('uvx --from git+https://github.com/oraios/serena serena --help', {
+            const result = execSync('uvx --from git+https://github.com/RoscoeTheDog/serena serena --help', {
                 encoding: 'utf8',
                 timeout: 30000,
                 stdio: 'pipe'
@@ -142,7 +142,7 @@ class SerenaInstaller {
                 "serena": {
                     command: "uvx",
                     args: [
-                        "--from", "git+https://github.com/oraios/serena",
+                        "--from", "git+https://github.com/RoscoeTheDog/serena",
                         "serena", "start-mcp-server",
                         "--context", "ide-assistant"
                     ]
@@ -184,7 +184,7 @@ class SerenaInstaller {
             }
 
             // Build the claude mcp add command for Serena
-            const command = 'claude mcp add serena uvx -- --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant -s user';
+            const command = 'claude mcp add serena uvx -- --from git+https://github.com/RoscoeTheDog/serena serena start-mcp-server --context ide-assistant -s user';
 
             // Execute the command to add MCP server to Claude Code CLI
             this.log('Adding Serena MCP server to Claude Code CLI with user scope...');
@@ -199,7 +199,7 @@ class SerenaInstaller {
                 this.success('Claude Code CLI MCP server already configured');
             } else {
                 this.log(`Warning: Failed to configure Claude Code CLI: ${error.message}`, 'error');
-                this.log('You may need to manually run: claude mcp add serena uvx -- --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant -s user');
+                this.log('You may need to manually run: claude mcp add serena uvx -- --from git+https://github.com/RoscoeTheDog/serena serena start-mcp-server --context ide-assistant -s user');
             }
         }
     }
