@@ -16,6 +16,7 @@ from serena.tools import (
     ToolMarkerSymbolicRead,
 )
 from serena.tools.tools_base import ToolMarkerOptional
+from serena.util.symbol_cache import get_global_cache
 from solidlsp.ls_types import SymbolKind
 
 
@@ -135,6 +136,19 @@ class GetSymbolsOverviewTool(Tool, ToolMarkerSymbolicRead):
             Don't adjust unless there is really no other way to get the content required for the task.
         :return: a JSON object containing info about top-level symbols in the file
         """
+        # Use cache for symbol overview
+        cache = get_global_cache(self.project.project_root)
+        query_params = {"tool": "get_symbols_overview"}
+        
+        # Try cache first
+        cache_hit, cached_data, cache_metadata = cache.get(relative_path, query_params)
+        if cache_hit:
+            # Return cached result with metadata
+            result = json.loads(cached_data)
+            result["_cache"] = cache_metadata
+            return self._limit_length(json.dumps(result), max_answer_chars)
+        
+        # Cache miss - perform query
         symbol_retriever = self.create_language_server_symbol_retriever()
         file_path = os.path.join(self.project.project_root, relative_path)
 
@@ -152,6 +166,11 @@ class GetSymbolsOverviewTool(Tool, ToolMarkerSymbolicRead):
             "file": relative_path,
             "symbols": symbol_list
         }
+        
+        # Cache the result
+        cache_metadata = cache.put(relative_path, json.dumps(optimized_result), query_params)
+        optimized_result["_cache"] = cache_metadata
+        
         result_json_str = json.dumps(optimized_result)
         return self._limit_length(result_json_str, max_answer_chars)
 
@@ -223,6 +242,31 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             -1 means the default value from the config will be used.
         :return: a list of symbols (with locations) matching the name.
         """
+        # Only use cache for single-file queries (not directory/global searches)
+        cache = get_global_cache(self.project.project_root)
+        use_cache = relative_path and os.path.isfile(os.path.join(self.project.project_root, relative_path))
+
+        if use_cache:
+            # Build query params for cache key
+            query_params = {
+                "name_path": name_path,
+                "depth": depth,
+                "include_body": include_body,
+                "include_kinds": include_kinds,
+                "exclude_kinds": exclude_kinds,
+                "substring_matching": substring_matching,
+                "tool": "find_symbol"
+            }
+
+            # Try cache first
+            cache_hit, cached_data, cache_metadata = cache.get(relative_path, query_params)
+            if cache_hit:
+                # Return cached result with metadata
+                result = json.loads(cached_data)
+                result["_cache"] = cache_metadata
+                return self._limit_length(json.dumps(result), max_answer_chars)
+
+        # Cache miss or not cacheable - perform query
         parsed_include_kinds: Sequence[SymbolKind] | None = [SymbolKind(k) for k in include_kinds] if include_kinds else None
         parsed_exclude_kinds: Sequence[SymbolKind] | None = [SymbolKind(k) for k in exclude_kinds] if exclude_kinds else None
         symbol_retriever = self.create_language_server_symbol_retriever()
@@ -236,6 +280,12 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         )
         symbol_dicts = [_sanitize_symbol_dict(s.to_dict(kind=True, location=True, depth=depth, include_body=include_body)) for s in symbols]
         optimized_result = _optimize_symbol_list(symbol_dicts)
+
+        # Cache the result if single-file query
+        if use_cache:
+            cache_metadata = cache.put(relative_path, json.dumps(optimized_result), query_params)
+            optimized_result["_cache"] = cache_metadata
+
         result = json.dumps(optimized_result)
         return self._limit_length(result, max_answer_chars)
 
@@ -331,6 +381,10 @@ class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
             body=body,
         )
         
+        # Invalidate cache for the edited file
+        cache = get_global_cache(self.project.project_root)
+        invalidated_count = cache.invalidate_file(relative_path)
+        
         # Generate response based on format
         if response_format == "summary":
             return json.dumps({
@@ -338,7 +392,8 @@ class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
                 "operation": "replace_symbol_body",
                 "file": relative_path,
                 "symbol": name_path,
-                "message": f"Successfully replaced body of '{name_path}' in {relative_path}"
+                "message": f"Successfully replaced body of '{name_path}' in {relative_path}",
+                "_cache_invalidated": invalidated_count
             }, indent=2)
         
         elif response_format == "full":
@@ -350,7 +405,8 @@ class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
                 "operation": "replace_symbol_body",
                 "file": relative_path,
                 "symbol": name_path,
-                "new_content": new_content
+                "new_content": new_content,
+                "_cache_invalidated": invalidated_count
             }, indent=2)
         
         else:  # diff (default)
@@ -367,7 +423,8 @@ class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
                     "operation": "replace_symbol_body",
                     "file": relative_path,
                     "symbol": name_path,
-                    "message": "No changes detected (content identical)"
+                    "message": "No changes detected (content identical)",
+                    "_cache_invalidated": invalidated_count
                 }, indent=2)
             
             return json.dumps({
@@ -376,7 +433,8 @@ class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
                 "file": relative_path,
                 "symbol": name_path,
                 "diff": diff_output,
-                "hint": "Use response_format='full' to see complete file content"
+                "hint": "Use response_format='full' to see complete file content",
+                "_cache_invalidated": invalidated_count
             }, indent=2)
 
 
@@ -415,6 +473,10 @@ class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
         code_editor = self.create_code_editor()
         code_editor.insert_after_symbol(name_path, relative_file_path=relative_path, body=body)
         
+        # Invalidate cache for the edited file
+        cache = get_global_cache(self.project.project_root)
+        invalidated_count = cache.invalidate_file(relative_path)
+        
         # Generate response based on format
         if response_format == "summary":
             return json.dumps({
@@ -422,7 +484,8 @@ class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
                 "operation": "insert_after_symbol",
                 "file": relative_path,
                 "symbol": name_path,
-                "message": f"Successfully inserted content after '{name_path}' in {relative_path}"
+                "message": f"Successfully inserted content after '{name_path}' in {relative_path}",
+                "_cache_invalidated": invalidated_count
             }, indent=2)
         
         elif response_format == "full":
@@ -434,7 +497,8 @@ class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
                 "operation": "insert_after_symbol",
                 "file": relative_path,
                 "symbol": name_path,
-                "new_content": new_content
+                "new_content": new_content,
+                "_cache_invalidated": invalidated_count
             }, indent=2)
         
         else:  # diff (default)
@@ -450,7 +514,8 @@ class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
                 "file": relative_path,
                 "symbol": name_path,
                 "diff": diff_output,
-                "hint": "Use response_format='full' to see complete file content"
+                "hint": "Use response_format='full' to see complete file content",
+                "_cache_invalidated": invalidated_count
             }, indent=2)
 
 
@@ -489,6 +554,10 @@ class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
         code_editor = self.create_code_editor()
         code_editor.insert_before_symbol(name_path, relative_file_path=relative_path, body=body)
         
+        # Invalidate cache for the edited file
+        cache = get_global_cache(self.project.project_root)
+        invalidated_count = cache.invalidate_file(relative_path)
+        
         # Generate response based on format
         if response_format == "summary":
             return json.dumps({
@@ -496,7 +565,8 @@ class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
                 "operation": "insert_before_symbol",
                 "file": relative_path,
                 "symbol": name_path,
-                "message": f"Successfully inserted content before '{name_path}' in {relative_path}"
+                "message": f"Successfully inserted content before '{name_path}' in {relative_path}",
+                "_cache_invalidated": invalidated_count
             }, indent=2)
         
         elif response_format == "full":
@@ -508,7 +578,8 @@ class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
                 "operation": "insert_before_symbol",
                 "file": relative_path,
                 "symbol": name_path,
-                "new_content": new_content
+                "new_content": new_content,
+                "_cache_invalidated": invalidated_count
             }, indent=2)
         
         else:  # diff (default)
@@ -524,5 +595,6 @@ class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
                 "file": relative_path,
                 "symbol": name_path,
                 "diff": diff_output,
-                "hint": "Use response_format='full' to see complete file content"
+                "hint": "Use response_format='full' to see complete file content",
+                "_cache_invalidated": invalidated_count
             }, indent=2)
