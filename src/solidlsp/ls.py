@@ -1065,6 +1065,10 @@ class SolidLanguageServer(ABC):
 
         flat_all_symbol_list: list[ls_types.UnifiedSymbolInformation] = []
         root_nodes: list[ls_types.UnifiedSymbolInformation] = []
+
+        # Counter for cooperative yielding to prevent CPU starvation
+        symbols_processed = 0
+
         for root_item in response:
             if "range" not in root_item and "location" not in root_item:
                 if root_item["kind"] in [SymbolKind.File, SymbolKind.Module]:
@@ -1086,12 +1090,20 @@ class SolidLanguageServer(ABC):
                 # TODO: l_tree should be a list of TreeRepr. Define the following function to return TreeRepr as well
 
                 def visit_tree_nodes_and_build_tree_repr(node: GenericDocumentSymbol) -> list[ls_types.UnifiedSymbolInformation]:
+                    nonlocal symbols_processed
                     node = cast(ls_types.UnifiedSymbolInformation, node)
                     l: list[ls_types.UnifiedSymbolInformation] = []
                     turn_item_into_symbol_with_children(node)
                     assert LSPConstants.CHILDREN in node
                     children = node[LSPConstants.CHILDREN]
                     l.append(node)
+
+                    # Cooperative yielding: yield CPU every 50 symbols to prevent system hang
+                    # This allows other processes to run without blocking the entire system
+                    symbols_processed += 1
+                    if symbols_processed % 50 == 0:
+                        sleep(0)  # Yield CPU to other processes/threads
+
                     for child in children:
                         l.extend(visit_tree_nodes_and_build_tree_repr(child))
                     return l
@@ -1099,6 +1111,11 @@ class SolidLanguageServer(ABC):
                 flat_all_symbol_list.extend(visit_tree_nodes_and_build_tree_repr(root_symbol))
             else:
                 flat_all_symbol_list.append(ls_types.UnifiedSymbolInformation(**root_symbol))
+
+            # Yield CPU after processing each root symbol
+            symbols_processed += 1
+            if symbols_processed % 50 == 0:
+                sleep(0)
 
         result = flat_all_symbol_list, root_nodes
         self.logger.log(f"Caching document symbols for {relative_file_path}", logging.DEBUG)
