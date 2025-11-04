@@ -627,6 +627,36 @@ Whenever Serena starts working on a project, the list of memories is
 provided, and the agent can decide to read them.
 We found that memories can significantly improve the user experience with Serena.
 
+### Automatic Project Onboarding
+
+Serena automatically onboards projects when you activate them for the first time.
+This creates basic memory files containing:
+
+- **Project overview**: Language, tech stack, platform
+- **Suggested commands**: Detected from package.json, Makefile, pyproject.toml, etc.
+- **Code style**: ESLint, Prettier, Black, Ruff, mypy configuration
+- **Task completion checklist**: Test and lint commands
+
+#### What Gets Detected
+
+- **Tech Stack**: Node.js, Python, Rust, Go, Ruby, Java (Maven/Gradle)
+- **Frameworks**: React, Next.js, Vue, Angular
+- **Build Tools**: Make, Docker, Docker Compose
+- **Package Managers**: npm, poetry, cargo, bundler
+- **Code Style**: ESLint, Prettier, Black, Ruff, mypy, EditorConfig
+
+#### Benefits
+
+- ⚡ **Instant**: Onboarding completes in <1 second
+- 🎯 **Automatic**: No manual exploration needed
+- 💾 **Efficient**: Saves 10,000-20,000 tokens per activation
+- 🔍 **Accurate**: Deterministic detection from configuration files
+
+#### Manual Onboarding
+
+For complex projects, you can still use the `onboarding` tool to perform
+deeper analysis or supplement auto-generated memories.
+
 ### Prepare Your Project
 
 #### Structure Your Codebase

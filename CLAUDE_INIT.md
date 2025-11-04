@@ -65,7 +65,7 @@ try {
   serenaWorking = true;
   serenaMemories = await mcp.serena.list_memories();
   serenaProject = await mcp.serena.get_current_config().catch(() => ({active_project: null}));
-  serenaOnboarding = await mcp.serena.check_onboarding_performed().catch(() => ({performed: false}));
+  serenaOnboarding = await mcp.serena.check_onboarding_performed().catch(() => ({performed: false})); // Now auto-performed on activation
 } catch (noProjectError) {
   if (noProjectError.message?.includes('No active project')) {
     // Try to activate current project automatically
@@ -75,7 +75,7 @@ try {
       serenaWorking = true;
       serenaMemories = await mcp.serena.list_memories().catch(() => []);
       serenaProject = await mcp.serena.get_current_config().catch(() => ({active_project: currentDir}));
-      serenaOnboarding = await mcp.serena.check_onboarding_performed().catch(() => ({performed: false}));
+      serenaOnboarding = await mcp.serena.check_onboarding_performed().catch(() => ({performed: false})); // Auto-performed during activation
       console.log('Serena MCP: Project activated successfully');
     } catch (activationError) {
       serenaWorking = false;

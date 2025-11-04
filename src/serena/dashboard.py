@@ -57,6 +57,15 @@ class SerenaDashboardAPI:
         return self._memory_log_handler
 
     def _setup_routes(self) -> None:
+        # Add after_request handler to disable caching
+        @self._app.after_request
+        def add_no_cache_headers(response: Response) -> Response:
+            """Disable caching for all dashboard responses."""
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
+
         # Static files
         @self._app.route("/dashboard/<path:filename>")
         def serve_dashboard(filename: str) -> Response:

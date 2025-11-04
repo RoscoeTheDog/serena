@@ -25,6 +25,19 @@ class ActivateProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject):
         """
         active_project = self.agent.activate_project_from_path_or_name(project)
 
+        # Ensure project.yml exists (in case project was registered but .serena was deleted)
+        from pathlib import Path
+        project_yml_path = Path(active_project.path_to_project_yml())
+        if not project_yml_path.exists():
+            # Regenerate project.yml from existing project config
+            from serena.config.serena_config import ProjectConfig
+            ProjectConfig.autogenerate(
+                active_project.project_root,
+                project_name=active_project.project_name,
+                project_language=active_project.language,
+                save_to_disk=True
+            )
+
         # Check if a parent project was used instead of the requested path
         used_parent = hasattr(active_project, '_used_parent_path') and hasattr(active_project, '_requested_path')
 
