@@ -431,6 +431,12 @@ class SerenaAgent:
         """
         :return: whether this agent uses language server-based code analysis
         """
+        from solidlsp.ls_config import Language
+
+        # Skip LSP for languages that don't support it
+        if self._active_project and self._active_project.language == Language.MARKDOWN:
+            return False
+
         return not self.serena_config.jetbrains
 
     def _activate_project(self, project: Project) -> None:
@@ -673,6 +679,12 @@ class SerenaAgent:
         """
         Starts/resets the language server for the current project
         """
+        # Skip for non-LSP languages
+        if not self.is_using_language_server():
+            log.info("Language server not applicable for this language")
+            self.language_server = None
+            return
+
         tool_timeout = self.serena_config.tool_timeout
         if tool_timeout is None or tool_timeout < 0:
             ls_timeout = None

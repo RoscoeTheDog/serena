@@ -277,7 +277,7 @@ class Project:
         log_level: int = logging.INFO,
         ls_timeout: float | None = DEFAULT_TOOL_TIMEOUT - 5,
         trace_lsp_communication: bool = False,
-    ) -> SolidLanguageServer:
+    ) -> SolidLanguageServer | None:
         """
         Create a language server for a project. Note that you will have to start it
         before performing any LS operations.
@@ -287,8 +287,13 @@ class Project:
         :param log_level: the log level for the language server
         :param ls_timeout: the timeout for the language server
         :param trace_lsp_communication: whether to trace LSP communication
-        :return: the language server
+        :return: the language server, or None if language doesn't support LSP
         """
+        # Skip LSP for languages that don't need/support it
+        if self.language == Language.MARKDOWN:
+            log.info(f"Skipping language server initialization for {self.language} (not required)")
+            return None
+
         ls_config = LanguageServerConfig(
             code_language=self.language,
             ignored_paths=self._ignored_patterns,
