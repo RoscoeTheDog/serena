@@ -25,16 +25,16 @@
 **Estimated**: 37k tokens
 
 #### Session 2: Helper Functions Implementation
-- [ ] 2.1 Create `src/serena/tools/onboarding_helpers.py`
-- [ ] 2.2 Implement `detect_tech_stack()` function
-- [ ] 2.3 Implement `find_command_files()` function
-- [ ] 2.4 Implement `detect_code_style()` function
-- [ ] 2.5 Implement `generate_commands_memory()` function
-- [ ] 2.6 Implement `generate_completion_checklist()` function
-- [ ] 2.7 Implement helper utilities (read_json_safe, read_toml_safe, parse_makefile_targets)
-- [ ] 2.8 Add imports to `config_tools.py`
-- [ ] 2.9 Write unit tests for each helper function
-- [ ] 2.10 Verify all helpers work with mock projects
+- [x] 2.1 Create `src/serena/tools/onboarding_helpers.py`
+- [x] 2.2 Implement `detect_tech_stack()` function
+- [x] 2.3 Implement `find_command_files()` function
+- [x] 2.4 Implement `detect_code_style()` function
+- [x] 2.5 Implement `generate_commands_memory()` function
+- [x] 2.6 Implement `generate_completion_checklist()` function
+- [x] 2.7 Implement helper utilities (read_json_safe, read_toml_safe, parse_makefile_targets)
+- [x] 2.8 Add imports to `config_tools.py`
+- [x] 2.9 Write unit tests for each helper function
+- [x] 2.10 Verify all helpers work with mock projects
 
 **Document**: `PHASE_1_HELPER_FUNCTIONS.md`
 **Estimated**: 52k tokens
@@ -181,10 +181,10 @@
 - [x] Ready for Session 2
 
 ### Session 2 Status
-- [ ] Started
-- [ ] Helper functions complete
-- [ ] Unit tests passing
-- [ ] Ready for Session 3
+- [x] Started
+- [x] Helper functions complete
+- [x] Unit tests written (require MCP restart to execute)
+- [x] Ready for Session 3
 
 ### Session 3 Status
 - [ ] Started

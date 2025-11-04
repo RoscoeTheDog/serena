@@ -3,6 +3,13 @@ import platform
 
 from serena.config.context_mode import SerenaAgentMode
 from serena.tools import Tool, ToolMarkerDoesNotRequireActiveProject, ToolMarkerOptional
+from serena.tools.onboarding_helpers import (
+    detect_tech_stack,
+    find_command_files,
+    detect_code_style,
+    generate_commands_memory,
+    generate_completion_checklist,
+)
 
 
 class ActivateProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject):
@@ -151,74 +158,24 @@ additional information as you work with the project.
         }
 
     def _detect_tech_stack(self, project) -> str:
-        """
-        Detect tech stack from project files.
-
-        NOTE: This is a stub - full implementation in onboarding_helpers.py (Session 2)
-        """
-        # Temporary stub - return simple detection
-        if project.relative_path_exists("package.json"):
-            return "Node.js/npm"
-        elif project.relative_path_exists("pyproject.toml"):
-            return "Python"
-        elif project.relative_path_exists("Cargo.toml"):
-            return "Rust/Cargo"
-        else:
-            return "Unknown"
+        """Wrapper for tech stack detection."""
+        return detect_tech_stack(project)
 
     def _find_command_files(self, project) -> dict:
-        """
-        Find command definitions from configuration files.
-
-        NOTE: This is a stub - full implementation in onboarding_helpers.py (Session 2)
-        """
-        # Temporary stub - return empty dict
-        return {}
+        """Wrapper for command file detection."""
+        return find_command_files(project)
 
     def _detect_code_style(self, project) -> str:
-        """
-        Detect code style configuration.
-
-        NOTE: This is a stub - full implementation in onboarding_helpers.py (Session 2)
-        """
-        # Temporary stub - return empty string
-        return ""
+        """Wrapper for code style detection."""
+        return detect_code_style(project)
 
     def _generate_commands_memory(self, commands: dict, project) -> str:
-        """
-        Generate suggested_commands.md content.
-
-        NOTE: This is a stub - full implementation in onboarding_helpers.py (Session 2)
-        """
-        # Temporary stub - return basic template
-        return f"""# Suggested Commands for {project.project_name}
-
-## Auto-Detected Commands
-
-_No commands detected yet. Full detection will be implemented in Session 2._
-
-## Common Development Commands
-
-- `git status` - Check git status
-- `git diff` - View changes
-"""
+        """Wrapper for commands memory generation."""
+        return generate_commands_memory(commands, project)
 
     def _generate_completion_checklist(self, commands: dict) -> str:
-        """
-        Generate task_completion_checklist.md content.
-
-        NOTE: This is a stub - full implementation in onboarding_helpers.py (Session 2)
-        """
-        # Temporary stub - return basic checklist
-        return """# Task Completion Checklist
-
-## When You Complete a Task
-
-- [ ] All tests pass
-- [ ] Code is properly formatted
-- [ ] No linting errors
-- [ ] Git commit created with descriptive message
-"""
+        """Wrapper for completion checklist generation."""
+        return generate_completion_checklist(commands)
 
 
 class RemoveProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMarkerOptional):
