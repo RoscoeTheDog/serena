@@ -42,6 +42,10 @@ class PyrightServer(SolidLanguageServer):
             solidlsp_settings,
         )
 
+        # Set request timeout to prevent indefinite stalls on complex operations
+        # Pyright can hang on documentSymbol requests for large/complex files
+        self.set_request_timeout(240.0)  # 240 seconds (4 minutes) for document symbol requests
+
         # Event to signal when initial workspace analysis is complete
         self.analysis_complete = threading.Event()
         self.found_source_files = False

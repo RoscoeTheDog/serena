@@ -14,6 +14,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from copy import copy
 from pathlib import Path, PurePath
+import time
 from time import sleep
 from typing import Self, Union, cast
 
@@ -984,23 +985,40 @@ class SolidLanguageServer(ABC):
                 else:
                     self.logger.log(f"No cache hit for symbols with {include_body=} in {relative_file_path}", logging.DEBUG)
 
-            self.logger.log(f"Requesting document symbols for {relative_file_path} from the Language Server", logging.DEBUG)
-            response = self.server.send.document_symbol(
-                {"textDocument": {"uri": pathlib.Path(os.path.join(self.repository_root_path, relative_file_path)).as_uri()}}
+            self.logger.log(
+                f"Requesting document symbols for {relative_file_path} (include_body={include_body}) from the Language Server",
+                logging.DEBUG
             )
-            if response is None:
+
+            start_time = time.time()
+            try:
+                response = self.server.send.document_symbol(
+                    {"textDocument": {"uri": pathlib.Path(os.path.join(self.repository_root_path, relative_file_path)).as_uri()}}
+                )
+                elapsed = time.time() - start_time
+
+                if response is None:
+                    self.logger.log(
+                        f"Received None response from the Language Server for document symbols in {relative_file_path}. "
+                        f"This means the language server can't understand this file (possibly due to syntax errors). It may also be due to a bug or misconfiguration of the LS. "
+                        f"Returning empty list",
+                        logging.WARNING,
+                    )
+                    return [], []
+
+                assert isinstance(response, list), f"Unexpected response from Language Server: {response}"
                 self.logger.log(
-                    f"Received None response from the Language Server for document symbols in {relative_file_path}. "
-                    f"This means the language server can't understand this file (possibly due to syntax errors). It may also be due to a bug or misconfiguration of the LS. "
-                    f"Returning empty list",
-                    logging.WARNING,
+                    f"Received {len(response)} document symbols for {relative_file_path} from the Language Server in {elapsed:.2f}s",
+                    logging.DEBUG,
+                )
+            except TimeoutError as e:
+                elapsed = time.time() - start_time
+                self.logger.log(
+                    f"Timeout after {elapsed:.2f}s requesting document symbols for {relative_file_path} with include_body={include_body}. "
+                    f"LSP request exceeded {self._request_timeout}s timeout. Returning empty result to allow graceful degradation.",
+                    logging.WARNING
                 )
                 return [], []
-            assert isinstance(response, list), f"Unexpected response from Language Server: {response}"
-            self.logger.log(
-                f"Received {len(response)} document symbols for {relative_file_path} from the Language Server",
-                logging.DEBUG,
-            )
 
         def turn_item_into_symbol_with_children(item: GenericDocumentSymbol):
             item = cast(ls_types.UnifiedSymbolInformation, item)
@@ -1023,7 +1041,17 @@ class SolidLanguageServer(ABC):
             if "relativePath" not in location:
                 location["relativePath"] = relative_file_path
             if include_body:
-                item["body"] = self.retrieve_symbol_body(item)
+                # Optimization: Read body from filesystem to avoid LSP overhead
+                # Safe because LSP already validated the file by returning symbols
+                try:
+                    item["body"] = self._retrieve_symbol_body_from_filesystem(item, relative_file_path)
+                except Exception as e:
+                    # Fallback to LSP-based retrieval if filesystem fails
+                    self.logger.log(
+                        f"Filesystem body retrieval failed for {item.get('name', 'unknown')}, using LSP fallback: {e}",
+                        logging.DEBUG
+                    )
+                    item["body"] = self.retrieve_symbol_body(item)
             # handle missing selectionRange
             if "selectionRange" not in item:
                 if "range" in item:
@@ -1292,6 +1320,48 @@ class SolidLanguageServer(ABC):
         assert isinstance(response, dict)
 
         return ls_types.Hover(**response)
+
+    def _retrieve_symbol_body_from_filesystem(
+        self,
+        symbol: ls_types.UnifiedSymbolInformation,
+        relative_file_path: str
+    ) -> str:
+        """
+        Retrieve symbol body directly from filesystem without LSP overhead.
+        
+        This is safe to use AFTER LSP has validated the file by returning symbols,
+        as it avoids the overhead of nested open_file() calls that can cause timeouts.
+        
+        :param symbol: The symbol whose body to retrieve
+        :param relative_file_path: The relative path to the file containing the symbol
+        :return: The symbol body as a string
+        :raises: Exception if filesystem read fails (caller should fallback to LSP)
+        """
+        absolute_path = os.path.join(self.repository_root_path, relative_file_path)
+
+        try:
+            with open(absolute_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except Exception as e:
+            self.logger.log(
+                f"Failed to read {relative_file_path} from filesystem: {e}",
+                logging.WARNING
+            )
+            raise
+
+        start_line = symbol["location"]["range"]["start"]["line"]
+        end_line = symbol["location"]["range"]["end"]["line"]
+        start_col = symbol["location"]["range"]["start"]["character"]
+
+        if start_line >= len(lines) or end_line >= len(lines):
+            raise ValueError(f"Symbol range [{start_line}:{end_line}] exceeds file length {len(lines)}")
+
+        body_lines = lines[start_line:end_line + 1]
+        if body_lines:
+            # Remove leading indentation from first line
+            body_lines[0] = body_lines[0][start_col:]
+
+        return ''.join(body_lines)
 
     def retrieve_symbol_body(self, symbol: ls_types.UnifiedSymbolInformation | LSPTypes.DocumentSymbol | LSPTypes.SymbolInformation) -> str:
         """
