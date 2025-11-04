@@ -35,6 +35,78 @@ def _sanitize_symbol_dict(symbol_dict: dict[str, Any]) -> dict[str, Any]:
     return symbol_dict
 
 
+def _optimize_symbol_list(symbol_dicts: list[dict[str, Any]]) -> dict[str, Any]:
+    """
+    Optimize a list of symbol dictionaries by factoring out repeated values.
+    
+    Returns a structured dictionary with:
+    - _schema: version marker
+    - file or files: the file path(s) (factored out if all symbols are from same file)
+    - symbols: list of symbols with redundant fields removed
+    """
+    if not symbol_dicts:
+        return {"_schema": "structured_v1", "symbols": []}
+    
+    # Check if all symbols have the same relative_path
+    relative_paths = {s.get("relative_path") for s in symbol_dicts if "relative_path" in s}
+    
+    if len(relative_paths) == 1:
+        # Single file - factor out the path
+        common_path = relative_paths.pop()
+        optimized_symbols = []
+        for s in symbol_dicts:
+            optimized = {k: v for k, v in s.items() if k != "relative_path" and v is not None}
+            optimized_symbols.append(optimized)
+        
+        return {
+            "_schema": "structured_v1",
+            "file": common_path,
+            "symbols": optimized_symbols
+        }
+    else:
+        # Multiple files - keep relative_path but remove null values
+        optimized_symbols = []
+        for s in symbol_dicts:
+            optimized = {k: v for k, v in s.items() if v is not None}
+            optimized_symbols.append(optimized)
+        
+        return {
+            "_schema": "structured_v1", 
+            "symbols": optimized_symbols
+        }
+
+
+def _generate_unified_diff(
+    old_content: str,
+    new_content: str,
+    filepath: str,
+    context_lines: int = 3
+) -> str:
+    """
+    Generate a unified diff between old and new content.
+    
+    :param old_content: The original file content
+    :param new_content: The modified file content
+    :param filepath: The file path for the diff header
+    :param context_lines: Number of context lines to show (default: 3)
+    :return: Unified diff string
+    """
+    import difflib
+    
+    old_lines = old_content.splitlines(keepends=True)
+    new_lines = new_content.splitlines(keepends=True)
+    
+    diff = difflib.unified_diff(
+        old_lines,
+        new_lines,
+        fromfile=f"a/{filepath}",
+        tofile=f"b/{filepath}",
+        n=context_lines
+    )
+    
+    return "".join(diff)
+
+
 class RestartLanguageServerTool(Tool, ToolMarkerOptional):
     """Restarts the language server, may be necessary when edits not through Serena happen."""
 
@@ -73,7 +145,14 @@ class GetSymbolsOverviewTool(Tool, ToolMarkerSymbolicRead):
         if os.path.isdir(file_path):
             raise ValueError(f"Expected a file path, but got a directory path: {relative_path}. ")
         result = symbol_retriever.get_symbol_overview(relative_path)[relative_path]
-        result_json_str = json.dumps([dataclasses.asdict(i) for i in result])
+        # Optimize: since all symbols are from the same file, use structured format
+        symbol_list = [dataclasses.asdict(i) for i in result]
+        optimized_result = {
+            "_schema": "structured_v1",
+            "file": relative_path,
+            "symbols": symbol_list
+        }
+        result_json_str = json.dumps(optimized_result)
         return self._limit_length(result_json_str, max_answer_chars)
 
 
@@ -156,7 +235,8 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             within_relative_path=relative_path,
         )
         symbol_dicts = [_sanitize_symbol_dict(s.to_dict(kind=True, location=True, depth=depth, include_body=include_body)) for s in symbols]
-        result = json.dumps(symbol_dicts)
+        optimized_result = _optimize_symbol_list(symbol_dicts)
+        result = json.dumps(optimized_result)
         return self._limit_length(result, max_answer_chars)
 
 
@@ -208,7 +288,8 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
                 )
                 ref_dict["content_around_reference"] = content_around_ref.to_display_string()
             reference_dicts.append(ref_dict)
-        result = json.dumps(reference_dicts)
+        optimized_result = _optimize_symbol_list(reference_dicts)
+        result = json.dumps(optimized_result)
         return self._limit_length(result, max_answer_chars)
 
 
@@ -222,6 +303,7 @@ class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
         name_path: str,
         relative_path: str,
         body: str,
+        response_format: str = "diff",
     ) -> str:
         r"""
         Replaces the body of the symbol with the given `name_path`.
@@ -230,14 +312,72 @@ class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
         :param relative_path: the relative path to the file containing the symbol
         :param body: the new symbol body. Important: Begin directly with the symbol definition and provide no
             leading indentation for the first line (but do indent the rest of the body according to the context).
+        :param response_format: output format - "diff" (default, concise unified diff), 
+            "summary" (brief confirmation), or "full" (complete file content)
         """
+        import os
+        
+        # Read old content if diff or full format requested
+        if response_format in ("diff", "full"):
+            full_path = os.path.join(self.agent.project_root, relative_path)
+            with open(full_path, "r", encoding="utf-8") as f:
+                old_content = f.read()
+        
+        # Perform the edit
         code_editor = self.create_code_editor()
         code_editor.replace_body(
             name_path,
             relative_file_path=relative_path,
             body=body,
         )
-        return SUCCESS_RESULT
+        
+        # Generate response based on format
+        if response_format == "summary":
+            return json.dumps({
+                "status": "success",
+                "operation": "replace_symbol_body",
+                "file": relative_path,
+                "symbol": name_path,
+                "message": f"Successfully replaced body of '{name_path}' in {relative_path}"
+            }, indent=2)
+        
+        elif response_format == "full":
+            full_path = os.path.join(self.agent.project_root, relative_path)
+            with open(full_path, "r", encoding="utf-8") as f:
+                new_content = f.read()
+            return json.dumps({
+                "status": "success",
+                "operation": "replace_symbol_body",
+                "file": relative_path,
+                "symbol": name_path,
+                "new_content": new_content
+            }, indent=2)
+        
+        else:  # diff (default)
+            full_path = os.path.join(self.agent.project_root, relative_path)
+            with open(full_path, "r", encoding="utf-8") as f:
+                new_content = f.read()
+            
+            diff_output = _generate_unified_diff(old_content, new_content, relative_path)
+            
+            if not diff_output:
+                # No changes detected
+                return json.dumps({
+                    "status": "success",
+                    "operation": "replace_symbol_body",
+                    "file": relative_path,
+                    "symbol": name_path,
+                    "message": "No changes detected (content identical)"
+                }, indent=2)
+            
+            return json.dumps({
+                "status": "success",
+                "operation": "replace_symbol_body",
+                "file": relative_path,
+                "symbol": name_path,
+                "diff": diff_output,
+                "hint": "Use response_format='full' to see complete file content"
+            }, indent=2)
 
 
 class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
@@ -250,6 +390,7 @@ class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
         name_path: str,
         relative_path: str,
         body: str,
+        response_format: str = "diff",
     ) -> str:
         """
         Inserts the given body/content after the end of the definition of the given symbol (via the symbol's location).
@@ -259,10 +400,58 @@ class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
         :param relative_path: the relative path to the file containing the symbol
         :param body: the body/content to be inserted. The inserted code shall begin with the next line after
             the symbol.
+        :param response_format: output format - "diff" (default, concise unified diff), 
+            "summary" (brief confirmation), or "full" (complete file content)
         """
+        import os
+        
+        # Read old content if diff or full format requested
+        if response_format in ("diff", "full"):
+            full_path = os.path.join(self.agent.project_root, relative_path)
+            with open(full_path, "r", encoding="utf-8") as f:
+                old_content = f.read()
+        
+        # Perform the edit
         code_editor = self.create_code_editor()
         code_editor.insert_after_symbol(name_path, relative_file_path=relative_path, body=body)
-        return SUCCESS_RESULT
+        
+        # Generate response based on format
+        if response_format == "summary":
+            return json.dumps({
+                "status": "success",
+                "operation": "insert_after_symbol",
+                "file": relative_path,
+                "symbol": name_path,
+                "message": f"Successfully inserted content after '{name_path}' in {relative_path}"
+            }, indent=2)
+        
+        elif response_format == "full":
+            full_path = os.path.join(self.agent.project_root, relative_path)
+            with open(full_path, "r", encoding="utf-8") as f:
+                new_content = f.read()
+            return json.dumps({
+                "status": "success",
+                "operation": "insert_after_symbol",
+                "file": relative_path,
+                "symbol": name_path,
+                "new_content": new_content
+            }, indent=2)
+        
+        else:  # diff (default)
+            full_path = os.path.join(self.agent.project_root, relative_path)
+            with open(full_path, "r", encoding="utf-8") as f:
+                new_content = f.read()
+            
+            diff_output = _generate_unified_diff(old_content, new_content, relative_path)
+            
+            return json.dumps({
+                "status": "success",
+                "operation": "insert_after_symbol",
+                "file": relative_path,
+                "symbol": name_path,
+                "diff": diff_output,
+                "hint": "Use response_format='full' to see complete file content"
+            }, indent=2)
 
 
 class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
@@ -275,6 +464,7 @@ class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
         name_path: str,
         relative_path: str,
         body: str,
+        response_format: str = "diff",
     ) -> str:
         """
         Inserts the given content before the beginning of the definition of the given symbol (via the symbol's location).
@@ -284,7 +474,55 @@ class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
         :param name_path: name path of the symbol before which to insert content (definitions in the `find_symbol` tool apply)
         :param relative_path: the relative path to the file containing the symbol
         :param body: the body/content to be inserted before the line in which the referenced symbol is defined
+        :param response_format: output format - "diff" (default, concise unified diff), 
+            "summary" (brief confirmation), or "full" (complete file content)
         """
+        import os
+        
+        # Read old content if diff or full format requested
+        if response_format in ("diff", "full"):
+            full_path = os.path.join(self.agent.project_root, relative_path)
+            with open(full_path, "r", encoding="utf-8") as f:
+                old_content = f.read()
+        
+        # Perform the edit
         code_editor = self.create_code_editor()
         code_editor.insert_before_symbol(name_path, relative_file_path=relative_path, body=body)
-        return SUCCESS_RESULT
+        
+        # Generate response based on format
+        if response_format == "summary":
+            return json.dumps({
+                "status": "success",
+                "operation": "insert_before_symbol",
+                "file": relative_path,
+                "symbol": name_path,
+                "message": f"Successfully inserted content before '{name_path}' in {relative_path}"
+            }, indent=2)
+        
+        elif response_format == "full":
+            full_path = os.path.join(self.agent.project_root, relative_path)
+            with open(full_path, "r", encoding="utf-8") as f:
+                new_content = f.read()
+            return json.dumps({
+                "status": "success",
+                "operation": "insert_before_symbol",
+                "file": relative_path,
+                "symbol": name_path,
+                "new_content": new_content
+            }, indent=2)
+        
+        else:  # diff (default)
+            full_path = os.path.join(self.agent.project_root, relative_path)
+            with open(full_path, "r", encoding="utf-8") as f:
+                new_content = f.read()
+            
+            diff_output = _generate_unified_diff(old_content, new_content, relative_path)
+            
+            return json.dumps({
+                "status": "success",
+                "operation": "insert_before_symbol",
+                "file": relative_path,
+                "symbol": name_path,
+                "diff": diff_output,
+                "hint": "Use response_format='full' to see complete file content"
+            }, indent=2)

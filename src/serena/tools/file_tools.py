@@ -82,21 +82,95 @@ class CreateTextFileTool(Tool, ToolMarkerCanEdit):
         return json.dumps(answer)
 
 
+def _build_tree_format(dirs: list[str], files: list[str], base_path: str) -> str:
+    """
+    Build a collapsed tree format showing directories with file counts.
+
+    :param dirs: list of directory paths (relative)
+    :param files: list of file paths (relative)
+    :param base_path: the base path for relative display
+    :return: formatted tree string
+    """
+    # Build directory structure with file counts
+    dir_counts = defaultdict(int)
+    dir_files = defaultdict(list)
+
+    # Count files in each directory
+    for file_path in files:
+        dir_path = os.path.dirname(file_path)
+        if dir_path:
+            dir_counts[dir_path] += 1
+            dir_files[dir_path].append(os.path.basename(file_path))
+        else:
+            # Files in root
+            dir_counts["."] += 1
+            dir_files["."].append(file_path)
+
+    # Build tree structure
+    # Group directories by depth and parent
+    root_items = []
+    
+    # Separate immediate children from nested directories
+    immediate_dirs = set()
+    immediate_files = []
+    
+    for dir_path in sorted(dirs):
+        if "/" not in dir_path.replace("\\", "/"):
+            # Immediate subdirectory
+            immediate_dirs.add(dir_path)
+    
+    for file_path in sorted(files):
+        if "/" not in file_path.replace("\\", "/") and "\\" not in file_path:
+            # Immediate file
+            immediate_files.append(file_path)
+    
+    # Build output
+    lines = []
+    
+    # Show immediate directories with counts
+    for dir_path in sorted(immediate_dirs):
+        # Normalize path separators
+        normalized = dir_path.replace("\\", "/")
+        
+        # Count total files in this directory tree (including subdirectories)
+        count = sum(1 for f in files if f.replace("\\", "/").startswith(normalized + "/"))
+        
+        if count > 0:
+            lines.append(f"{dir_path}/ ({count} files)")
+        else:
+            lines.append(f"{dir_path}/ (empty)")
+    
+    # Show immediate files
+    if immediate_files:
+        for file in immediate_files:
+            lines.append(file)
+    
+    # Add instructions
+    if immediate_dirs:
+        lines.append("")
+        example_dir = next(iter(sorted(immediate_dirs)))
+        lines.append(f"Expand with: list_dir(\"{example_dir}\", recursive=false)")
+    
+    return "\n".join(lines)
+
+
 class ListDirTool(Tool):
     """
     Lists files and directories in the given directory (optionally with recursion).
     """
 
-    def apply(self, relative_path: str, recursive: bool, max_answer_chars: int = -1) -> str:
+    def apply(self, relative_path: str, recursive: bool, format: str = "list", max_answer_chars: int = -1) -> str:
         """
         Lists all non-gitignored files and directories in the given directory (optionally with recursion).
 
         :param relative_path: the relative path to the directory to list; pass "." to scan the project root
         :param recursive: whether to scan subdirectories recursively
+        :param format: output format - "list" (default, full listing) or "tree" (collapsed tree with file counts)
         :param max_answer_chars: if the output is longer than this number of characters,
             no content will be returned. -1 means the default value from the config will be used.
             Don't adjust unless there is really no other way to get the content required for the task.
-        :return: a JSON object with the names of directories and files within the given directory
+        :return: a JSON object with the names of directories and files within the given directory (format="list"),
+                 or a tree-formatted string showing collapsed directories with file counts (format="tree")
         """
         # Check if the directory exists before validation
         if not self.project.relative_path_exists(relative_path):
@@ -117,7 +191,22 @@ class ListDirTool(Tool):
             is_ignored_file=self.project.is_ignored_path,
         )
 
-        result = json.dumps({"dirs": dirs, "files": files})
+        # Format output based on requested format
+        if format == "tree" and recursive:
+            # Tree format: collapsed directories with file counts
+            tree_output = _build_tree_format(dirs, files, relative_path)
+            result = json.dumps({
+                "_schema": "tree_v1",
+                "format": "tree",
+                "base_path": relative_path,
+                "tree": tree_output,
+                "total_dirs": len(dirs),
+                "total_files": len(files)
+            })
+        else:
+            # List format (default): full listing
+            result = json.dumps({"dirs": dirs, "files": files})
+        
         return self._limit_length(result, max_answer_chars)
 
 
