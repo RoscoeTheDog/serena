@@ -37,18 +37,31 @@ def find_serena_processes(verbose=False):
 
     for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'exe', 'environ']):
         try:
+            cmdline = proc.info.get('cmdline')
+            cmdline_str = ' '.join(cmdline) if cmdline else ''
+            proc_name = proc.info.get('name', '')
+
             # Method 1: Check for SERENA_MCP_SERVER environment variable (most reliable)
+            # BUT: Child processes inherit env vars, so also verify it's actually running Serena
             proc_environ = proc.info.get('environ')
             if proc_environ and proc_environ.get('SERENA_MCP_SERVER') == '1':
-                serena_processes.append(proc)
-                if verbose:
-                    cmdline = proc.info.get('cmdline', [])
-                    cmdline_str = ' '.join(cmdline) if cmdline else '<no cmdline>'
-                    print(f"  Found (env var): PID={proc.info['pid']}, CMD={cmdline_str[:100]}")
+                # Verify this is actually a Serena process, not a child (pyright, cmd.exe, etc.)
+                is_actually_serena = any([
+                    'serena' in cmdline_str.lower() and ('mcp' in cmdline_str.lower() or 'serena.cli' in cmdline_str.lower()),
+                    'serena-mcp-server' in cmdline_str.lower(),
+                    'serena-mcp-server' in proc_name.lower(),
+                ])
+
+                if is_actually_serena:
+                    serena_processes.append(proc)
+                    if verbose:
+                        print(f"  Found (env var): PID={proc.info['pid']}, CMD={cmdline_str[:100]}")
+                    continue
+                elif verbose:
+                    print(f"  Skipped (child process): PID={proc.info['pid']}, CMD={cmdline_str[:100]}")
                 continue
 
             # Method 2: Check process name (if setproctitle was used)
-            proc_name = proc.info.get('name', '')
             if proc_name and 'serena-mcp-server' in proc_name.lower():
                 serena_processes.append(proc)
                 if verbose:
@@ -56,11 +69,8 @@ def find_serena_processes(verbose=False):
                 continue
 
             # Method 3: Check command line (fallback for older versions)
-            cmdline = proc.info.get('cmdline')
             if not cmdline:
                 continue
-
-            cmdline_str = ' '.join(cmdline)
 
             # Identify Serena processes by looking for:
             # 1. Python process

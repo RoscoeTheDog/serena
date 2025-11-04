@@ -41,6 +41,8 @@ The script uses **three detection methods** to reliably identify Serena MCP serv
 1. **Environment Variable** (Most Reliable)
    - Checks for `SERENA_MCP_SERVER=1` environment variable
    - Set automatically by Serena when the MCP server starts
+   - **Validates** the process is actually Serena (not child processes like Pyright)
+   - Child processes inherit env vars, so command line is double-checked
    - Works even if the command line is obscured
 
 2. **Process Name** (If Available)
