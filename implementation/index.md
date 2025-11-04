@@ -1,6 +1,6 @@
 # Implementation Sprint: Token Efficiency Enhancements
 
-**Sprint Goal**: Reduce client token consumption by 50-75% while maintaining 100% accuracy
+**Sprint Goal**: Reduce client token consumption by 65-85% while maintaining 100% accuracy
 
 **Start Date**: 2025-01-04
 **Target Completion**: TBD
@@ -10,13 +10,14 @@
 
 ## Sprint Overview
 
-This sprint implements safe, high-impact token efficiency improvements for Serena's tool outputs. Focus is on Tier 1 (safe, high-impact) and Tier 2 (safe with guardrails) enhancements from the risk assessment.
+This sprint implements safe, high-impact token efficiency improvements for Serena's tool outputs. All enhancements are either zero-risk or low-risk with strong guardrails. No risky features included.
 
 **Success Metrics**:
-- 50-75% reduction in average tool output tokens
+- 65-85% reduction in average tool output tokens
 - Zero accuracy degradation
 - Full backward compatibility
 - LLM always has path to more detail when needed
+- All features either automatic-safe or explicit opt-in
 
 ---
 
@@ -26,17 +27,23 @@ This sprint implements safe, high-impact token efficiency improvements for Seren
 - **1** - Structural JSON Optimization [`unassigned`]
 - **2** - Diff-Based Edit Responses [`unassigned`]
 - **3** - Directory Tree Collapse [`unassigned`]
-- **4** - Cache with Hash Validation [`unassigned`]
+- **4** - Cache with Hash Validation & Delta Updates [`unassigned`]
 
 ### Phase 2: Intelligent Summarization (Low Risk with Guardrails)
 - **5** - Signature Mode with Complexity Warnings [`unassigned`]
-- **6** - Semantic Truncation with Section Inventory [`unassigned`]
+- **6** - Semantic Truncation with Context Markers [`unassigned`]
 - **7** - Smart Snippet Selection [`unassigned`]
 - **8** - Pattern Search Summaries [`unassigned`]
 
 ### Phase 3: Universal Controls (Infrastructure)
 - **9** - Verbosity Control System [`unassigned`]
 - **10** - Token Estimation Framework [`unassigned`]
+
+### Phase 4: Advanced Safe Features (Zero/Low Risk)
+- **11** - On-Demand Body Retrieval [`unassigned`]
+- **12** - Memory Metadata Tool [`unassigned`]
+- **13** - Reference Count Mode (Opt-In) [`unassigned`]
+- **14** - Exclude Generated Code (Transparent) [`unassigned`]
 
 ---
 
@@ -173,13 +180,13 @@ Expand with: list_dir("src/auth", recursive=false)
 
 ---
 
-### Story 4: Cache with Hash Validation
+### Story 4: Cache with Hash Validation & Delta Updates
 **Status**: `unassigned`
 **Risk Level**: 🟢 Low
-**Estimated Savings**: 80-100% on cache hits
-**Effort**: 3-4 days
+**Estimated Savings**: 80-100% on cache hits, 80-95% on incremental updates
+**Effort**: 4-5 days
 
-**Objective**: Implement file-hash-based caching for symbol and search results.
+**Objective**: Implement file-hash-based caching for symbol and search results, with delta updates for changed files.
 
 **Scope**:
 - Add cache key generation (file path + content hash)
@@ -187,6 +194,7 @@ Expand with: list_dir("src/auth", recursive=false)
 - Cache find_symbol results
 - Automatic invalidation on file changes
 - Return cache metadata in responses
+- **Delta updates**: Return only changed symbols/files instead of full project state
 
 **Acceptance Criteria**:
 - [ ] Symbol queries return cache keys
@@ -195,6 +203,8 @@ Expand with: list_dir("src/auth", recursive=false)
 - [ ] Cache hit returns minimal response
 - [ ] Cache miss returns full result + new key
 - [ ] Memory usage stays reasonable (LRU eviction)
+- [ ] **Delta updates show only what changed between cache versions**
+- [ ] **Delta includes added/modified/removed symbols**
 
 **Files to Modify**:
 - `src/serena/symbol.py` (add caching layer)
@@ -213,6 +223,18 @@ Expand with: list_dir("src/auth", recursive=false)
 # Next query with cache key:
 find_symbol(..., cache_key="models.py:sha256:abc123...")
 # Returns: {"status": "cache_valid", "use_cached": true}
+
+# After file edit, delta update:
+{
+  "previous_cache_key": "project:v1",
+  "new_cache_key": "project:v2",
+  "delta": {
+    "modified_files": ["auth.py", "models.py"],
+    "added_files": [],
+    "removed_files": [],
+    "symbols_changed": ["User.authenticate", "User.validate"]
+  }
+}
 ```
 
 ---
@@ -267,19 +289,20 @@ find_symbol(..., cache_key="models.py:sha256:abc123...")
 
 ---
 
-### Story 6: Semantic Truncation with Section Inventory
+### Story 6: Semantic Truncation with Context Markers
 **Status**: `unassigned`
-**Risk Level**: 🟡 Medium (requires guardrails)
+**Risk Level**: 🟢 Low (with semantic boundaries)
 **Estimated Savings**: 60-85%
 **Effort**: 3-4 days
 
-**Objective**: Intelligent truncation on semantic boundaries with inventory of omitted sections.
+**Objective**: Intelligent truncation on semantic boundaries with inventory of omitted sections and contextual markers.
 
 **Scope**:
 - Parse code into semantic units (functions, classes, methods)
 - Truncate on complete unit boundaries only
-- Provide inventory of truncated sections
+- Provide inventory of truncated sections with context markers
 - Easy retrieval of specific sections
+- **Context markers**: Show relationships between included/truncated sections
 
 **Acceptance Criteria**:
 - [ ] Never splits functions/classes mid-definition
@@ -287,6 +310,8 @@ find_symbol(..., cache_key="models.py:sha256:abc123...")
 - [ ] Each truncated section has token estimate
 - [ ] Clear instructions for retrieving specific sections
 - [ ] Works across all supported languages
+- [ ] **Context markers show dependencies between sections**
+- [ ] **Markers indicate if truncated section calls included section**
 
 **Files to Modify**:
 - `src/serena/tools/tools_base.py` (_limit_length method)
@@ -297,12 +322,36 @@ find_symbol(..., cache_key="models.py:sha256:abc123...")
 ```python
 {
   "included_sections": [
-    {"type": "class", "name": "PaymentProcessor", "lines": "1-45"},
-    {"type": "method", "name": "validate_card", "lines": "10-30"}
+    {
+      "type": "class",
+      "name": "PaymentProcessor",
+      "lines": "1-45",
+      "calls_truncated": ["process_payment", "refund_payment"]  # Context marker
+    },
+    {
+      "type": "method",
+      "name": "validate_card",
+      "lines": "10-30",
+      "called_by_truncated": ["process_payment"]  # Context marker
+    }
   ],
   "truncated_sections": [
-    {"type": "method", "name": "process_payment", "lines": "46-89", "tokens": 450},
-    {"type": "method", "name": "refund_payment", "lines": "90-120", "tokens": 320}
+    {
+      "type": "method",
+      "name": "process_payment",
+      "lines": "46-89",
+      "tokens": 450,
+      "calls": ["validate_card", "charge_card"],  # Context marker
+      "complexity": "high"
+    },
+    {
+      "type": "method",
+      "name": "refund_payment",
+      "lines": "90-120",
+      "tokens": 320,
+      "calls": ["validate_card"],  # Context marker
+      "complexity": "medium"
+    }
   ],
   "total_truncated_tokens": 770,
   "retrieval_hint": "Use find_symbol('PaymentProcessor/process_payment', include_body=true)"
@@ -479,22 +528,252 @@ class Tool:
 
 ---
 
+### Story 11: On-Demand Body Retrieval
+**Status**: `unassigned`
+**Risk Level**: 🟢 Low (zero accuracy risk)
+**Estimated Savings**: 95%+
+**Effort**: 2-3 days
+
+**Objective**: Separate symbol search from body retrieval for massive token savings.
+
+**Scope**:
+- Create new tool `get_symbol_body` for targeted body retrieval
+- Optimize `find_symbol` to return metadata without bodies by default
+- Support batch body retrieval for multiple symbols
+- Maintain backward compatibility with `include_body=true`
+
+**Acceptance Criteria**:
+- [ ] New `get_symbol_body(symbol_id)` tool implemented
+- [ ] Returns just the body for a specific symbol
+- [ ] Supports batch retrieval: `get_symbol_body([id1, id2, id3])`
+- [ ] `find_symbol` continues to work with `include_body=true`
+- [ ] Symbol IDs are stable and retrievable
+- [ ] Works across all supported languages
+
+**Files to Modify**:
+- `src/serena/tools/symbol_tools.py` (add GetSymbolBodyTool)
+- `src/serena/symbol.py` (add body retrieval by ID)
+
+**Implementation Notes**:
+```python
+# Search phase: no bodies (fast)
+symbols = find_symbol("process*", substring_matching=true)
+# Returns 100 matches with metadata, no bodies: ~500 tokens
+
+# Selection phase: get specific bodies
+body = get_symbol_body("process_payment:models.py:142")
+# Returns just the one body needed: ~450 tokens
+
+# Total: 950 tokens vs 45,000 tokens (100 bodies * 450)
+# Savings: 97.9%
+```
+
+**Why This Is Safe**:
+- No automatic filtering or hiding
+- LLM has complete control over what to retrieve
+- Identical to current manual workflow (search, then read)
+- Zero accuracy loss - just more efficient
+
+---
+
+### Story 12: Memory Metadata Tool
+**Status**: `unassigned`
+**Risk Level**: 🟢 Low (zero accuracy risk)
+**Estimated Savings**: 60-80%
+**Effort**: 1 day
+
+**Objective**: Provide memory file metadata and previews without reading full content.
+
+**Scope**:
+- Enhance `list_memories` to include metadata
+- Add preview (first 3 lines) to memory list
+- Include size, last modified, and token estimate
+- Maintain full `read_memory` for complete access
+
+**Acceptance Criteria**:
+- [ ] `list_memories(include_preview=true)` shows previews
+- [ ] Each memory includes size_kb, last_modified, estimated_tokens
+- [ ] Preview is first 3 lines (configurable)
+- [ ] `read_memory` continues to work unchanged
+- [ ] Backward compatible (default behavior unchanged)
+
+**Files to Modify**:
+- `src/serena/tools/memory_tools.py` (ListMemoriesTool, add metadata)
+
+**Implementation Notes**:
+```python
+# Enhanced list:
+[
+  {
+    "name": "authentication_flow",
+    "size_kb": 12,
+    "last_modified": "2024-01-15",
+    "preview": "# Authentication Flow\n\nThe system uses JWT tokens...",
+    "estimated_tokens": 3200,
+    "lines": 145
+  },
+  {
+    "name": "api_endpoints",
+    "size_kb": 8,
+    "last_modified": "2024-01-10",
+    "preview": "# API Endpoints\n\n## User Management\n...",
+    "estimated_tokens": 2100,
+    "lines": 98
+  }
+]
+
+# LLM can make informed choice:
+# Small file + relevant preview → read_memory("authentication_flow")
+# Large file + irrelevant preview → skip
+```
+
+**Why This Is Safe**:
+- No data hidden, just metadata added
+- Full read always available
+- Helps LLM make better decisions
+- Zero accuracy loss
+
+---
+
+### Story 13: Reference Count Mode (Opt-In)
+**Status**: `unassigned`
+**Risk Level**: 🟡 Medium (safe as explicit opt-in)
+**Estimated Savings**: 90%+ for exploration
+**Effort**: 1-2 days
+
+**Objective**: Add count-only mode for finding references without full context (explicit opt-in).
+
+**Scope**:
+- Add `mode` parameter to `find_referencing_symbols`
+- Implement "count" mode: returns metrics only
+- Implement "summary" mode: counts + first 10 matches
+- Full mode remains default (backward compatible)
+
+**Acceptance Criteria**:
+- [ ] `mode="count"` returns just counts by file/type
+- [ ] `mode="summary"` returns counts + preview (10 matches)
+- [ ] `mode="full"` is default (current behavior)
+- [ ] Count mode explicitly says "use mode='full' for details"
+- [ ] Summary mode shows "showing 10 of 47 matches"
+- [ ] Backward compatible (no mode = full)
+
+**Files to Modify**:
+- `src/serena/tools/symbol_tools.py` (FindReferencingSymbolsTool)
+
+**Implementation Notes**:
+```python
+# Exploration phase: just need to know impact
+refs = find_referencing_symbols("authenticate", mode="count")
+# Returns:
+{
+  "total_references": 47,
+  "by_file": {"auth.py": 12, "api.py": 35},
+  "by_type": {"function_call": 42, "import": 5},
+  "mode_used": "count",
+  "full_details_available": "Use mode='full' to see all references with context"
+}
+# Tokens: ~150 vs 7,000+ for full
+
+# Implementation phase: need details
+refs = find_referencing_symbols("authenticate", mode="full")
+# Returns: all 47 references with full context
+```
+
+**Why This Is Safe**:
+- **Explicit opt-in**: LLM must request count mode
+- Default behavior unchanged (full mode)
+- Always shows what's available
+- Clear upgrade path to full details
+- LLM controls the trade-off
+
+---
+
+### Story 14: Exclude Generated Code (Transparent)
+**Status**: `unassigned`
+**Risk Level**: 🟡 Medium (safe with transparency)
+**Estimated Savings**: 30-60%
+**Effort**: 2 days
+
+**Objective**: Exclude generated/vendor code from searches with full transparency and easy override.
+
+**Scope**:
+- Add `exclude_generated` parameter to search tools
+- Detect common generated/vendor patterns
+- Always show what was excluded
+- Easy override to include everything
+
+**Acceptance Criteria**:
+- [ ] `exclude_generated=true` filters out generated code
+- [ ] Default is `false` (backward compatible)
+- [ ] Always reports what was excluded
+- [ ] Common patterns detected: node_modules, __pycache__, migrations, vendor/, .git
+- [ ] Clear instruction for including excluded files
+- [ ] Works with `find_symbol`, `search_for_pattern`, `list_dir`
+
+**Files to Modify**:
+- `src/serena/tools/symbol_tools.py` (FindSymbolTool)
+- `src/serena/tools/file_tools.py` (SearchForPatternTool, ListDirTool)
+- `src/serena/util/file_system.py` (add exclusion detection)
+
+**Implementation Notes**:
+```python
+# With exclusion:
+find_symbol("User", exclude_generated=true)
+# Returns:
+{
+  "results": [
+    {"name": "User", "file": "models.py", ...},
+    {"name": "UserService", "file": "services.py", ...}
+  ],
+  "excluded": {
+    "node_modules": 847,
+    "__pycache__": 234,
+    "migrations": 45,
+    ".git": 12
+  },
+  "excluded_patterns": [
+    "**/node_modules/**",
+    "**/__pycache__/**",
+    "**/migrations/**",
+    "**/.git/**"
+  ],
+  "include_excluded": "Use exclude_generated=false to include all files"
+}
+```
+
+**Why This Is Safe**:
+- **Explicit opt-in**: Must request exclusion
+- Always shows what was excluded
+- Easy override (one parameter)
+- Sensible defaults (vendor/generated only)
+- No risk of missing custom code
+
+---
+
 ## Execution Log
 
 ### 2025-01-04
 - Sprint initialized
-- 10 stories defined (4 Phase 1, 4 Phase 2, 2 Phase 3)
+- 14 stories defined (4 Phase 1, 4 Phase 2, 2 Phase 3, 4 Phase 4)
 - Risk assessment completed
+- Extended sprint with 4 additional safe stories
+- All risky features excluded
 - Ready to begin Phase 1 implementation
 
 ---
 
 ## Sprint Metrics
 
-**Target Token Reduction**: 50-75%
-**Stories Completed**: 0/10
+**Target Token Reduction**: 65-85%
+**Stories Completed**: 0/14
 **Current Phase**: 1 (Foundation)
-**Estimated Total Effort**: 25-32 days
+**Estimated Total Effort**: 30-38 days
+
+**Phase Breakdown**:
+- Phase 1 (Foundation): 4 stories, 9-11 days
+- Phase 2 (Intelligent Summarization): 4 stories, 11-14 days
+- Phase 3 (Universal Controls): 2 stories, 5-7 days
+- Phase 4 (Advanced Safe Features): 4 stories, 6-8 days
 
 ---
 
@@ -509,8 +788,10 @@ class Tool:
 
 ### Dependencies
 - Stories 1-4 (Phase 1) are independent, can be parallelized
-- Story 9 (Verbosity Control) should complete before Phase 2
+- Story 9 (Verbosity Control) should complete before Phase 2 for best integration
 - Story 10 (Token Estimation) supports all others but not blocking
+- Stories 11-14 (Phase 4) are independent and can start anytime
+- Story 11 (On-Demand Body) pairs well with Story 5 (Signatures)
 
 ### Risks & Mitigations
 - **Risk**: LLM doesn't request more detail when needed
@@ -522,12 +803,15 @@ class Tool:
 
 ## Sprint Completion Checklist
 
-- [ ] All Phase 1 stories completed
-- [ ] All Phase 2 stories completed
-- [ ] All Phase 3 stories completed
+- [ ] All Phase 1 stories completed (Stories 1-4)
+- [ ] All Phase 2 stories completed (Stories 5-8)
+- [ ] All Phase 3 stories completed (Stories 9-10)
+- [ ] All Phase 4 stories completed (Stories 11-14)
 - [ ] Integration tests pass
 - [ ] Manual testing with Claude Code/Desktop
-- [ ] Token savings verified (>50% reduction)
+- [ ] Token savings verified (>65% reduction)
+- [ ] No accuracy degradation verified
+- [ ] Backward compatibility verified
 - [ ] Documentation updated
 - [ ] CHANGELOG.md updated
 - [ ] README.md updated with new features
