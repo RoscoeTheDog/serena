@@ -66,6 +66,7 @@ dev = [
 ]
 agno = ["agno>=1.2.6", "sqlalchemy>=2.0.40"]
 google = ["google-genai>=1.8.0"]
+process-management = ["setproctitle>=1.3.3"]
 
 [project.urls]
 Homepage = "https://github.com/oraios/serena"

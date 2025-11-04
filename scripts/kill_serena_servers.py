@@ -25,38 +25,62 @@ def find_serena_processes(verbose=False):
     """
     Find all Serena MCP server processes.
 
+    Uses multiple detection methods:
+    1. Environment variable SERENA_MCP_SERVER (most reliable)
+    2. Process name (if setproctitle was used)
+    3. Command line patterns (fallback)
+
     Returns:
         list: List of psutil.Process objects that are Serena servers
     """
     serena_processes = []
 
-    for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'exe']):
+    for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'exe', 'environ']):
         try:
-            cmdline = proc.info['cmdline']
+            # Method 1: Check for SERENA_MCP_SERVER environment variable (most reliable)
+            proc_environ = proc.info.get('environ')
+            if proc_environ and proc_environ.get('SERENA_MCP_SERVER') == '1':
+                serena_processes.append(proc)
+                if verbose:
+                    cmdline = proc.info.get('cmdline', [])
+                    cmdline_str = ' '.join(cmdline) if cmdline else '<no cmdline>'
+                    print(f"  Found (env var): PID={proc.info['pid']}, CMD={cmdline_str[:100]}")
+                continue
+
+            # Method 2: Check process name (if setproctitle was used)
+            proc_name = proc.info.get('name', '')
+            if proc_name and 'serena-mcp-server' in proc_name.lower():
+                serena_processes.append(proc)
+                if verbose:
+                    print(f"  Found (proc name): PID={proc.info['pid']}, NAME={proc_name}")
+                continue
+
+            # Method 3: Check command line (fallback for older versions)
+            cmdline = proc.info.get('cmdline')
             if not cmdline:
                 continue
 
-            # Convert cmdline to string for searching
             cmdline_str = ' '.join(cmdline)
 
             # Identify Serena processes by looking for:
             # 1. Python process
             # 2. Running serena module or mcp_server
             # 3. Or running from serena directory
-            is_python = proc.info['name'] and 'python' in proc.info['name'].lower()
+            is_python = proc_name and 'python' in proc_name.lower()
             is_serena = any([
                 'serena' in cmdline_str.lower() and 'mcp' in cmdline_str.lower(),
                 'serena.mcp_server' in cmdline_str,
                 'serena/mcp_server' in cmdline_str,
                 'serena\\mcp_server' in cmdline_str,
                 '-m serena' in cmdline_str,
+                'serena-mcp-server' in cmdline_str,
                 'serena-mcp' in cmdline_str,
             ])
 
             if is_python and is_serena:
                 serena_processes.append(proc)
                 if verbose:
-                    print(f"  Found: PID={proc.info['pid']}, CMD={cmdline_str[:100]}")
+                    print(f"  Found (cmdline): PID={proc.info['pid']}, CMD={cmdline_str[:100]}")
 
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass

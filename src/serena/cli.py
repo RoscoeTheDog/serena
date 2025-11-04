@@ -146,6 +146,18 @@ class TopLevelCommands(AutoRegisteringGroup):
         trace_lsp_communication: bool | None,
         tool_timeout: float | None,
     ) -> None:
+        # Mark this process as a Serena MCP server for process identification
+        # This environment variable makes it easy to kill Serena servers specifically
+        os.environ["SERENA_MCP_SERVER"] = "1"
+        os.environ["SERENA_MCP_SERVER_PID"] = str(os.getpid())
+
+        # Try to set a descriptive process title (requires setproctitle, but gracefully degrades)
+        try:
+            import setproctitle
+            setproctitle.setproctitle("serena-mcp-server")
+        except ImportError:
+            pass  # setproctitle not installed, that's okay
+
         # initialize logging, using INFO level initially (will later be adjusted by SerenaAgent according to the config)
         #   * memory log handler (for use by GUI/Dashboard)
         #   * stream handler for stderr (for direct console output, which will also be captured by clients like Claude Desktop)

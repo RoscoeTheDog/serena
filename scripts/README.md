@@ -36,11 +36,23 @@ scripts\kill_serena.bat
 
 ### How It Works
 
-The script identifies Serena processes by looking for Python processes running:
-- `serena.mcp_server`
-- `-m serena`
-- `serena/mcp_server` or `serena\mcp_server`
-- Any command line containing both "serena" and "mcp"
+The script uses **three detection methods** to reliably identify Serena MCP servers:
+
+1. **Environment Variable** (Most Reliable)
+   - Checks for `SERENA_MCP_SERVER=1` environment variable
+   - Set automatically by Serena when the MCP server starts
+   - Works even if the command line is obscured
+
+2. **Process Name** (If Available)
+   - Checks if process name is `serena-mcp-server`
+   - Requires `setproctitle` package (optional dependency)
+
+3. **Command Line Pattern** (Fallback)
+   - Python processes running:
+     - `serena.mcp_server`
+     - `-m serena`
+     - `serena/mcp_server` or `serena\mcp_server`
+     - Any command line containing both "serena" and "mcp"
 
 ### When to Use
 
