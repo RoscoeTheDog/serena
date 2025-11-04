@@ -1,4 +1,5 @@
 import json
+import platform
 
 from serena.config.context_mode import SerenaAgentMode
 from serena.tools import Tool, ToolMarkerDoesNotRequireActiveProject, ToolMarkerOptional
@@ -16,10 +17,13 @@ class ActivateProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject):
         :param project: the name of a registered project to activate or a path to a project directory
         """
         active_project = self.agent.activate_project_from_path_or_name(project)
-        
+
         # Check if a parent project was used instead of the requested path
         used_parent = hasattr(active_project, '_used_parent_path') and hasattr(active_project, '_requested_path')
-        
+
+        # Check and auto-onboard if needed
+        onboarding_status = self._check_and_auto_onboard(active_project)
+
         if active_project.is_newly_created:
             result_str = (
                 f"Created and activated a new project with name '{active_project.project_name}' at {active_project.project_root}, language: {active_project.project_config.language.value}. "
@@ -32,6 +36,10 @@ class ActivateProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject):
             result_str = f"Activated existing project with name '{active_project.project_name}' at {active_project.project_root}, language: {active_project.project_config.language.value}"
             if used_parent:
                 result_str = f"Using parent project at {active_project._used_parent_path} (requested: {active_project._requested_path})\n" + result_str
+
+        # Add onboarding status if onboarding was performed
+        if onboarding_status["performed"]:
+            result_str += "\n\n" + onboarding_status["message"]
 
         if active_project.project_config.initial_prompt:
             result_str += f"\nAdditional project information:\n {active_project.project_config.initial_prompt}"
@@ -47,6 +55,170 @@ class ActivateProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject):
             delattr(active_project, '_requested_path')
         
         return result_str
+
+    def _check_and_auto_onboard(self, project) -> dict:
+        """
+        Check if project needs onboarding and perform it automatically if needed.
+
+        :param project: the activated project
+        :return: dict with 'performed' (bool) and 'message' (str)
+        """
+        from .memory_tools import ListMemoriesTool
+
+        list_memories_tool = self.agent.get_tool(ListMemoriesTool)
+        memories = json.loads(list_memories_tool.apply())
+
+        if len(memories) == 0:
+            # No memories exist - perform auto-onboarding
+            return self._auto_onboard_project(project)
+        else:
+            return {
+                "performed": False,
+                "message": f"Project already onboarded ({len(memories)} memories available)"
+            }
+
+    def _auto_onboard_project(self, project) -> dict:
+        """
+        Automatically onboard a project by analyzing files and creating basic memories.
+
+        :param project: the project to onboard
+        :return: dict with 'performed' (bool) and 'message' (str)
+        """
+        from .memory_tools import WriteMemoryTool
+
+        write_memory = self.agent.get_tool(WriteMemoryTool)
+
+        # Detect tech stack using helper functions (implemented in Session 2)
+        tech_stack = self._detect_tech_stack(project)
+
+        # Find command files using helper functions (implemented in Session 2)
+        commands = self._find_command_files(project)
+
+        # Detect code style hints using helper functions (implemented in Session 2)
+        style_info = self._detect_code_style(project)
+
+        # Create project overview memory
+        overview = f"""# {project.project_name}
+
+**Language**: {project.language}
+**Location**: {project.project_root}
+**Tech Stack**: {tech_stack}
+**Platform**: {platform.system()}
+
+## Auto-Detected Information
+
+This project was automatically onboarded. The information below was detected from
+configuration files and project structure. You may want to supplement this with
+additional information as you work with the project.
+"""
+
+        write_memory.apply(
+            memory_name="project_overview.md",
+            content=overview
+        )
+
+        # Create suggested commands memory
+        commands_md = self._generate_commands_memory(commands, project)
+        write_memory.apply(
+            memory_name="suggested_commands.md",
+            content=commands_md
+        )
+
+        # Create code style memory if detected
+        if style_info:
+            write_memory.apply(
+                memory_name="code_style_and_conventions.md",
+                content=style_info
+            )
+
+        # Create task completion checklist
+        completion_checklist = self._generate_completion_checklist(commands)
+        write_memory.apply(
+            memory_name="task_completion_checklist.md",
+            content=completion_checklist
+        )
+
+        memories_created = 4 if style_info else 3
+
+        return {
+            "performed": True,
+            "message": (
+                f"✓ Auto-onboarded project (created {memories_created} memories)\n"
+                f"  - Detected tech stack: {tech_stack}\n"
+                f"  - Found {len(commands)} command sources\n"
+                "  - Use `read_memory` to view detailed information"
+            )
+        }
+
+    def _detect_tech_stack(self, project) -> str:
+        """
+        Detect tech stack from project files.
+
+        NOTE: This is a stub - full implementation in onboarding_helpers.py (Session 2)
+        """
+        # Temporary stub - return simple detection
+        if project.relative_path_exists("package.json"):
+            return "Node.js/npm"
+        elif project.relative_path_exists("pyproject.toml"):
+            return "Python"
+        elif project.relative_path_exists("Cargo.toml"):
+            return "Rust/Cargo"
+        else:
+            return "Unknown"
+
+    def _find_command_files(self, project) -> dict:
+        """
+        Find command definitions from configuration files.
+
+        NOTE: This is a stub - full implementation in onboarding_helpers.py (Session 2)
+        """
+        # Temporary stub - return empty dict
+        return {}
+
+    def _detect_code_style(self, project) -> str:
+        """
+        Detect code style configuration.
+
+        NOTE: This is a stub - full implementation in onboarding_helpers.py (Session 2)
+        """
+        # Temporary stub - return empty string
+        return ""
+
+    def _generate_commands_memory(self, commands: dict, project) -> str:
+        """
+        Generate suggested_commands.md content.
+
+        NOTE: This is a stub - full implementation in onboarding_helpers.py (Session 2)
+        """
+        # Temporary stub - return basic template
+        return f"""# Suggested Commands for {project.project_name}
+
+## Auto-Detected Commands
+
+_No commands detected yet. Full detection will be implemented in Session 2._
+
+## Common Development Commands
+
+- `git status` - Check git status
+- `git diff` - View changes
+"""
+
+    def _generate_completion_checklist(self, commands: dict) -> str:
+        """
+        Generate task_completion_checklist.md content.
+
+        NOTE: This is a stub - full implementation in onboarding_helpers.py (Session 2)
+        """
+        # Temporary stub - return basic checklist
+        return """# Task Completion Checklist
+
+## When You Complete a Task
+
+- [ ] All tests pass
+- [ ] Code is properly formatted
+- [ ] No linting errors
+- [ ] Git commit created with descriptive message
+"""
 
 
 class RemoveProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMarkerOptional):
