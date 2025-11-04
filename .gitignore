@@ -237,4 +237,4 @@ tmp/
 .mcp-cache
 
 # Generated Claude MCP Installer Documentation (platform-specific)
-claude-mcp-installer/instance/
+claude-mcp-installer/
