@@ -211,16 +211,90 @@ class Tool(Component):
                 params[param] = value
         log.info(f"{self.get_name_from_cls()}: {dict_string(params)}")
 
-    def _limit_length(self, result: str, max_answer_chars: int) -> str:
+    def _limit_length(
+        self,
+        result: str,
+        max_answer_chars: int,
+        use_semantic_truncation: bool = False,
+        language: str = "python",
+        file_path: str = "",
+    ) -> str:
+        """
+        Limit the length of tool output, optionally using semantic truncation.
+
+        :param result: The result string to potentially truncate
+        :param max_answer_chars: Maximum characters allowed (-1 for default)
+        :param use_semantic_truncation: If True, use semantic truncation on code boundaries
+        :param language: Programming language for semantic parsing (python, javascript, etc.)
+        :param file_path: Optional file path for better retrieval hints
+        :return: Potentially truncated result
+        """
         if max_answer_chars == -1:
             max_answer_chars = self.agent.serena_config.default_max_tool_answer_chars
         if max_answer_chars <= 0:
             raise ValueError(f"Must be positive or the default (-1), got: {max_answer_chars=}")
-        if (n_chars := len(result)) > max_answer_chars:
-            result = (
-                f"The answer is too long ({n_chars} characters). "
-                + "Please try a more specific tool query or raise the max_answer_chars parameter."
-            )
+
+        n_chars = len(result)
+        if n_chars <= max_answer_chars:
+            return result
+
+        # If semantic truncation requested, use it
+        if use_semantic_truncation:
+            try:
+                from serena.util.semantic_truncator import SemanticTruncator
+                import json
+
+                truncator = SemanticTruncator()
+                max_tokens = max_answer_chars // 4  # Convert chars to approximate tokens
+
+                truncation_result = truncator.truncate(
+                    content=result, max_tokens=max_tokens, language=language, file_path=file_path
+                )
+
+                # Build output with truncation metadata
+                output_parts = [
+                    truncation_result.included_content,
+                    "",
+                    "=" * 80,
+                    "SEMANTIC TRUNCATION SUMMARY",
+                    "=" * 80,
+                    "",
+                    f"Total truncated tokens: {truncation_result.total_truncated_tokens}",
+                    "",
+                    "Included sections:",
+                ]
+
+                for section in truncation_result.included_sections:
+                    output_parts.append(f"  • {section.type}: {section.name} (lines {section.line_range})")
+                    if section.calls:
+                        output_parts.append(f"    └─ calls: {', '.join(section.calls)}")
+
+                output_parts.append("")
+                output_parts.append("Truncated sections:")
+
+                for section in truncation_result.truncated_sections:
+                    output_parts.append(
+                        f"  • {section.type}: {section.name} (lines {section.line_range}, ~{section.tokens} tokens, complexity: {section.complexity})"
+                    )
+                    if section.calls:
+                        output_parts.append(f"    └─ calls: {', '.join(section.calls)}")
+                    if section.called_by:
+                        output_parts.append(f"    └─ called by: {', '.join(section.called_by)}")
+
+                output_parts.append("")
+                output_parts.append(f"Retrieval: {truncation_result.retrieval_hint}")
+
+                return "\n".join(output_parts)
+
+            except Exception as e:
+                log.error(f"Semantic truncation failed: {e}", exc_info=e)
+                # Fall through to simple truncation
+
+        # Simple truncation fallback
+        result = (
+            f"The answer is too long ({n_chars} characters). "
+            + "Please try a more specific tool query or raise the max_answer_chars parameter."
+        )
         return result
 
     def is_active(self) -> bool:
