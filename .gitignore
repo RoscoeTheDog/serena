@@ -234,3 +234,7 @@ tmp/
 # Swift
 /test/resources/repos/swift/test_repo/.build
 /test/resources/repos/swift/test_repo/.swiftpm
+.mcp-cache
+
+# Generated Claude MCP Installer Documentation (platform-specific)
+claude-mcp-installer/instance/

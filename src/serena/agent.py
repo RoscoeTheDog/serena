@@ -455,34 +455,143 @@ class SerenaAgent:
         if self._project_activation_callback is not None:
             self._project_activation_callback()
 
-    def load_project_from_path_or_name(self, project_root_or_name: str, autogenerate: bool) -> Project | None:
+    def find_parent_serena_project(self, start_path: str) -> Optional[str]:
+        """
+        Traverse upward from start_path to find an existing Serena project.
+        
+        Detection strategy:
+        1. Start from the requested path
+        2. Traverse upward looking for:
+           - Existing .serena/ directory (primary indicator)
+           - Registered project in serena_config
+           - Git boundary (.git directory) as fallback heuristic
+        3. Stop at filesystem root
+        
+        :param start_path: The path to start searching from
+        :return: Path to parent project root if found, None otherwise
+        """
+        from serena.constants import SERENA_MANAGED_DIR_NAME
+        
+        # Resolve to absolute path and handle symlinks
+        try:
+            current_path = Path(start_path).resolve()
+        except Exception:
+            return None
+            
+        if not current_path.exists() or not current_path.is_dir():
+            return None
+        
+        # Store the original path to avoid returning it
+        original_path = current_path
+        
+        # Get filesystem root for this platform
+        # On Windows: drive root (e.g., C:\)
+        # On Unix: /
+        root_parts = current_path.parts[0:1]  # First part is the root
+        
+        # Traverse upward from parent of current_path
+        current_path = current_path.parent
+        
+        while current_path.parts != root_parts and len(current_path.parts) > 0:
+            # Check for .serena/ directory (primary indicator)
+            serena_dir = current_path / SERENA_MANAGED_DIR_NAME
+            if serena_dir.exists() and serena_dir.is_dir():
+                # Verify this is actually a registered project or has valid config
+                current_path_str = str(current_path)
+                
+                # Check if already registered in serena_config
+                existing_project = self.serena_config.get_project(current_path_str)
+                if existing_project is not None:
+                    log.info(f"Found parent Serena project at {current_path_str} (registered)")
+                    return current_path_str
+                
+                # Check if has valid project config even if not registered
+                from serena.config.serena_config import ProjectConfig
+                try:
+                    ProjectConfig.load(current_path, autogenerate=False)
+                    log.info(f"Found parent Serena project at {current_path_str} (has .serena/project.yml)")
+                    return current_path_str
+                except Exception:
+                    # .serena exists but no valid config, continue searching
+                    pass
+            
+            # Check if we've hit a git boundary (fallback heuristic)
+            # Only use .git as a stopping point, not as a project indicator
+            git_dir = current_path / ".git"
+            if git_dir.exists() and serena_dir.exists():
+                # Found .git and .serena together - this is a project root
+                current_path_str = str(current_path)
+                log.info(f"Found parent Serena project at {current_path_str} (has .serena/ at git root)")
+                return current_path_str
+            
+            # Move up one directory
+            if current_path.parent == current_path:
+                # Reached filesystem root
+                break
+            current_path = current_path.parent
+        
+        return None
+
+    def load_project_from_path_or_name(self, project_root_or_name: str, autogenerate: bool, local_only: bool = False) -> Project | None:
         """
         Get a project instance from a path or a name.
 
         :param project_root_or_name: the path to the project root or the name of the project
         :param autogenerate: whether to autogenerate the project for the case where first argument is a directory
             which does not yet contain a Serena project configuration file
+        :param local_only: if True, skip parent project traversal and only use the exact path provided
         :return: the project instance if it was found/could be created, None otherwise
         """
+        # Check if it's a registered project by name first
         project_instance: Project | None = self.serena_config.get_project(project_root_or_name)
         if project_instance is not None:
             log.info(f"Found registered project '{project_instance.project_name}' at path {project_instance.project_root}")
-        elif autogenerate and os.path.isdir(project_root_or_name):
+            return project_instance
+        
+        # If it's a directory path, check for parent project (unless local_only is True)
+        if os.path.isdir(project_root_or_name) and not local_only:
+            parent_project_path = self.find_parent_serena_project(project_root_or_name)
+            if parent_project_path is not None:
+                # Try to get the parent project (it might already be registered)
+                project_instance = self.serena_config.get_project(parent_project_path)
+                if project_instance is not None:
+                    log.info(f"Using parent project '{project_instance.project_name}' at {parent_project_path} instead of {project_root_or_name}")
+                    # Mark that we're using a parent project (will be communicated to user)
+                    project_instance._used_parent_path = parent_project_path
+                    project_instance._requested_path = project_root_or_name
+                    return project_instance
+                # Parent project found but not registered - add it
+                elif autogenerate:
+                    project_instance = self.serena_config.add_project_from_path(parent_project_path)
+                    log.info(f"Added parent project {project_instance.project_name} at {parent_project_path} (requested: {project_root_or_name})")
+                    project_instance._used_parent_path = parent_project_path
+                    project_instance._requested_path = project_root_or_name
+                    return project_instance
+        
+        # No parent found or local_only is True - try to create at requested path
+        if autogenerate and os.path.isdir(project_root_or_name):
             project_instance = self.serena_config.add_project_from_path(project_root_or_name)
             log.info(f"Added new project {project_instance.project_name} for path {project_instance.project_root}")
-        return project_instance
+            return project_instance
+            
+        return None
 
-    def activate_project_from_path_or_name(self, project_root_or_name: str) -> Project:
+    def activate_project_from_path_or_name(self, project_root_or_name: str, local_only: bool = False) -> Project:
         """
         Activate a project from a path or a name.
         If the project was already registered, it will just be activated.
         If the argument is a path at which no Serena project previously existed, the project will be created beforehand.
+        
+        By default, this method will traverse upward to find a parent Serena project if the requested path
+        is a subdirectory of an existing project. Set local_only=True to disable this behavior.
+        
         Raises ProjectNotFoundError if the project could neither be found nor created.
 
-        :return: a tuple of the project instance and a Boolean indicating whether the project was newly
-            created
+        :param project_root_or_name: the path to the project root or the name of the project
+        :param local_only: if True, skip parent project traversal and only activate at the exact path provided
+        :return: the project instance
         """
-        project_instance: Project | None = self.load_project_from_path_or_name(project_root_or_name, autogenerate=True)
+        project_instance: Project | None = self.load_project_from_path_or_name(project_root_or_name, autogenerate=True, local_only=local_only)
         if project_instance is None:
             raise ProjectNotFoundError(
                 f"Project '{project_root_or_name}' not found: Not a valid project name or directory. "
