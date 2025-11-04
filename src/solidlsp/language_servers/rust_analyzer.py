@@ -636,4 +636,16 @@ class RustAnalyzer(SolidLanguageServer):
         self.server.notify.initialized({})
         self.completions_available.set()
 
-        self.server_ready.wait()
+        # Wait for server readiness with timeout
+        # Rust-analyzer sends experimental/serverStatus with quiescent:true when ready
+        ready_timeout = 60.0
+        self.logger.log(f"Waiting up to {ready_timeout} seconds for Rust Analyzer to be ready...", logging.INFO)
+        if self.server_ready.wait(timeout=ready_timeout):
+            self.logger.log("Rust Analyzer is ready and available for requests", logging.INFO)
+        else:
+            self.logger.log(
+                f"Timeout waiting for Rust Analyzer ready signal after {ready_timeout} seconds, proceeding anyway",
+                logging.WARNING
+            )
+            # Fallback: assume server is ready after timeout
+            self.server_ready.set()
