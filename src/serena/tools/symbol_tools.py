@@ -7,7 +7,7 @@ import json
 import os
 from collections.abc import Sequence
 from copy import copy
-from typing import Any
+from typing import Any, Literal
 
 from serena.tools import (
     SUCCESS_RESULT,
@@ -16,6 +16,7 @@ from serena.tools import (
     ToolMarkerSymbolicRead,
 )
 from serena.tools.tools_base import ToolMarkerOptional
+from serena.util.complexity_analyzer import ComplexityAnalyzer
 from serena.util.symbol_cache import get_global_cache
 from solidlsp.ls_types import SymbolKind
 
@@ -186,6 +187,7 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         depth: int = 0,
         relative_path: str = "",
         include_body: bool = False,
+        detail_level: Literal["full", "signature", "auto"] = "full",
         include_kinds: list[int] = [],  # noqa: B006
         exclude_kinds: list[int] = [],  # noqa: B006
         substring_matching: bool = False,
@@ -230,6 +232,10 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             If you have some knowledge about the codebase, you should use this parameter, as it will significantly
             speed up the search as well as reduce the number of results.
         :param include_body: If True, include the symbol's source code. Use judiciously.
+        :param detail_level: Level of detail to return. Options:
+            - "full" (default): Return complete symbol information including body if include_body=True
+            - "signature": Return signature + docstring only with complexity analysis and warnings
+            - "auto": Automatically decide based on complexity (not yet implemented, defaults to "full")
         :param include_kinds: Optional. List of LSP symbol kind integers to include. (e.g., 5 for Class, 12 for Function).
             Valid kinds: 1=file, 2=module, 3=namespace, 4=package, 5=class, 6=method, 7=property, 8=field, 9=constructor, 10=enum,
             11=interface, 12=function, 13=variable, 14=constant, 15=string, 16=number, 17=boolean, 18=array, 19=object,
@@ -252,6 +258,7 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
                 "name_path": name_path,
                 "depth": depth,
                 "include_body": include_body,
+                "detail_level": detail_level,
                 "include_kinds": include_kinds,
                 "exclude_kinds": exclude_kinds,
                 "substring_matching": substring_matching,
@@ -278,7 +285,77 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             substring_matching=substring_matching,
             within_relative_path=relative_path,
         )
-        symbol_dicts = [_sanitize_symbol_dict(s.to_dict(kind=True, location=True, depth=depth, include_body=include_body)) for s in symbols]
+        # Handle detail_level - auto defaults to full for now
+        effective_detail_level = detail_level if detail_level != "auto" else "full"
+
+        # For signature mode, we need to fetch the body to perform analysis
+        need_body_for_analysis = effective_detail_level == "signature"
+        actual_include_body = include_body or need_body_for_analysis
+
+        # Re-fetch with body if we didn't include it initially but need it for signature mode
+        if need_body_for_analysis and not include_body:
+            symbols = symbol_retriever.find_by_name(
+                name_path,
+                include_body=True,  # Need body for complexity analysis
+                include_kinds=parsed_include_kinds,
+                exclude_kinds=parsed_exclude_kinds,
+                substring_matching=substring_matching,
+                within_relative_path=relative_path,
+            )
+
+        # Apply detail_level and add complexity analysis if needed
+        if effective_detail_level == "signature":
+            from serena.analytics import TokenCountEstimator
+
+            symbol_dicts = []
+            for s in symbols:
+                # Get symbol dict without body first
+                s_dict = _sanitize_symbol_dict(s.to_dict(kind=True, location=True, depth=depth, include_body=False))
+
+                # Add signature and docstring
+                signature = s.extract_signature()
+                docstring = s.extract_docstring()
+
+                if signature:
+                    s_dict["signature"] = signature
+                if docstring:
+                    s_dict["docstring"] = docstring
+
+                # Add complexity analysis if body is available
+                if s.body:
+                    try:
+                        # Determine language from file extension
+                        file_ext = s.relative_path.split('.')[-1] if s.relative_path else "py"
+                        language = "python" if file_ext == "py" else file_ext
+
+                        metrics = ComplexityAnalyzer.analyze(s.body, language)
+                        s_dict["complexity"] = metrics.to_dict()
+                        s_dict["recommendation"] = ComplexityAnalyzer.get_recommendation(metrics)
+
+                        # Add token estimates
+                        estimator = TokenCountEstimator()
+                        sig_doc_text = (signature or "") + "\n" + (docstring or "")
+                        signature_tokens = estimator.estimate_token_count(sig_doc_text)
+                        full_body_tokens = estimator.estimate_token_count(s.body)
+
+                        s_dict["tokens_estimate"] = {
+                            "signature_plus_docstring": signature_tokens,
+                            "full_body": full_body_tokens,
+                            "savings": full_body_tokens - signature_tokens
+                        }
+                    except Exception as e:
+                        # If complexity analysis fails, continue without it
+                        import logging
+                        log = logging.getLogger(__name__)
+                        log.warning(f"Failed to analyze complexity for symbol {s.name}: {e}")
+                        s_dict["complexity"] = {"error": str(e)}
+                        s_dict["recommendation"] = "complexity_analysis_failed"
+
+                symbol_dicts.append(s_dict)
+        else:
+            # Full mode - return complete symbol information
+            symbol_dicts = [_sanitize_symbol_dict(s.to_dict(kind=True, location=True, depth=depth, include_body=include_body)) for s in symbols]
+
         optimized_result = _optimize_symbol_list(symbol_dicts)
 
         # Cache the result if single-file query

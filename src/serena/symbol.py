@@ -253,6 +253,94 @@ class LanguageServerSymbol(Symbol, ToStringMixin):
     def body(self) -> str | None:
         return self.symbol_root.get("body")
 
+    def extract_signature(self) -> str | None:
+        """
+        Extract just the signature (first line) of the symbol without the body.
+        
+        For functions/methods, this returns the def/async def line.
+        For classes, this returns the class declaration line.
+        For other symbols, returns the first line of the body.
+        
+        :return: The signature string, or None if body is not available
+        """
+        if self.body is None:
+            return None
+        
+        lines = self.body.splitlines()
+        if not lines:
+            return None
+        
+        # For multi-line signatures (with line continuations), collect all lines until we hit the colon
+        signature_lines = []
+        for line in lines:
+            signature_lines.append(line)
+            # Check if this line ends the signature (has : but not in a string)
+            stripped = line.strip()
+            if ':' in stripped and not stripped.endswith('\\'):
+                break
+        
+        return '\n'.join(signature_lines)
+    
+    def extract_docstring(self) -> str | None:
+        """
+        Extract the docstring from the symbol body.
+        
+        :return: The docstring (without quotes), or None if not present
+        """
+        if self.body is None:
+            return None
+        
+        try:
+            import ast
+            # Parse the body to extract docstring
+            tree = ast.parse(self.body)
+            if tree.body and isinstance(tree.body[0], (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                docstring = ast.get_docstring(tree.body[0])
+                return docstring
+        except:
+            pass
+        
+        # Fallback: look for docstring pattern at start of body
+        lines = self.body.splitlines()
+        if len(lines) < 2:
+            return None
+        
+        # Skip the signature line
+        start_idx = 1
+        while start_idx < len(lines) and not lines[start_idx].strip():
+            start_idx += 1
+        
+        if start_idx >= len(lines):
+            return None
+        
+        # Check if next non-empty line is a docstring
+        first_line = lines[start_idx].strip()
+        if first_line.startswith('"""') or first_line.startswith("'''"):
+            quote = first_line[:3]
+            # Collect docstring lines
+            docstring_lines = []
+            in_docstring = True
+            
+            # Handle single-line docstring
+            if first_line.count(quote) >= 2:
+                return first_line[3:-3]
+            
+            # Multi-line docstring
+            for i in range(start_idx, len(lines)):
+                line = lines[i].strip()
+                if i == start_idx:
+                    docstring_lines.append(line[3:])
+                elif quote in line:
+                    # End of docstring
+                    docstring_lines.append(line.replace(quote, ''))
+                    break
+                else:
+                    docstring_lines.append(line)
+            
+            return '\n'.join(docstring_lines).strip()
+        
+        return None
+
     def get_name_path(self) -> str:
         """
         Get the name path of the symbol (e.g. "class/method/inner_function").
@@ -357,6 +445,7 @@ class LanguageServerSymbol(Symbol, ToStringMixin):
         include_body: bool = False,
         include_children_body: bool = False,
         include_relative_path: bool = True,
+        detail_level: str = "full",
     ) -> dict[str, Any]:
         """
         Converts the symbol to a dictionary.
@@ -371,6 +460,10 @@ class LanguageServerSymbol(Symbol, ToStringMixin):
             and pass the children without passing the parent body to the LM.
         :param include_relative_path: whether to include the relative path of the symbol in the location
             entry. Relative paths of the symbol's children are always excluded.
+        :param detail_level: level of detail to include ("full", "signature", "minimal").
+            - "full": include full body if include_body=True
+            - "signature": include only signature and docstring
+            - "minimal": only metadata, no code content
         :return: a dictionary representation of the symbol
         """
         result: dict[str, Any] = {"name": self.name, "name_path": self.get_name_path()}
@@ -383,10 +476,22 @@ class LanguageServerSymbol(Symbol, ToStringMixin):
             body_start_line, body_end_line = self.get_body_line_numbers()
             result["body_location"] = {"start_line": body_start_line, "end_line": body_end_line}
 
-        if include_body:
+        # Handle different detail levels
+        if include_body and detail_level == "signature":
+            # Signature mode: extract signature and docstring only
+            signature = self.extract_signature()
+            docstring = self.extract_docstring()
+            
+            if signature is not None:
+                result["signature"] = signature
+            if docstring is not None:
+                result["docstring"] = docstring
+        elif include_body and detail_level == "full":
+            # Full mode: include complete body
             if self.body is None:
                 log.warning("Requested body for symbol, but it is not present. The symbol might have been loaded with include_body=False.")
             result["body"] = self.body
+        # For "minimal" or include_body=False, we don't include any code content
 
         def add_children(s: Self) -> list[dict[str, Any]]:
             children = []
@@ -400,6 +505,7 @@ class LanguageServerSymbol(Symbol, ToStringMixin):
                         include_children_body=include_children_body,
                         # all children have the same relative path as the parent
                         include_relative_path=False,
+                        detail_level=detail_level,
                     )
                 )
             return children
