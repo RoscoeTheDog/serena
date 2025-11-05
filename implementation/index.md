@@ -35,17 +35,19 @@ This provides:
 ## Stories
 
 ### Story 1: Design Centralized Storage Schema
-**Status**: unassigned
-**Effort**: 0.5 days
+**Status**: completed
+**Claimed**: 2025-11-05 01:01
+**Completed**: 2025-11-05 01:15
+**Effort**: 0.5 days (actual: 0.25 days)
 **Risk Level**: 🟡 MEDIUM
 
 **Description**: Define the new storage layout under `~/.serena/projects/` with project identifier strategy
 
 **Acceptance Criteria**:
-- [ ] Document storage layout in `docs/centralized-config-storage.md`
-- [ ] Define project identifier strategy (hash-based vs name-based)
-- [ ] Define safe default configurations
-- [ ] Schema supports backward migration from `.serena/`
+- [x] Document storage layout in `docs/centralized-config-storage.md`
+- [x] Define project identifier strategy (hash-based: SHA256 first 16 chars)
+- [x] Define safe default configurations
+- [x] Schema supports backward migration from `.serena/`
 
 **Technical Details**:
 ```
@@ -276,6 +278,17 @@ include_metadata: true           # Rich context for decisions
 - Archived previous sprint (MCP Interface Simplification) to `archive/2025-11-05-0102/`
 - Defined 10 stories for centralized config storage refactor
 - Sprint goal: Eliminate `.serena` directory pollution in project roots
+
+### 2025-11-05 01:01 - Story 1: unassigned → in_progress
+- Beginning design document for centralized storage schema
+
+### 2025-11-05 01:15 - Story 1: in_progress → completed
+- Created comprehensive design document at `docs/centralized-config-storage.md`
+- Defined storage layout: `~/.serena/projects/{project-id}/`
+- Project identifier strategy: SHA256 hash (first 16 chars) of absolute path
+- Documented safe defaults for junior-dev-friendly agent experience
+- Outlined backward migration strategy and MCP tool signatures
+- Total: 350+ lines of architectural documentation
 
 ---
 
