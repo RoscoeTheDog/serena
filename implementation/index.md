@@ -65,25 +65,36 @@ This provides:
 ---
 
 ### Story 2: Implement Path Resolution Helpers
-**Status**: unassigned
-**Effort**: 1 day
+**Status**: completed
+**Claimed**: 2025-11-05 01:30
+**Completed**: 2025-11-05 01:45
+**Effort**: 1 day (actual: 0.25 days)
 **Risk Level**: 🟡 MEDIUM
 **Parent**: Story 1
 
 **Description**: Add utility functions to resolve project-specific paths in centralized location
 
 **Acceptance Criteria**:
-- [ ] Add `get_centralized_project_dir(project_root: Path) -> Path` to `constants.py`
-- [ ] Add `get_project_identifier(project_root: Path) -> str` helper
-- [ ] Add `get_project_config_path(project_root: Path) -> Path` helper
-- [ ] Add `get_project_memories_path(project_root: Path) -> Path` helper
-- [ ] Unit tests for all path helpers
-- [ ] Ensure cross-platform compatibility (Windows/Linux/macOS)
+- [x] Add `get_centralized_project_dir(project_root: Path) -> Path` to `constants.py`
+- [x] Add `get_project_identifier(project_root: Path) -> str` helper
+- [x] Add `get_project_config_path(project_root: Path) -> Path` helper
+- [x] Add `get_project_memories_path(project_root: Path) -> Path` helper
+- [x] Add `get_legacy_project_dir(project_root: Path) -> Path` helper (bonus)
+- [x] Unit tests for all path helpers
+- [x] Ensure cross-platform compatibility (Windows/Linux/macOS)
 
 **Technical Details**:
 - Use SHA256 hash (first 16 chars) of absolute project path as identifier
 - Handle path normalization (case sensitivity, symlinks)
 - Create directories lazily (on first access)
+
+**Implementation Notes**:
+- Added 5 helper functions to `src/serena/constants.py`
+- Comprehensive test suite in `test/serena/test_constants.py` (300+ lines, 7 test classes)
+- Manual test script `test_path_helpers_manual.py` for quick validation
+- All tests pass on Windows platform
+- Functions handle symlinks, relative paths, case-insensitive filesystems
+- Idempotent directory creation (safe to call multiple times)
 
 ---
 
@@ -289,6 +300,25 @@ include_metadata: true           # Rich context for decisions
 - Documented safe defaults for junior-dev-friendly agent experience
 - Outlined backward migration strategy and MCP tool signatures
 - Total: 350+ lines of architectural documentation
+
+### 2025-11-05 01:30 - Story 2: unassigned → in_progress
+- Beginning implementation of path resolution helpers
+
+### 2025-11-05 01:45 - Story 2: in_progress → completed
+- Implemented 5 helper functions in `src/serena/constants.py`:
+  - `get_project_identifier()` - SHA256 hash-based project ID generation
+  - `get_centralized_project_dir()` - Centralized project directory resolution
+  - `get_project_config_path()` - Config file path resolution
+  - `get_project_memories_path()` - Memories directory path resolution
+  - `get_legacy_project_dir()` - Legacy .serena directory path (backward compat)
+- Created comprehensive test suite (`test/serena/test_constants.py`):
+  - 7 test classes, 30+ test cases
+  - Tests for determinism, collision resistance, path normalization
+  - Cross-platform compatibility tests (Windows/Linux/macOS paths)
+  - Symlink resolution, case-insensitivity, idempotency
+- Created manual test script for quick validation
+- All tests pass on Windows platform
+- Total implementation: ~400 lines (including tests and docs)
 
 ---
 
