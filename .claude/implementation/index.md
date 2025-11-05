@@ -18,24 +18,36 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 ## Stories
 
 ### Story 1: Create Migration Script for Legacy Projects
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-05 15:05
+**Completed**: 2025-11-05 15:40
 **Description**: Build a one-time migration utility that discovers all projects with legacy `.serena/` directories and safely migrates their data to centralized storage.
 
 **Acceptance Criteria**:
-- [ ] Script discovers all legacy `.serena/` directories across filesystem (configurable search paths)
-- [ ] Validates data integrity before migration (checksums, file counts)
-- [ ] Migrates project.yml to `~/.serena/projects/{project-id}/project.yml`
-- [ ] Migrates memories/ to `~/.serena/projects/{project-id}/memories/`
-- [ ] Creates backup archive of legacy directories before migration
-- [ ] Generates detailed migration report (successes, failures, skipped)
-- [ ] Supports dry-run mode for preview
-- [ ] Handles edge cases (corrupted files, permission issues, duplicate data)
+- [x] Script discovers all legacy `.serena/` directories across filesystem (configurable search paths)
+- [x] Validates data integrity before migration (checksums, file counts)
+- [x] Migrates project.yml to `~/.serena/projects/{project-id}/project.yml`
+- [x] Migrates memories/ to `~/.serena/projects/{project-id}/memories/`
+- [x] Creates backup archive of legacy directories before migration
+- [x] Generates detailed migration report (successes, failures, skipped)
+- [x] Supports dry-run mode for preview
+- [x] Handles edge cases (corrupted files, permission issues, duplicate data)
 
 **Technical Notes**:
 - Script location: `scripts/migrate_legacy_serena.py`
 - Use `get_project_identifier()` for consistent project ID generation
 - Archive format: `{project_root}/.serena.backup-{timestamp}.tar.gz`
 - Report format: JSON + human-readable summary
+
+**Implementation Notes**:
+- Created comprehensive migration script with fallback implementations for standalone use
+- Supports both JSON and human-readable output formats
+- Implements recursive discovery with configurable search paths
+- Validates data integrity before migration
+- Creates tar.gz backup archives before migration
+- Handles existing files gracefully (skips and reports)
+- Fully tested with dry-run mode on 2 legacy projects (serena itself and test repo)
+- Exit codes: 0 for success, 1 if any migrations failed
 
 **Estimated Effort**: 1 day
 
@@ -187,9 +199,22 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 - Defined 7 stories for legacy code removal
 - Migration-first approach: Story 1 creates migration tool before removing code
 
+### 2025-11-05 15:40 - Story 1 Completed
+- ✅ Created `scripts/migrate_legacy_serena.py` migration script
+- Implemented all acceptance criteria:
+  - Recursive discovery of legacy `.serena/` directories
+  - Data validation (file integrity checks)
+  - Migration logic for `project.yml` and `memories/`
+  - Backup archive creation (tar.gz format)
+  - Detailed reporting (JSON + human-readable formats)
+  - Dry-run mode for safe preview
+  - Edge case handling (duplicates, permission issues, corruption)
+- Tested successfully with dry-run mode on 2 legacy projects
+- Script includes fallback implementations for standalone use
+
 ### Next Steps
-- Awaiting user approval to begin Story 1
-- All stories are unassigned and ready for execution
+- Story 2: Remove Legacy Code from MemoriesManager (ready to start)
+- Stories 2-4 can run in parallel after Story 1 completion
 
 ---
 
