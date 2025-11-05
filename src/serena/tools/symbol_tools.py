@@ -233,7 +233,8 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         output_format: Literal["metadata", "signature", "body"] = "metadata",
         include_kinds: list[int] = [],  # noqa: B006
         exclude_kinds: list[int] = [],  # noqa: B006
-        substring_matching: bool = False,
+        substring_matching: bool | None = None,  # DEPRECATED - use match_mode
+        match_mode: Literal["exact", "substring", "glob", "regex"] = "exact",
         exclude_generated: bool | None = None,  # DEPRECATED - use search_scope
         search_scope: Literal["all", "source", "custom"] = "source",
         max_answer_chars: int = -1,
@@ -304,7 +305,34 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             If not provided, all kinds are included.
         :param exclude_kinds: Optional. List of LSP symbol kind integers to exclude. Takes precedence over `include_kinds`.
             If not provided, no kinds are excluded.
-        :param substring_matching: If True, use substring matching for the last segment of `name`.
+        :param match_mode: Match mode for the last segment of `name_path`. Options:
+            - "exact" (default, recommended): Fast exact match - use when you know the precise symbol name
+            - "substring": Match if pattern is substring of symbol name - use for exploratory searches
+            - "glob": Support wildcards (* and ?) - use for pattern-based searches (e.g., "User*Service")
+            - "regex": Full regex power - use for complex patterns (e.g., "User.*Service")
+
+            Examples:
+                # Exact match (fastest)
+                find_symbol("UserService")  # Only matches "UserService"
+
+                # Substring match
+                find_symbol("Service", match_mode="substring")  # Matches "UserService", "AuthService", etc.
+
+                # Glob pattern (NEW capability)
+                find_symbol("User*Service", match_mode="glob")  # Matches "UserAuthService", "UserApiService", etc.
+                find_symbol("User?Service", match_mode="glob")  # Matches "UserAService", "UserBService", etc.
+
+                # Regex pattern (NEW capability)
+                find_symbol("User.*Service", match_mode="regex")  # Matches "UserAuthService", "UserApiService", etc.
+                find_symbol("User[A-Z]+Service", match_mode="regex")  # More complex patterns
+
+            Performance notes:
+            - "exact" is fastest (O(1) comparison)
+            - "substring" is fast for short patterns
+            - "glob" is moderately fast (simple wildcard expansion)
+            - "regex" can be slower for complex patterns
+        :param substring_matching: [DEPRECATED] Use match_mode="substring" instead. If provided, overrides match_mode.
+            This parameter will be removed in version 2.0.0.
         :param search_scope: Controls which files to search. Options:
             - "source" (default): Exclude common generated/vendor patterns (node_modules, __pycache__, migrations,
               dist, build, .venv, venv, target, .next, .nuxt, vendor, .git, .pytest_cache, .mypy_cache,
@@ -361,6 +389,33 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
                 "removal_version": "2.0.0"
             })
 
+        # Map deprecated substring_matching to new match_mode
+        effective_match_mode = match_mode
+
+        if substring_matching is not None:
+            # substring_matching takes precedence for backward compatibility
+            effective_match_mode = "substring" if substring_matching else "exact"
+            deprecation_warnings.append({
+                "parameter": "substring_matching",
+                "value": substring_matching,
+                "replacement": "match_mode",
+                "migration": "Use match_mode='substring' instead of substring_matching=True" if substring_matching else "Use match_mode='exact' (default) instead of substring_matching=False",
+                "removal_version": "2.0.0"
+            })
+
+        # Validate regex patterns early if regex mode is used
+        if effective_match_mode == "regex":
+            import re
+            try:
+                re.compile(name_path.split("/")[-1])  # Validate only the last segment
+            except re.error as e:
+                return json.dumps({
+                    "error": "Invalid regex pattern",
+                    "pattern": name_path.split("/")[-1],
+                    "details": str(e),
+                    "suggestion": "Use a valid regex pattern or switch to match_mode='glob' for simple wildcards"
+                })
+
         # Map deprecated exclude_generated to new search_scope
         effective_search_scope = search_scope
 
@@ -387,7 +442,7 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
                 "output_format": effective_output_format,
                 "include_kinds": include_kinds,
                 "exclude_kinds": exclude_kinds,
-                "substring_matching": substring_matching,
+                "match_mode": effective_match_mode,
                 "search_scope": effective_search_scope,
                 "tool": "find_symbol"
             }
@@ -418,7 +473,7 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             include_body=need_body,
             include_kinds=parsed_include_kinds,
             exclude_kinds=parsed_exclude_kinds,
-            substring_matching=substring_matching,
+            match_mode=effective_match_mode,
             within_relative_path=relative_path,
         )
 
@@ -534,6 +589,14 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         # Add deprecation warnings if any deprecated params were used
         if deprecation_warnings:
             optimized_result["_deprecated"] = deprecation_warnings
+
+        # Add performance hints for slower match modes
+        if effective_match_mode in ("glob", "regex"):
+            performance_notes = {
+                "glob": "Glob matching is moderately fast. For better performance, use match_mode='exact' if you know the precise name.",
+                "regex": "Regex matching can be slower for complex patterns. Consider using match_mode='glob' for simple wildcards or match_mode='exact' for precise matches."
+            }
+            optimized_result["_performance_hint"] = performance_notes.get(effective_match_mode)
 
         # Cache the result if single-file query
         if use_cache:

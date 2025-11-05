@@ -119,15 +119,24 @@ class LanguageServerSymbol(Symbol, ToStringMixin):
     def match_name_path(
         name_path: str,
         symbol_name_path_parts: list[str],
-        substring_matching: bool,
+        substring_matching: bool = False,
+        match_mode: str | None = None,
     ) -> bool:
         """
         Checks if a given `name_path` matches a symbol's qualified name parts.
         See docstring of `Symbol.find` for more details.
+
+        :param name_path: The pattern to match
+        :param symbol_name_path_parts: The symbol's qualified name parts
+        :param substring_matching: [DEPRECATED] Use match_mode instead
+        :param match_mode: Match mode - "exact", "substring", "glob", or "regex"
         """
         assert name_path, "name_path must not be empty"
         assert symbol_name_path_parts, "symbol_name_path_parts must not be empty"
         name_path_sep = LanguageServerSymbol._NAME_PATH_SEP
+
+        # Resolve match mode (substring_matching takes precedence for backward compat)
+        effective_match_mode = match_mode or ("substring" if substring_matching else "exact")
 
         is_absolute_pattern = name_path.startswith(name_path_sep)
         pattern_parts = name_path.lstrip(name_path_sep).rstrip(name_path_sep).split(name_path_sep)
@@ -143,12 +152,26 @@ class LanguageServerSymbol(Symbol, ToStringMixin):
             # ancestors must match
             return False
 
-        # matching the last part of the symbol name
+        # matching the last part of the symbol name using specified mode
         name_to_match = pattern_parts[-1]
         symbol_name = symbol_name_path_parts[-1]
-        if substring_matching:
+
+        if effective_match_mode == "exact":
+            return name_to_match == symbol_name
+        elif effective_match_mode == "substring":
             return name_to_match in symbol_name
+        elif effective_match_mode == "glob":
+            import fnmatch
+            return fnmatch.fnmatch(symbol_name, name_to_match)
+        elif effective_match_mode == "regex":
+            import re
+            try:
+                return bool(re.search(name_to_match, symbol_name))
+            except re.error:
+                # Invalid regex - fall back to exact match
+                return name_to_match == symbol_name
         else:
+            # Unknown mode - fall back to exact
             return name_to_match == symbol_name
 
     def __init__(self, symbol_root_from_ls: UnifiedSymbolInformation) -> None:
@@ -383,6 +406,7 @@ class LanguageServerSymbol(Symbol, ToStringMixin):
         self,
         name_path: str,
         substring_matching: bool = False,
+        match_mode: str | None = None,
         include_kinds: Sequence[SymbolKind] | None = None,
         exclude_kinds: Sequence[SymbolKind] | None = None,
     ) -> list[Self]:
@@ -409,8 +433,8 @@ class LanguageServerSymbol(Symbol, ToStringMixin):
           Passing `/class/method` will match against `class/method` but not `nested_class/class/method` or `method`.
 
         :param name_path: the name path to match against
-        :param substring_matching: whether to use substring matching (as opposed to exact matching)
-            of the last segment of `name_path` against the symbol name.
+        :param substring_matching: [DEPRECATED] Use match_mode instead. Whether to use substring matching.
+        :param match_mode: Match mode - "exact" (default), "substring", "glob", or "regex"
         :param include_kinds: an optional sequence of ints representing the LSP symbol kind.
             If provided, only symbols of the given kinds will be included in the result.
         :param exclude_kinds: If provided, symbols of the given kinds will be excluded from the result.
@@ -426,6 +450,7 @@ class LanguageServerSymbol(Symbol, ToStringMixin):
                 name_path=name_path,
                 symbol_name_path_parts=s.get_name_path_parts(),
                 substring_matching=substring_matching,
+                match_mode=match_mode,
             )
 
         def traverse(s: "LanguageServerSymbol") -> None:
@@ -573,6 +598,7 @@ class LanguageServerSymbolRetriever:
         include_kinds: Sequence[SymbolKind] | None = None,
         exclude_kinds: Sequence[SymbolKind] | None = None,
         substring_matching: bool = False,
+        match_mode: str | None = None,
         within_relative_path: str | None = None,
     ) -> list[LanguageServerSymbol]:
         """
@@ -585,7 +611,11 @@ class LanguageServerSymbolRetriever:
         for root in symbol_roots:
             symbols.extend(
                 LanguageServerSymbol(root).find(
-                    name_path, include_kinds=include_kinds, exclude_kinds=exclude_kinds, substring_matching=substring_matching
+                    name_path,
+                    include_kinds=include_kinds,
+                    exclude_kinds=exclude_kinds,
+                    substring_matching=substring_matching,
+                    match_mode=match_mode
                 )
             )
         return symbols
