@@ -228,8 +228,9 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         name_path: str,
         depth: int = 0,
         relative_path: str = "",
-        include_body: bool = False,
-        detail_level: Literal["full", "signature", "auto"] = "full",
+        include_body: bool | None = None,  # DEPRECATED - use output_format
+        detail_level: Literal["full", "signature", "auto"] | None = None,  # DEPRECATED - use output_format
+        output_format: Literal["metadata", "signature", "body"] = "metadata",
         include_kinds: list[int] = [],  # noqa: B006
         exclude_kinds: list[int] = [],  # noqa: B006
         substring_matching: bool = False,
@@ -274,11 +275,27 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             If a file is passed, the search will be restricted to that file.
             If you have some knowledge about the codebase, you should use this parameter, as it will significantly
             speed up the search as well as reduce the number of results.
-        :param include_body: If True, include the symbol's source code. Use judiciously.
-        :param detail_level: Level of detail to return. Options:
-            - "full" (default): Return complete symbol information including body if include_body=True
-            - "signature": Return signature + docstring only with complexity analysis and warnings
-            - "auto": Automatically decide based on complexity (not yet implemented, defaults to "full")
+        :param output_format: Level of detail to return. Options:
+            - "metadata" (default, recommended): Return symbol metadata only (name, kind, location) - fastest, most efficient
+            - "signature": Return signature + docstring + complexity analysis - useful for understanding symbols without reading full code
+            - "body": Return full source code - use sparingly, only when you need to read the actual implementation
+            
+            Examples:
+                # Default - get metadata to find symbols
+                find_symbol("UserService")  # Returns: name, kind, location, children
+                
+                # Get signature when you need to understand the API
+                find_symbol("UserService/authenticate", output_format="signature")
+                # Returns: signature, docstring, complexity metrics, token estimates
+                
+                # Get body only when you need to read implementation
+                find_symbol("UserService/authenticate", output_format="body")
+                # Returns: full source code
+
+        :param include_body: [DEPRECATED] Use output_format="body" instead. If provided, overrides output_format.
+            This parameter will be removed in version 2.0.0.
+        :param detail_level: [DEPRECATED] Use output_format instead. If provided, overrides output_format.
+            This parameter will be removed in version 2.0.0.
         :param include_kinds: Optional. List of LSP symbol kind integers to include. (e.g., 5 for Class, 12 for Function).
             Valid kinds: 1=file, 2=module, 3=namespace, 4=package, 5=class, 6=method, 7=property, 8=field, 9=constructor, 10=enum,
             11=interface, 12=function, 13=variable, 14=constant, 15=string, 16=number, 17=boolean, 18=array, 19=object,
@@ -293,6 +310,45 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             -1 means the default value from the config will be used.
         :return: a list of symbols (with locations) matching the name.
         """
+        # Handle deprecated parameters and build deprecation warnings
+        deprecation_warnings = []
+        
+        # Map deprecated parameters to new output_format
+        effective_output_format = output_format
+        
+        if include_body is not None:
+            # include_body takes precedence for backward compatibility
+            effective_output_format = "body" if include_body else "metadata"
+            deprecation_warnings.append({
+                "parameter": "include_body",
+                "value": include_body,
+                "replacement": "output_format",
+                "migration": f"Use output_format='body' instead of include_body=True" if include_body else "Use output_format='metadata' (default) instead of include_body=False",
+                "removal_version": "2.0.0"
+            })
+        
+        if detail_level is not None:
+            # detail_level also takes precedence
+            if detail_level == "signature":
+                effective_output_format = "signature"
+            elif detail_level == "full":
+                effective_output_format = "body" if include_body else "metadata"
+            elif detail_level == "auto":
+                # Auto mode - for now, treat as metadata
+                effective_output_format = "metadata"
+            
+            deprecation_warnings.append({
+                "parameter": "detail_level",
+                "value": detail_level,
+                "replacement": "output_format",
+                "migration": {
+                    "full": "Use output_format='body' or output_format='metadata' (depending on whether you need the body)",
+                    "signature": "Use output_format='signature'",
+                    "auto": "Use output_format='metadata' (recommended default)"
+                }.get(detail_level, "Use output_format parameter"),
+                "removal_version": "2.0.0"
+            })
+
         # Only use cache for single-file queries (not directory/global searches)
         cache = get_global_cache(self.project.project_root)
         use_cache = relative_path and os.path.isfile(os.path.join(self.project.project_root, relative_path))
@@ -302,8 +358,7 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             query_params = {
                 "name_path": name_path,
                 "depth": depth,
-                "include_body": include_body,
-                "detail_level": detail_level,
+                "output_format": effective_output_format,
                 "include_kinds": include_kinds,
                 "exclude_kinds": exclude_kinds,
                 "substring_matching": substring_matching,
@@ -317,40 +372,32 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
                 # Return cached result with metadata
                 result = json.loads(cached_data)
                 result["_cache"] = cache_metadata
+                
+                # Add deprecation warnings if any deprecated params were used
+                if deprecation_warnings:
+                    result["_deprecated"] = deprecation_warnings
+                
                 return self._limit_length(json.dumps(result), max_answer_chars)
 
         # Cache miss or not cacheable - perform query
         parsed_include_kinds: Sequence[SymbolKind] | None = [SymbolKind(k) for k in include_kinds] if include_kinds else None
         parsed_exclude_kinds: Sequence[SymbolKind] | None = [SymbolKind(k) for k in exclude_kinds] if exclude_kinds else None
         symbol_retriever = self.create_language_server_symbol_retriever()
+        
+        # Determine if we need body based on output_format
+        need_body = effective_output_format in ("signature", "body")
+        
         symbols = symbol_retriever.find_by_name(
             name_path,
-            include_body=include_body,
+            include_body=need_body,
             include_kinds=parsed_include_kinds,
             exclude_kinds=parsed_exclude_kinds,
             substring_matching=substring_matching,
             within_relative_path=relative_path,
         )
-        # Handle detail_level - auto defaults to full for now
-        effective_detail_level = detail_level if detail_level != "auto" else "full"
 
-        # For signature mode, we need to fetch the body to perform analysis
-        need_body_for_analysis = effective_detail_level == "signature"
-        actual_include_body = include_body or need_body_for_analysis
-
-        # Re-fetch with body if we didn't include it initially but need it for signature mode
-        if need_body_for_analysis and not include_body:
-            symbols = symbol_retriever.find_by_name(
-                name_path,
-                include_body=True,  # Need body for complexity analysis
-                include_kinds=parsed_include_kinds,
-                exclude_kinds=parsed_exclude_kinds,
-                substring_matching=substring_matching,
-                within_relative_path=relative_path,
-            )
-
-        # Apply detail_level and add complexity analysis if needed
-        if effective_detail_level == "signature":
+        # Apply output_format to control what we return
+        if effective_output_format == "signature":
             from serena.analytics import TokenCountEstimator
 
             symbol_dicts = []
@@ -398,9 +445,12 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
                         s_dict["recommendation"] = "complexity_analysis_failed"
 
                 symbol_dicts.append(s_dict)
+        elif effective_output_format == "body":
+            # Body mode - return complete symbol information with body
+            symbol_dicts = [_sanitize_symbol_dict(s.to_dict(kind=True, location=True, depth=depth, include_body=True)) for s in symbols]
         else:
-            # Full mode - return complete symbol information
-            symbol_dicts = [_sanitize_symbol_dict(s.to_dict(kind=True, location=True, depth=depth, include_body=include_body)) for s in symbols]
+            # Metadata mode (default) - return symbol information without body
+            symbol_dicts = [_sanitize_symbol_dict(s.to_dict(kind=True, location=True, depth=depth, include_body=False)) for s in symbols]
 
         # Add symbol IDs for on-demand body retrieval
         symbol_dicts = _add_symbol_ids(symbol_dicts)
@@ -450,6 +500,10 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         # Add exclusion metadata if present
         if exclusion_metadata:
             optimized_result["_excluded"] = exclusion_metadata
+
+        # Add deprecation warnings if any deprecated params were used
+        if deprecation_warnings:
+            optimized_result["_deprecated"] = deprecation_warnings
 
         # Cache the result if single-file query
         if use_cache:

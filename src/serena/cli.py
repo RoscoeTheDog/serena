@@ -629,7 +629,7 @@ class ProjectCommands(AutoRegisteringGroup):
                 # Test 2: FindSymbolTool
                 log.info("Testing FindSymbolTool for symbol: %s", symbol_name)
                 find_symbol_result = agent.execute_task(
-                    lambda: find_symbol_tool.apply(symbol_name, relative_path=target_file, include_body=True)
+                    lambda: find_symbol_tool.apply(symbol_name, relative_path=target_file, output_format="body")
                 )
                 find_symbol_data = json.loads(find_symbol_result)
                 log.info("FindSymbolTool found %d matches for symbol %s", len(find_symbol_data), symbol_name)

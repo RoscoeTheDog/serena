@@ -430,9 +430,9 @@ class SemanticTruncator:
         if len(truncated) == 1:
             section = truncated[0]
             if file_path:
-                return f"To see the truncated section '{section.name}', use: find_symbol('{section.name}', relative_path='{file_path}', include_body=True)"
+                return f"To see the truncated section '{section.name}', use: find_symbol('{section.name}', relative_path='{file_path}', output_format='body')"
             else:
-                return f"To see the truncated section '{section.name}', use: find_symbol('{section.name}', include_body=True)"
+                return f"To see the truncated section '{section.name}', use: find_symbol('{section.name}', output_format='body')"
 
         # Multiple truncated sections
         section_names = ", ".join(f"'{s.name}'" for s in truncated[:3])
@@ -440,6 +440,6 @@ class SemanticTruncator:
             section_names += f", and {len(truncated) - 3} more"
 
         if file_path:
-            return f"To see truncated sections ({section_names}), use: find_symbol('<name>', relative_path='{file_path}', include_body=True)"
+            return f"To see truncated sections ({section_names}), use: find_symbol('<name>', relative_path='{file_path}', output_format='body')"
         else:
-            return f"To see truncated sections ({section_names}), use: find_symbol('<name>', include_body=True)"
+            return f"To see truncated sections ({section_names}), use: find_symbol('<name>', output_format='body')"
