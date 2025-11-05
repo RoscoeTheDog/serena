@@ -84,16 +84,26 @@ class MemoriesManager:
             f.write(content)
         return f"Memory {name} written."
 
-    def list_memories(self, include_metadata: bool = False, preview_lines: int = 3) -> list[str] | list[dict]:
+    def list_memories(self, include_metadata: bool = True, preview_lines: int = 3) -> list[str] | list[dict]:
         """
-        List available memories.
+        List available memories with metadata (default) or just names.
 
         Args:
-            include_metadata: If True, return detailed metadata for each memory
+            include_metadata: If True, return detailed metadata for each memory (default: True).
+                Use include_metadata=False for just names (rare - only when you don't need to decide which to read).
             preview_lines: Number of lines to include in preview (default: 3)
 
         Returns:
-            List of memory names (if include_metadata=False) or list of dicts with metadata
+            List of dicts with metadata (if include_metadata=True, default) or list of memory names (if False).
+
+            Metadata includes: name, size_kb, last_modified, preview, estimated_tokens, lines
+
+        Example:
+            # Default: Get metadata to make informed decisions
+            memories = list_memories()  # Returns metadata for all
+
+            # Rare: Just get names
+            names = list_memories(include_metadata=False)
         """
         if not include_metadata:
             # Backward compatible: return simple list of names

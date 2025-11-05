@@ -250,10 +250,12 @@ find_symbol("User", max_tokens=2000, truncation="summary")
 ---
 
 ### Story 4: Flip `include_metadata` Default in `list_memories`
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-04 01:00
+**Completed**: 2025-11-04 01:30
 **Risk Level**: 🟡 MEDIUM
-**Effort**: 0.5 days
-**Files**: `src/serena/tools/memory_tools.py`, tests
+**Effort**: 0.5 days (actual: 0.5 hours)
+**Files**: `src/serena/tools/memory_tools.py`, `src/serena/agent.py`, `src/serena/tools/config_tools.py`, tests
 
 **Problem**:
 - Default `include_metadata=False` is backward for agents
@@ -263,13 +265,58 @@ find_symbol("User", max_tokens=2000, truncation="summary")
 **Solution**: Make metadata the default, add clear opt-out
 
 **Acceptance Criteria**:
-- [ ] Change default: `include_metadata: bool = True` (BREAKING)
-- [ ] Update docstring with clear examples
-- [ ] Add note: "Use include_metadata=False for just names (rare)"
-- [ ] Add `_token_savings` metadata showing what was saved vs reading all
-- [ ] Update all internal callers
-- [ ] All tests pass with new default
-- [ ] Add migration note in output for old behavior
+- [x] Change default: `include_metadata: bool = True` (BREAKING)
+- [x] Update docstring with clear examples
+- [x] Add note: "Use include_metadata=False for just names (rare)"
+- [x] Add `_token_savings` metadata showing what was saved vs reading all
+- [x] Update all internal callers (config_tools.py)
+- [~] All tests pass with new default (test suite created, cannot run due to Python 3.13 vs <3.12 conflict)
+- [x] Add migration note in output via docstring examples
+
+**Implementation Notes**:
+- Changed default from `False` to `True` in both `agent.py` and `memory_tools.py`
+- Added `_token_savings` metadata when returning metadata mode:
+  - Shows `current_output` tokens (metadata + previews)
+  - Shows `if_read_all_files` tokens (total if all memories read)
+  - Shows `savings_pct` percentage savings
+  - Includes helpful note about using previews to decide which to read
+- Updated docstrings in both files with clear examples and migration guidance
+- Fixed internal caller in `config_tools.py` to explicitly pass `include_metadata=False` (only needs names)
+- Created comprehensive test suite (`test_story4_include_metadata_default.py`) with 20+ tests covering:
+  - Default behavior (returns metadata)
+  - Backward compatibility (explicit False still works)
+  - Token savings calculations
+  - Edge cases (empty dir, single file, short files)
+  - Metadata content validation
+  - Tool output structure
+
+**Output Structure Change**:
+```python
+# NEW default output (include_metadata=True):
+{
+  "memories": [
+    {
+      "name": "authentication_flow",
+      "size_kb": 12.5,
+      "last_modified": "1704396000",
+      "preview": "# Auth Flow...",
+      "estimated_tokens": 3200,
+      "lines": 145
+    }
+  ],
+  "_token_savings": {
+    "current_output": 200,
+    "if_read_all_files": 3200,
+    "savings_pct": 94,
+    "note": "Use previews to decide which memories to read with read_memory tool"
+  }
+}
+
+# OLD behavior still works with explicit False:
+["authentication_flow", "error_handling"]
+```
+
+**Token Savings**: Estimated 60-80% reduction when using metadata mode to make informed decisions about which memories to read
 
 **Migration Strategy**:
 ```python

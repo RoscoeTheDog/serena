@@ -43,18 +43,18 @@ class ListMemoriesTool(Tool):
     Lists memories in Serena's project-specific memory store with optional metadata.
     """
 
-    def apply(self, include_metadata: bool = False, preview_lines: int = 3) -> str:
+    def apply(self, include_metadata: bool = True, preview_lines: int = 3) -> str:
         """
-        List available memories. Any memory can be read using the `read_memory` tool.
+        List available memories with metadata (default). Any memory can be read using the `read_memory` tool.
 
         Args:
-            include_metadata: If True, include size, last_modified, preview, estimated_tokens, and lines
+            include_metadata: If True, include size, last_modified, preview, estimated_tokens, and lines (default: True).
+                Use include_metadata=False for just names (rare - only when you don't need to decide which to read).
             preview_lines: Number of lines to include in preview (default: 3, only used if include_metadata=True)
 
         Returns:
             JSON string containing either:
-            - Simple list of memory names (if include_metadata=False, backward compatible)
-            - List of dicts with metadata (if include_metadata=True):
+            - List of dicts with metadata (if include_metadata=True, default):
               {
                 "name": str,
                 "size_kb": float,
@@ -63,8 +63,9 @@ class ListMemoriesTool(Tool):
                 "estimated_tokens": int,
                 "lines": int
               }
+            - Simple list of memory names (if include_metadata=False)
 
-        Example with metadata:
+        Example with metadata (default):
             [
               {
                 "name": "authentication_flow",
@@ -76,15 +77,44 @@ class ListMemoriesTool(Tool):
               }
             ]
 
-        Token Savings:
-        - Without metadata: List of names only (~50 tokens for 10 memories)
-        - With metadata: Preview + metadata (~200 tokens vs ~3000 for reading all files)
+        Example without metadata (rare):
+            ["authentication_flow", "error_handling", "database_schema"]
+
+        Token Savings (metadata mode):
+        - Metadata mode: Preview + metadata (~200 tokens vs ~3000 for reading all files)
         - Savings: ~60-80% when used to decide which memories to read
+        - Without metadata: Just names (~50 tokens for 10 memories) - use only when you already know which to read
         """
         result = self.memories_manager.list_memories(
             include_metadata=include_metadata,
             preview_lines=preview_lines
         )
+
+        # Add token savings metadata when returning metadata
+        if include_metadata and isinstance(result, list) and len(result) > 0:
+            # Calculate total tokens if all memories were read
+            total_tokens_if_read_all = sum(mem.get("estimated_tokens", 0) for mem in result)
+            # Estimate current output tokens (metadata + previews)
+            current_output = json.dumps(result, indent=2)
+            current_tokens = len(current_output) // 4
+
+            # Calculate savings
+            savings_pct = 0
+            if total_tokens_if_read_all > 0:
+                savings_pct = round((1 - current_tokens / total_tokens_if_read_all) * 100)
+
+            # Wrap result with metadata
+            output = {
+                "memories": result,
+                "_token_savings": {
+                    "current_output": current_tokens,
+                    "if_read_all_files": total_tokens_if_read_all,
+                    "savings_pct": savings_pct,
+                    "note": "Use previews to decide which memories to read with read_memory tool"
+                }
+            }
+            return json.dumps(output, indent=2)
+
         return json.dumps(result, indent=2 if include_metadata else None)
 
 

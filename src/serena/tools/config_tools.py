@@ -64,7 +64,7 @@ class ActivateProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject):
         if active_project.project_config.initial_prompt:
             result_str += f"\nAdditional project information:\n {active_project.project_config.initial_prompt}"
         result_str += (
-            f"\nAvailable memories:\n {json.dumps(list(self.memories_manager.list_memories()))}"
+            f"\nAvailable memories:\n {json.dumps(list(self.memories_manager.list_memories(include_metadata=False)))}"
             + "You should not read these memories directly, but rather use the `read_memory` tool to read them later if needed for the task."
         )
         result_str += f"\nAvailable tools:\n {json.dumps(self.agent.get_active_tool_names())}"
