@@ -1,0 +1,21 @@
+# .claude/ directory gitignore
+# EPHEMERAL-FS v3.3 - Selective tracking
+
+# Track structure and documentation
+!INDEX.md
+!implementation/
+!implementation/**/*.md
+!implementation/archive/
+!implementation/archive/**/*.md
+
+# Ignore temporary and local files
+settings.local.json
+scratch/
+test/fixtures/
+*.tmp
+*.log
+
+# Track archive metadata but ignore large artifacts
+!implementation/archive/INDEX.md
+implementation/archive/**/*.tar.gz
+implementation/archive/**/*.zip
