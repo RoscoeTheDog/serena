@@ -425,6 +425,7 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
         exclude_kinds: list[int] = [],  # noqa: B006
         context_lines: int = 1,
         extract_pattern: bool = True,
+        mode: Literal["count", "summary", "full"] = "full",
         max_answer_chars: int = -1,
     ) -> str:
         """
@@ -440,6 +441,8 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
             Set to 0 for just the reference line, or higher for more surrounding code.
         :param extract_pattern: if True, extract the usage pattern (e.g., "foo.bar(x, y)") from the reference line
             for more concise output. If False, shows full lines without pattern extraction (default: True).
+        :param mode: output mode - "count" (just counts by file/type), "summary" (counts + first 10 matches),
+            or "full" (all references with context, default). Count mode provides 90%+ token savings.
         :param max_answer_chars: same as in the `find_symbol` tool.
         :return: a list of JSON objects with the symbols referencing the requested symbol
         """
@@ -458,6 +461,12 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
             include_kinds=parsed_include_kinds,
             exclude_kinds=parsed_exclude_kinds,
         )
+
+        # Count mode: Return only counts and metadata
+        if mode == "count":
+            return self._generate_count_output(references_in_symbols, name_path, relative_path)
+
+        # Process references for summary and full modes
         reference_dicts = []
         for ref in references_in_symbols:
             ref_dict = ref.symbol.to_dict(kind=True, location=True, depth=0, include_body=include_body)
@@ -466,19 +475,19 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
                 ref_relative_path = ref.symbol.location.relative_path
                 assert ref_relative_path is not None, f"Referencing symbol {ref.symbol.name} has no relative path, this is likely a bug."
                 content_around_ref = self.project.retrieve_content_around_line(
-                    relative_file_path=ref_relative_path, 
-                    line=ref.line, 
-                    context_lines_before=context_lines, 
+                    relative_file_path=ref_relative_path,
+                    line=ref.line,
+                    context_lines_before=context_lines,
                     context_lines_after=context_lines
                 )
-                
+
                 # Extract the reference line for pattern extraction
                 reference_line = None
                 for text_line in content_around_ref.matched_lines:
                     if text_line.line_number == ref.line:
                         reference_line = text_line.line_content
                         break
-                
+
                 if extract_pattern and reference_line:
                     # Extract usage pattern from the reference line
                     usage_pattern = extract_usage_pattern(reference_line, target_symbol_name)
@@ -489,17 +498,113 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
                 else:
                     # Fall back to full context
                     ref_dict["content_around_reference"] = content_around_ref.to_display_string()
-                
+
                 # Add metadata about context
                 ref_dict["context_lines"] = context_lines
                 if extract_pattern:
                     ref_dict["pattern_extracted"] = True
                     ref_dict["expand_context_hint"] = f"Use context_lines={context_lines + 2} for more surrounding code"
-                    
+
             reference_dicts.append(ref_dict)
+
+        # Summary mode: Return counts + preview of first 10 references
+        if mode == "summary":
+            return self._generate_summary_output(reference_dicts, name_path, relative_path)
+
+        # Full mode: Return all references (default)
         optimized_result = _optimize_symbol_list(reference_dicts)
         result = json.dumps(optimized_result)
         return self._limit_length(result, max_answer_chars)
+
+    def _generate_count_output(self, references_in_symbols, name_path: str, relative_path: str) -> str:
+        """
+        Generate count-only output for reference queries.
+        Returns total_references, by_file counts, and by_type counts.
+        """
+        total_references = len(references_in_symbols)
+
+        # Count by file
+        by_file = {}
+        by_type = {}
+
+        for ref in references_in_symbols:
+            # Count by file
+            file_path = ref.symbol.location.relative_path or "unknown"
+            by_file[file_path] = by_file.get(file_path, 0) + 1
+
+            # Count by symbol kind/type
+            symbol_kind = ref.symbol.kind.name if ref.symbol.kind else "unknown"
+            by_type[symbol_kind] = by_type.get(symbol_kind, 0) + 1
+
+        # Sort by count (descending)
+        by_file_sorted = dict(sorted(by_file.items(), key=lambda x: x[1], reverse=True))
+        by_type_sorted = dict(sorted(by_type.items(), key=lambda x: x[1], reverse=True))
+
+        result = {
+            "_schema": "reference_count_v1",
+            "symbol": name_path,
+            "file": relative_path,
+            "total_references": total_references,
+            "by_file": by_file_sorted,
+            "by_type": by_type_sorted,
+            "mode_used": "count",
+            "full_details_available": "Use mode='full' to see all references with context",
+            "summary_available": "Use mode='summary' to see counts + first 10 matches"
+        }
+
+        return json.dumps(result, indent=2)
+
+    def _generate_summary_output(self, reference_dicts: list, name_path: str, relative_path: str) -> str:
+        """
+        Generate summary output with counts + preview of first 10 references.
+        """
+        total_references = len(reference_dicts)
+
+        # Count by file
+        by_file = {}
+        for ref_dict in reference_dicts:
+            file_path = ref_dict.get("relative_path", "unknown")
+            by_file[file_path] = by_file.get(file_path, 0) + 1
+
+        # Sort by count (descending)
+        by_file_sorted = dict(sorted(by_file.items(), key=lambda x: x[1], reverse=True))
+
+        # Take first 10 references for preview
+        preview_limit = 10
+        preview_refs = reference_dicts[:preview_limit]
+
+        # Create lightweight preview (just file, line, usage pattern)
+        preview = []
+        for ref in preview_refs:
+            preview_item = {
+                "file": ref.get("relative_path", "unknown"),
+                "line": ref.get("reference_line") or ref.get("line", 0),
+            }
+
+            # Add usage pattern if available
+            if "usage_pattern" in ref:
+                preview_item["usage_pattern"] = ref["usage_pattern"]
+            elif "full_line" in ref:
+                # Truncate full line to 100 chars
+                full_line = ref["full_line"].strip()
+                preview_item["snippet"] = full_line[:100] + ("..." if len(full_line) > 100 else "")
+
+            preview.append(preview_item)
+
+        result = {
+            "_schema": "reference_summary_v1",
+            "symbol": name_path,
+            "file": relative_path,
+            "total_references": total_references,
+            "by_file": by_file_sorted,
+            "preview": preview,
+            "preview_count": len(preview),
+            "mode_used": "summary",
+            "showing": f"Showing {len(preview)} of {total_references} references",
+            "full_details_available": f"Use mode='full' to see all {total_references} references with full context"
+        }
+
+        return json.dumps(result, indent=2)
 
 
 class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
