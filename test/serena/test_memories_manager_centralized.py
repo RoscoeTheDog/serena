@@ -51,14 +51,12 @@ class TestMemoriesManagerCentralizedStorage:
         assert not legacy_dir.exists()
 
     def test_init_stores_correct_paths(self, temp_project_root):
-        """Test that MemoriesManager stores correct centralized and legacy paths"""
+        """Test that MemoriesManager stores correct centralized path"""
         manager = MemoriesManager(str(temp_project_root))
 
         expected_centralized = get_project_memories_path(temp_project_root)
-        expected_legacy = get_legacy_project_dir(temp_project_root) / "memories"
 
         assert manager._memory_dir == expected_centralized
-        assert manager._legacy_memory_dir == expected_legacy
 
     # Save Memory Tests (Centralized Only)
 
