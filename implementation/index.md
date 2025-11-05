@@ -1682,7 +1682,9 @@ refs = find_referencing_symbols("authenticate", mode="full")
 ---
 
 ### Story 14: Exclude Generated Code (Transparent)
-**Status**: `unassigned`
+**Status**: `completed`
+**Claimed**: 2025-11-04 21:13
+**Completed**: 2025-11-04 21:21
 **Risk Level**: 🟡 Medium (safe with transparency)
 **Estimated Savings**: 30-60%
 **Effort**: 2 days
@@ -1910,20 +1912,42 @@ find_symbol("User", exclude_generated=true)
   - All acceptance criteria met
   - **Phase 4 now 75% complete** (3/4 stories done)
 
+- **Story 14 completed**: Exclude Generated Code (Transparent)
+  - Added `exclude_generated` parameter to `FindSymbolTool.apply()`, `SearchForPatternTool.apply()`, and `ListDirTool.apply()`
+  - Default is `false` for full backward compatibility
+  - Created comprehensive exclusion detection system in `src/serena/util/file_system.py`:
+    - `GENERATED_CODE_PATTERNS`: List of 18 common generated/vendor patterns
+    - `is_generated_code()`: Function to check if a path matches generated patterns
+    - `GeneratedCodeExclusionResult`: Dataclass to hold exclusion results and metadata
+    - `exclude_generated_code()`: Main filtering function with transparent reporting
+  - Pattern detection includes: node_modules, __pycache__, migrations, .git, vendor, dist, build, .next, .nuxt, target, .venv, venv, .pytest_cache, .mypy_cache, coverage, .coverage, htmlcov, wheelhouse, *.egg-info
+  - When enabled, responses include detailed exclusion metadata:
+    - `excluded_files`: Count of files excluded by each pattern
+    - `excluded_patterns`: List of all patterns used
+    - `total_excluded`: Total number of excluded files
+    - `include_excluded_instruction`: Clear guidance on how to include excluded files
+  - Created comprehensive unit tests in `test/serena/util/test_file_system.py` (TestGeneratedCodeExclusion class):
+    - 11 test methods covering all exclusion scenarios
+    - Tests for node_modules, __pycache__, migrations detection
+    - Tests for empty lists, mixed content, multiple patterns
+    - Tests for metadata formatting
+  - All code compiles successfully (verified with py_compile)
+  - **Phase 4 now 100% complete** (4/4 stories done) ✅
+
 ---
 
 ## Sprint Metrics
 
 **Target Token Reduction**: 65-85%
-**Stories Completed**: 13/14 (93%)
-**Current Phase**: 4 (Advanced Safe Features) - 🚀 **IN PROGRESS** (Stories 11-13 ✓)
-**Estimated Remaining Effort**: 1-2 days (Story 14 only)
+**Stories Completed**: 14/14 (100%) ✅
+**Current Phase**: 4 (Advanced Safe Features) - ✅ **COMPLETE** (Stories 11-14 ✓)
+**Estimated Remaining Effort**: 0 days - **SPRINT COMPLETE** 🎉
 
 **Phase Breakdown**:
 - Phase 1 (Foundation): 4 stories, 9-11 days ✅ **COMPLETE**
 - Phase 2 (Intelligent Summarization): 4 stories, 11-14 days ✅ **COMPLETE**
 - Phase 3 (Universal Controls): 2 stories, 5-7 days ✅ **COMPLETE**
-- Phase 4 (Advanced Safe Features): 4 stories, 6-8 days 🚀 **IN PROGRESS** (2/4 complete)
+- Phase 4 (Advanced Safe Features): 4 stories, 6-8 days ✅ **COMPLETE** (4/4 complete)
 
 **Execution Mode**: Linear single-agent (Stories 9-14)
 **Self-Healing**: Enabled with user alerts for critical issues

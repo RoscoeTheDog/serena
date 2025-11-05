@@ -706,3 +706,177 @@ src/*.o
 
         # foo.txt in other/ should NOT be ignored (outside foo/ subtree)
         assert not parser.should_ignore("other/foo.txt"), "other/foo.txt should NOT be ignored by foo/.gitignore"
+
+
+class TestGeneratedCodeExclusion:
+    """Test class for generated code exclusion functionality."""
+
+    def setup_method(self):
+        """Set up test environment before each test method."""
+        # Create a temporary directory for testing
+        self.test_dir = tempfile.mkdtemp()
+        self.repo_path = Path(self.test_dir)
+
+    def teardown_method(self):
+        """Clean up test environment after each test method."""
+        # Remove the temporary directory
+        shutil.rmtree(self.test_dir)
+
+    def test_is_generated_code_node_modules(self):
+        """Test detection of node_modules files."""
+        from serena.util.file_system import is_generated_code
+
+        is_gen, pattern = is_generated_code("node_modules/package/index.js", str(self.repo_path))
+        assert is_gen is True
+        assert pattern == "node_modules"
+
+        is_gen, pattern = is_generated_code("src/node_modules/package/index.js", str(self.repo_path))
+        assert is_gen is True
+        assert pattern == "node_modules"
+
+    def test_is_generated_code_pycache(self):
+        """Test detection of __pycache__ files."""
+        from serena.util.file_system import is_generated_code
+
+        is_gen, pattern = is_generated_code("__pycache__/module.pyc", str(self.repo_path))
+        assert is_gen is True
+        assert pattern == "__pycache__"
+
+        is_gen, pattern = is_generated_code("src/__pycache__/module.pyc", str(self.repo_path))
+        assert is_gen is True
+        assert pattern == "__pycache__"
+
+    def test_is_generated_code_migrations(self):
+        """Test detection of migrations files."""
+        from serena.util.file_system import is_generated_code
+
+        is_gen, pattern = is_generated_code("migrations/0001_initial.py", str(self.repo_path))
+        assert is_gen is True
+        assert pattern == "migrations"
+
+        is_gen, pattern = is_generated_code("app/migrations/0001_initial.py", str(self.repo_path))
+        assert is_gen is True
+        assert pattern == "migrations"
+
+    def test_is_generated_code_normal_file(self):
+        """Test that normal files are not detected as generated."""
+        from serena.util.file_system import is_generated_code
+
+        is_gen, pattern = is_generated_code("src/main.py", str(self.repo_path))
+        assert is_gen is False
+        assert pattern is None
+
+        is_gen, pattern = is_generated_code("README.md", str(self.repo_path))
+        assert is_gen is False
+        assert pattern is None
+
+    def test_exclude_generated_code_empty(self):
+        """Test exclusion with empty file lists."""
+        from serena.util.file_system import exclude_generated_code
+
+        result = exclude_generated_code([], [], str(self.repo_path))
+        assert result.included_files == []
+        assert result.included_dirs == []
+        assert result.excluded_counts == {}
+
+    def test_exclude_generated_code_files(self):
+        """Test exclusion of generated files."""
+        from serena.util.file_system import exclude_generated_code
+
+        files = [
+            "src/main.py",
+            "node_modules/package/index.js",
+            "__pycache__/module.pyc",
+            "src/utils.py",
+            "migrations/0001_initial.py",
+        ]
+
+        result = exclude_generated_code([], files, str(self.repo_path))
+
+        assert len(result.included_files) == 2
+        assert "src/main.py" in result.included_files
+        assert "src/utils.py" in result.included_files
+
+        assert "node_modules" in result.excluded_counts
+        assert "__pycache__" in result.excluded_counts
+        assert "migrations" in result.excluded_counts
+
+        assert result.excluded_counts["node_modules"] == 1
+        assert result.excluded_counts["__pycache__"] == 1
+        assert result.excluded_counts["migrations"] == 1
+
+    def test_exclude_generated_code_directories(self):
+        """Test exclusion of generated directories."""
+        from serena.util.file_system import exclude_generated_code
+
+        dirs = [
+            "src",
+            "node_modules",
+            "__pycache__",
+            "tests",
+            "migrations",
+        ]
+
+        result = exclude_generated_code(dirs, [], str(self.repo_path))
+
+        assert len(result.included_dirs) == 2
+        assert "src" in result.included_dirs
+        assert "tests" in result.included_dirs
+        assert "node_modules" not in result.included_dirs
+        assert "__pycache__" not in result.included_dirs
+        assert "migrations" not in result.included_dirs
+
+    def test_exclude_generated_code_mixed(self):
+        """Test exclusion with both files and directories."""
+        from serena.util.file_system import exclude_generated_code
+
+        dirs = ["src", "node_modules", "tests"]
+        files = [
+            "src/main.py",
+            "node_modules/pkg/index.js",
+            "tests/test_main.py",
+            "__pycache__/module.pyc",
+        ]
+
+        result = exclude_generated_code(dirs, files, str(self.repo_path))
+
+        assert len(result.included_dirs) == 2
+        assert "src" in result.included_dirs
+        assert "tests" in result.included_dirs
+
+        assert len(result.included_files) == 2
+        assert "src/main.py" in result.included_files
+        assert "tests/test_main.py" in result.included_files
+
+        assert result.excluded_counts["node_modules"] == 1
+        assert result.excluded_counts["__pycache__"] == 1
+
+    def test_exclude_generated_code_multiple_patterns(self):
+        """Test that multiple file exclusions are counted correctly."""
+        from serena.util.file_system import exclude_generated_code
+
+        files = [
+            "node_modules/pkg1/index.js",
+            "node_modules/pkg2/main.js",
+            "node_modules/pkg3/utils.js",
+            "__pycache__/module1.pyc",
+            "__pycache__/module2.pyc",
+            "src/main.py",
+        ]
+
+        result = exclude_generated_code([], files, str(self.repo_path))
+
+        assert len(result.included_files) == 1
+        assert result.excluded_counts["node_modules"] == 3
+        assert result.excluded_counts["__pycache__"] == 2
+
+    def test_exclude_generated_code_metadata(self):
+        """Test that exclusion metadata is properly formatted."""
+        from serena.util.file_system import exclude_generated_code, GENERATED_CODE_PATTERNS
+
+        files = ["node_modules/pkg/index.js", "src/main.py"]
+        result = exclude_generated_code([], files, str(self.repo_path))
+
+        assert result.excluded_patterns == GENERATED_CODE_PATTERNS
+        assert len(result.excluded_patterns) > 0
+        assert any("node_modules" in p for p in result.excluded_patterns)

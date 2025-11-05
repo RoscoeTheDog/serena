@@ -233,6 +233,7 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         include_kinds: list[int] = [],  # noqa: B006
         exclude_kinds: list[int] = [],  # noqa: B006
         substring_matching: bool = False,
+        exclude_generated: bool = False,
         max_answer_chars: int = -1,
     ) -> str:
         """
@@ -286,6 +287,8 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         :param exclude_kinds: Optional. List of LSP symbol kind integers to exclude. Takes precedence over `include_kinds`.
             If not provided, no kinds are excluded.
         :param substring_matching: If True, use substring matching for the last segment of `name`.
+        :param exclude_generated: If True, exclude generated/vendor code (node_modules, __pycache__, migrations, etc.).
+            Default is False for backward compatibility. When enabled, response includes exclusion metadata.
         :param max_answer_chars: Max characters for the JSON result. If exceeded, no content is returned.
             -1 means the default value from the config will be used.
         :return: a list of symbols (with locations) matching the name.
@@ -304,6 +307,7 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
                 "include_kinds": include_kinds,
                 "exclude_kinds": exclude_kinds,
                 "substring_matching": substring_matching,
+                "exclude_generated": exclude_generated,
                 "tool": "find_symbol"
             }
 
@@ -401,7 +405,51 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         # Add symbol IDs for on-demand body retrieval
         symbol_dicts = _add_symbol_ids(symbol_dicts)
 
+        # Apply generated code exclusion if requested
+        exclusion_metadata = None
+        if exclude_generated:
+            from serena.util.file_system import exclude_generated_code
+
+            # Extract file paths from symbol_dicts
+            included_symbols = []
+            all_file_paths = []
+            for symbol_dict in symbol_dicts:
+                rel_path = symbol_dict.get("relative_path")
+                if rel_path:
+                    all_file_paths.append(rel_path)
+
+            # Get unique file paths
+            unique_paths = list(set(all_file_paths))
+
+            # Filter using exclusion logic
+            exclusion_result = exclude_generated_code([], unique_paths, self.project.project_root)
+            included_files_set = set(exclusion_result.included_files)
+
+            # Filter symbols - only keep those from included files
+            for symbol_dict in symbol_dicts:
+                rel_path = symbol_dict.get("relative_path")
+                if rel_path and rel_path in included_files_set:
+                    included_symbols.append(symbol_dict)
+                elif not rel_path:
+                    # Keep symbols without a path (shouldn't normally happen)
+                    included_symbols.append(symbol_dict)
+
+            symbol_dicts = included_symbols
+
+            # Prepare exclusion metadata
+            if exclusion_result.excluded_counts:
+                exclusion_metadata = {
+                    "excluded_files": exclusion_result.excluded_counts,
+                    "excluded_patterns": exclusion_result.excluded_patterns,
+                    "total_excluded": sum(exclusion_result.excluded_counts.values()),
+                    "include_excluded_instruction": "Use exclude_generated=false to include all files"
+                }
+
         optimized_result = _optimize_symbol_list(symbol_dicts)
+
+        # Add exclusion metadata if present
+        if exclusion_metadata:
+            optimized_result["_excluded"] = exclusion_metadata
 
         # Cache the result if single-file query
         if use_cache:

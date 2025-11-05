@@ -19,6 +19,124 @@ class ScanResult(NamedTuple):
     files: list[str]
 
 
+# Common generated/vendor code patterns
+GENERATED_CODE_PATTERNS = [
+    "**/node_modules/**",
+    "**/__pycache__/**",
+    "**/migrations/**",
+    "**/.git/**",
+    "**/vendor/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/.nuxt/**",
+    "**/target/**",  # Rust/Java build directory
+    "**/.venv/**",
+    "**/venv/**",
+    "**/.pytest_cache/**",
+    "**/.mypy_cache/**",
+    "**/coverage/**",
+    "**/.coverage/**",
+    "**/htmlcov/**",
+    "**/wheelhouse/**",
+    "**/*.egg-info/**",
+]
+
+
+@dataclass
+class GeneratedCodeExclusionResult:
+    """Result of excluding generated code from a file/directory list."""
+
+    included_files: list[str]
+    """Files that were not excluded."""
+    included_dirs: list[str]
+    """Directories that were not excluded."""
+    excluded_counts: dict[str, int]
+    """Count of files excluded by each pattern."""
+    excluded_patterns: list[str]
+    """Patterns used for exclusion."""
+
+
+def is_generated_code(path: str, project_root: str = "") -> tuple[bool, str | None]:
+    """
+    Check if a path matches common generated/vendor code patterns.
+
+    :param path: Relative path to check
+    :param project_root: Optional project root for context
+    :return: Tuple of (is_generated, matching_pattern)
+    """
+    from pathspec import PathSpec
+
+    # Normalize path to use forward slashes
+    normalized_path = path.replace(os.sep, "/")
+
+    # Ensure path starts with /
+    if not normalized_path.startswith("/"):
+        normalized_path = "/" + normalized_path
+
+    # Check if it's a directory (add trailing slash if needed)
+    if project_root:
+        abs_path = os.path.join(project_root, path)
+        if os.path.exists(abs_path) and os.path.isdir(abs_path):
+            if not normalized_path.endswith("/"):
+                normalized_path = normalized_path + "/"
+
+    # Create pathspec from patterns
+    spec = PathSpec.from_lines(pathspec.patterns.GitWildMatchPattern, GENERATED_CODE_PATTERNS)
+
+    # Check if path matches any pattern
+    if spec.match_file(normalized_path):
+        # Find which pattern matched
+        for pattern in GENERATED_CODE_PATTERNS:
+            single_spec = PathSpec.from_lines(pathspec.patterns.GitWildMatchPattern, [pattern])
+            if single_spec.match_file(normalized_path):
+                # Extract readable name from pattern (e.g., "**/node_modules/**" -> "node_modules")
+                pattern_name = pattern.replace("**/", "").replace("/**", "").replace("/", "")
+                return True, pattern_name
+
+    return False, None
+
+
+def exclude_generated_code(
+    directories: list[str], files: list[str], project_root: str = ""
+) -> GeneratedCodeExclusionResult:
+    """
+    Filter out generated/vendor code from file and directory lists.
+
+    :param directories: List of directory paths
+    :param files: List of file paths
+    :param project_root: Optional project root for context
+    :return: GeneratedCodeExclusionResult with filtered lists and exclusion metadata
+    """
+    included_files = []
+    included_dirs = []
+    excluded_counts: dict[str, int] = {}
+
+    # Process files
+    for file_path in files:
+        is_gen, pattern_name = is_generated_code(file_path, project_root)
+        if is_gen and pattern_name:
+            excluded_counts[pattern_name] = excluded_counts.get(pattern_name, 0) + 1
+        else:
+            included_files.append(file_path)
+
+    # Process directories
+    for dir_path in directories:
+        is_gen, pattern_name = is_generated_code(dir_path, project_root)
+        if is_gen and pattern_name:
+            # Don't count directories themselves, just note they're excluded
+            pass
+        else:
+            included_dirs.append(dir_path)
+
+    return GeneratedCodeExclusionResult(
+        included_files=included_files,
+        included_dirs=included_dirs,
+        excluded_counts=excluded_counts,
+        excluded_patterns=GENERATED_CODE_PATTERNS,
+    )
+
+
 def scan_directory(
     path: str,
     recursive: bool = False,

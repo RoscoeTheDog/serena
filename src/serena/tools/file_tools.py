@@ -161,13 +161,15 @@ class ListDirTool(Tool):
     Lists files and directories in the given directory (optionally with recursion).
     """
 
-    def apply(self, relative_path: str, recursive: bool, format: str = "list", max_answer_chars: int = -1) -> str:
+    def apply(self, relative_path: str, recursive: bool, format: str = "list", exclude_generated: bool = False, max_answer_chars: int = -1) -> str:
         """
         Lists all non-gitignored files and directories in the given directory (optionally with recursion).
 
         :param relative_path: the relative path to the directory to list; pass "." to scan the project root
         :param recursive: whether to scan subdirectories recursively
         :param format: output format - "list" (default, full listing) or "tree" (collapsed tree with file counts)
+        :param exclude_generated: If True, exclude generated/vendor code (node_modules, __pycache__, migrations, etc.).
+            Default is False for backward compatibility. When enabled, response includes exclusion metadata.
         :param max_answer_chars: if the output is longer than this number of characters,
             no content will be returned. -1 means the default value from the config will be used.
             Don't adjust unless there is really no other way to get the content required for the task.
@@ -193,22 +195,46 @@ class ListDirTool(Tool):
             is_ignored_file=self.project.is_ignored_path,
         )
 
+        # Apply generated code exclusion if requested
+        exclusion_metadata = None
+        if exclude_generated:
+            from serena.util.file_system import exclude_generated_code
+
+            exclusion_result = exclude_generated_code(dirs, files, self.get_project_root())
+            dirs = exclusion_result.included_dirs
+            files = exclusion_result.included_files
+
+            # Prepare exclusion metadata
+            if exclusion_result.excluded_counts:
+                exclusion_metadata = {
+                    "excluded_files": exclusion_result.excluded_counts,
+                    "excluded_patterns": exclusion_result.excluded_patterns,
+                    "total_excluded": sum(exclusion_result.excluded_counts.values()),
+                    "include_excluded_instruction": "Use exclude_generated=false to include all files"
+                }
+
         # Format output based on requested format
         if format == "tree" and recursive:
             # Tree format: collapsed directories with file counts
             tree_output = _build_tree_format(dirs, files, relative_path)
-            result = json.dumps({
+            result_dict = {
                 "_schema": "tree_v1",
                 "format": "tree",
                 "base_path": relative_path,
                 "tree": tree_output,
                 "total_dirs": len(dirs),
                 "total_files": len(files)
-            })
+            }
+            if exclusion_metadata:
+                result_dict["_excluded"] = exclusion_metadata
+            result = json.dumps(result_dict)
         else:
             # List format (default): full listing
-            result = json.dumps({"dirs": dirs, "files": files})
-        
+            result_dict = {"dirs": dirs, "files": files}
+            if exclusion_metadata:
+                result_dict["_excluded"] = exclusion_metadata
+            result = json.dumps(result_dict)
+
         return self._limit_length(result, max_answer_chars)
 
 
@@ -398,6 +424,7 @@ class SearchForPatternTool(Tool):
         paths_exclude_glob: str = "",
         relative_path: str = "",
         restrict_search_to_code_files: bool = False,
+        exclude_generated: bool = False,
         max_answer_chars: int = -1,
         output_mode: str = "detailed",
     ) -> str:
@@ -451,6 +478,8 @@ class SearchForPatternTool(Tool):
             For example, for finding classes or methods from a name pattern.
             Setting to False is a better choice if you also want to search in non-code files, like in html or yaml files,
             which is why it is the default.
+        :param exclude_generated: If True, exclude generated/vendor code (node_modules, __pycache__, migrations, etc.).
+            Default is False for backward compatibility. When enabled, response includes exclusion metadata.
         :param output_mode: controls the level of detail in the output. Options:
             - "summary": Returns counts by file and first 10 matches (60-80% token savings)
             - "detailed": Returns all matches with full context (current default for backward compatibility)
@@ -496,13 +525,50 @@ class SearchForPatternTool(Tool):
         for match in matches:
             assert match.source_file_path is not None
             file_to_matches[match.source_file_path].append(match.to_display_string())
-        
+
+        # Apply generated code exclusion if requested
+        exclusion_metadata = None
+        if exclude_generated:
+            from serena.util.file_system import exclude_generated_code
+
+            file_paths = list(file_to_matches.keys())
+            exclusion_result = exclude_generated_code([], file_paths, self.get_project_root())
+            included_files_set = set(exclusion_result.included_files)
+
+            # Filter matches - only keep those from included files
+            filtered_matches = {
+                file_path: match_list
+                for file_path, match_list in file_to_matches.items()
+                if file_path in included_files_set
+            }
+            file_to_matches = filtered_matches
+
+            # Prepare exclusion metadata
+            if exclusion_result.excluded_counts:
+                exclusion_metadata = {
+                    "excluded_files": exclusion_result.excluded_counts,
+                    "excluded_patterns": exclusion_result.excluded_patterns,
+                    "total_excluded": sum(exclusion_result.excluded_counts.values()),
+                    "include_excluded_instruction": "Use exclude_generated=false to include all files"
+                }
+
         # Handle output mode
         if output_mode == "summary":
-            return self._generate_summary_output(file_to_matches, substring_pattern, max_answer_chars)
+            summary = self._generate_summary_output(file_to_matches, substring_pattern, max_answer_chars)
+            # Add exclusion metadata to summary if present
+            if exclusion_metadata:
+                summary_dict = json.loads(summary)
+                summary_dict["_excluded"] = exclusion_metadata
+                return json.dumps(summary_dict)
+            return summary
         else:
             # Default: detailed mode (backward compatible)
-            result = json.dumps(file_to_matches)
+            if exclusion_metadata:
+                result_dict = file_to_matches.copy()
+                result_dict["_excluded"] = exclusion_metadata
+                result = json.dumps(result_dict)
+            else:
+                result = json.dumps(file_to_matches)
             return self._limit_length(result, max_answer_chars)
     
     def _generate_summary_output(
