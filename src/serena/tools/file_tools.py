@@ -161,15 +161,26 @@ class ListDirTool(Tool):
     Lists files and directories in the given directory (optionally with recursion).
     """
 
-    def apply(self, relative_path: str, recursive: bool, format: str = "list", exclude_generated: bool = False, max_answer_chars: int = -1) -> str:
+    def apply(self, relative_path: str, recursive: bool, format: str = "list", exclude_generated: bool | None = None, search_scope: Literal["all", "source", "custom"] = "source", max_answer_chars: int = -1) -> str:
         """
         Lists all non-gitignored files and directories in the given directory (optionally with recursion).
 
         :param relative_path: the relative path to the directory to list; pass "." to scan the project root
         :param recursive: whether to scan subdirectories recursively
         :param format: output format - "list" (default, full listing) or "tree" (collapsed tree with file counts)
-        :param exclude_generated: If True, exclude generated/vendor code (node_modules, __pycache__, migrations, etc.).
-            Default is False for backward compatibility. When enabled, response includes exclusion metadata.
+        :param search_scope: Controls which files to list. Options:
+            - "source" (default): Exclude common generated/vendor patterns (node_modules, __pycache__, migrations,
+              dist, build, .venv, venv, target, .next, .nuxt, vendor, .git, .pytest_cache, .mypy_cache,
+              coverage, htmlcov, wheelhouse, *.egg-info)
+            - "all": Include all files (no exclusions)
+            - "custom": Use custom patterns from config (future feature)
+
+            Default is "source" which is what agents want 95% of the time. Use "all" to explicitly list everything.
+            When files are excluded, response includes exclusion metadata showing what was filtered.
+        :param exclude_generated: [DEPRECATED] Use search_scope instead. If provided, overrides search_scope.
+            This parameter will be removed in version 2.0.0.
+            - exclude_generated=True maps to search_scope="source"
+            - exclude_generated=False maps to search_scope="all"
         :param max_answer_chars: if the output is longer than this number of characters,
             no content will be returned. -1 means the default value from the config will be used.
             Don't adjust unless there is really no other way to get the content required for the task.
@@ -187,6 +198,21 @@ class ListDirTool(Tool):
 
         self.project.validate_relative_path(relative_path)
 
+        # Handle parameter deprecation
+        deprecation_warnings = []
+        effective_search_scope = search_scope
+
+        if exclude_generated is not None:
+            # exclude_generated takes precedence for backward compatibility
+            effective_search_scope = "source" if exclude_generated else "all"
+            deprecation_warnings.append({
+                "parameter": "exclude_generated",
+                "value": exclude_generated,
+                "replacement": "search_scope",
+                "migration": f"Use search_scope='source' instead of exclude_generated=True" if exclude_generated else "Use search_scope='all' instead of exclude_generated=False (or omit for new default 'source')",
+                "removal_version": "2.0.0"
+            })
+
         dirs, files = scan_directory(
             os.path.join(self.get_project_root(), relative_path),
             relative_to=self.get_project_root(),
@@ -195,9 +221,9 @@ class ListDirTool(Tool):
             is_ignored_file=self.project.is_ignored_path,
         )
 
-        # Apply generated code exclusion if requested
+        # Apply search scope filtering
         exclusion_metadata = None
-        if exclude_generated:
+        if effective_search_scope == "source":
             from serena.util.file_system import exclude_generated_code
 
             exclusion_result = exclude_generated_code(dirs, files, self.get_project_root())
@@ -210,8 +236,12 @@ class ListDirTool(Tool):
                     "excluded_files": exclusion_result.excluded_counts,
                     "excluded_patterns": exclusion_result.excluded_patterns,
                     "total_excluded": sum(exclusion_result.excluded_counts.values()),
-                    "include_excluded_instruction": "Use exclude_generated=false to include all files"
+                    "include_excluded_instruction": "Use search_scope='all' to include all files"
                 }
+        elif effective_search_scope == "custom":
+            # Future feature - for now, treat as "source"
+            # TODO: Load custom patterns from config
+            pass
 
         # Format output based on requested format
         if format == "tree" and recursive:
@@ -227,12 +257,16 @@ class ListDirTool(Tool):
             }
             if exclusion_metadata:
                 result_dict["_excluded"] = exclusion_metadata
+            if deprecation_warnings:
+                result_dict["_deprecated"] = deprecation_warnings
             result = json.dumps(result_dict)
         else:
             # List format (default): full listing
             result_dict = {"dirs": dirs, "files": files}
             if exclusion_metadata:
                 result_dict["_excluded"] = exclusion_metadata
+            if deprecation_warnings:
+                result_dict["_deprecated"] = deprecation_warnings
             result = json.dumps(result_dict)
 
         return self._limit_length(result, max_answer_chars)
@@ -424,7 +458,8 @@ class SearchForPatternTool(Tool):
         paths_exclude_glob: str = "",
         relative_path: str = "",
         restrict_search_to_code_files: bool = False,
-        exclude_generated: bool = False,
+        exclude_generated: bool | None = None,  # DEPRECATED - use search_scope
+        search_scope: Literal["all", "source", "custom"] = "source",
         max_answer_chars: int = -1,
         result_format: Literal["summary", "detailed"] | None = None,
         output_mode: str | None = None,
@@ -479,8 +514,19 @@ class SearchForPatternTool(Tool):
             For example, for finding classes or methods from a name pattern.
             Setting to False is a better choice if you also want to search in non-code files, like in html or yaml files,
             which is why it is the default.
-        :param exclude_generated: If True, exclude generated/vendor code (node_modules, __pycache__, migrations, etc.).
-            Default is False for backward compatibility. When enabled, response includes exclusion metadata.
+        :param search_scope: Controls which files to search. Options:
+            - "source" (default): Exclude common generated/vendor patterns (node_modules, __pycache__, migrations,
+              dist, build, .venv, venv, target, .next, .nuxt, vendor, .git, .pytest_cache, .mypy_cache,
+              coverage, htmlcov, wheelhouse, *.egg-info)
+            - "all": Include all files (no exclusions)
+            - "custom": Use custom patterns from config (future feature)
+
+            Default is "source" which is what agents want 95% of the time. Use "all" to explicitly search everything.
+            When files are excluded, response includes exclusion metadata showing what was filtered.
+        :param exclude_generated: [DEPRECATED] Use search_scope instead. If provided, overrides search_scope.
+            This parameter will be removed in version 2.0.0.
+            - exclude_generated=True maps to search_scope="source"
+            - exclude_generated=False maps to search_scope="all"
         :param result_format: Controls the level of detail in the output. Options:
             - "summary": Returns counts by file and first 10 matches (60-80% token savings, DEFAULT)
             - "detailed": Returns all matches with full context (explicit opt-in for complete results)
@@ -495,7 +541,7 @@ class SearchForPatternTool(Tool):
             raise FileNotFoundError(f"Relative path {relative_path} does not exist.")
 
         # Handle parameter deprecation and resolution
-        deprecation_warning = None
+        deprecation_warnings = []
         actual_result_format = result_format
 
         # Priority: result_format > output_mode > default
@@ -505,15 +551,29 @@ class SearchForPatternTool(Tool):
         elif output_mode is not None:
             # Deprecated parameter provided
             actual_result_format = output_mode  # type: ignore
-            deprecation_warning = {
+            deprecation_warnings.append({
                 "parameter": "output_mode",
                 "replacement": "result_format",
                 "removal_version": "2.0.0",
                 "migration": f"Use result_format='{output_mode}' instead of output_mode='{output_mode}'"
-            }
+            })
         else:
             # Use new default: "summary"
             actual_result_format = "summary"
+
+        # Map deprecated exclude_generated to new search_scope
+        effective_search_scope = search_scope
+
+        if exclude_generated is not None:
+            # exclude_generated takes precedence for backward compatibility
+            effective_search_scope = "source" if exclude_generated else "all"
+            deprecation_warnings.append({
+                "parameter": "exclude_generated",
+                "value": exclude_generated,
+                "replacement": "search_scope",
+                "migration": f"Use search_scope='source' instead of exclude_generated=True" if exclude_generated else "Use search_scope='all' instead of exclude_generated=False (or omit for new default 'source')",
+                "removal_version": "2.0.0"
+            })
 
         if restrict_search_to_code_files:
             matches = self.project.search_source_files_for_pattern(
@@ -551,9 +611,9 @@ class SearchForPatternTool(Tool):
             assert match.source_file_path is not None
             file_to_matches[match.source_file_path].append(match.to_display_string())
 
-        # Apply generated code exclusion if requested
+        # Apply search scope filtering
         exclusion_metadata = None
-        if exclude_generated:
+        if effective_search_scope == "source":
             from serena.util.file_system import exclude_generated_code
 
             file_paths = list(file_to_matches.keys())
@@ -574,7 +634,7 @@ class SearchForPatternTool(Tool):
                     "excluded_files": exclusion_result.excluded_counts,
                     "excluded_patterns": exclusion_result.excluded_patterns,
                     "total_excluded": sum(exclusion_result.excluded_counts.values()),
-                    "include_excluded_instruction": "Use exclude_generated=false to include all files"
+                    "include_excluded_instruction": "Use search_scope='all' to include all files"
                 }
 
         # Handle result format
@@ -586,9 +646,9 @@ class SearchForPatternTool(Tool):
             if exclusion_metadata:
                 summary_dict["_excluded"] = exclusion_metadata
 
-            # Add deprecation warning if deprecated parameter was used
-            if deprecation_warning:
-                summary_dict["_deprecated"] = deprecation_warning
+            # Add deprecation warnings if any deprecated parameters were used
+            if deprecation_warnings:
+                summary_dict["_deprecated"] = deprecation_warnings
 
             return json.dumps(summary_dict, indent=2)
         else:
@@ -599,9 +659,9 @@ class SearchForPatternTool(Tool):
             if exclusion_metadata:
                 result_dict["_excluded"] = exclusion_metadata
 
-            # Add deprecation warning if deprecated parameter was used
-            if deprecation_warning:
-                result_dict["_deprecated"] = deprecation_warning
+            # Add deprecation warnings if any deprecated parameters were used
+            if deprecation_warnings:
+                result_dict["_deprecated"] = deprecation_warnings
 
             result = json.dumps(result_dict)
             return self._limit_length(result, max_answer_chars)

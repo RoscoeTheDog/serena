@@ -234,7 +234,8 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         include_kinds: list[int] = [],  # noqa: B006
         exclude_kinds: list[int] = [],  # noqa: B006
         substring_matching: bool = False,
-        exclude_generated: bool = False,
+        exclude_generated: bool | None = None,  # DEPRECATED - use search_scope
+        search_scope: Literal["all", "source", "custom"] = "source",
         max_answer_chars: int = -1,
     ) -> str:
         """
@@ -304,18 +305,29 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         :param exclude_kinds: Optional. List of LSP symbol kind integers to exclude. Takes precedence over `include_kinds`.
             If not provided, no kinds are excluded.
         :param substring_matching: If True, use substring matching for the last segment of `name`.
-        :param exclude_generated: If True, exclude generated/vendor code (node_modules, __pycache__, migrations, etc.).
-            Default is False for backward compatibility. When enabled, response includes exclusion metadata.
+        :param search_scope: Controls which files to search. Options:
+            - "source" (default): Exclude common generated/vendor patterns (node_modules, __pycache__, migrations,
+              dist, build, .venv, venv, target, .next, .nuxt, vendor, .git, .pytest_cache, .mypy_cache,
+              coverage, htmlcov, wheelhouse, *.egg-info)
+            - "all": Include all files (no exclusions)
+            - "custom": Use custom patterns from config (future feature)
+
+            Default is "source" which is what agents want 95% of the time. Use "all" to explicitly search everything.
+            When files are excluded, response includes exclusion metadata showing what was filtered.
+        :param exclude_generated: [DEPRECATED] Use search_scope instead. If provided, overrides search_scope.
+            This parameter will be removed in version 2.0.0.
+            - exclude_generated=True maps to search_scope="source"
+            - exclude_generated=False maps to search_scope="all"
         :param max_answer_chars: Max characters for the JSON result. If exceeded, no content is returned.
             -1 means the default value from the config will be used.
         :return: a list of symbols (with locations) matching the name.
         """
         # Handle deprecated parameters and build deprecation warnings
         deprecation_warnings = []
-        
+
         # Map deprecated parameters to new output_format
         effective_output_format = output_format
-        
+
         if include_body is not None:
             # include_body takes precedence for backward compatibility
             effective_output_format = "body" if include_body else "metadata"
@@ -326,7 +338,7 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
                 "migration": f"Use output_format='body' instead of include_body=True" if include_body else "Use output_format='metadata' (default) instead of include_body=False",
                 "removal_version": "2.0.0"
             })
-        
+
         if detail_level is not None:
             # detail_level also takes precedence
             if detail_level == "signature":
@@ -336,7 +348,7 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             elif detail_level == "auto":
                 # Auto mode - for now, treat as metadata
                 effective_output_format = "metadata"
-            
+
             deprecation_warnings.append({
                 "parameter": "detail_level",
                 "value": detail_level,
@@ -346,6 +358,20 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
                     "signature": "Use output_format='signature'",
                     "auto": "Use output_format='metadata' (recommended default)"
                 }.get(detail_level, "Use output_format parameter"),
+                "removal_version": "2.0.0"
+            })
+
+        # Map deprecated exclude_generated to new search_scope
+        effective_search_scope = search_scope
+
+        if exclude_generated is not None:
+            # exclude_generated takes precedence for backward compatibility
+            effective_search_scope = "source" if exclude_generated else "all"
+            deprecation_warnings.append({
+                "parameter": "exclude_generated",
+                "value": exclude_generated,
+                "replacement": "search_scope",
+                "migration": f"Use search_scope='source' instead of exclude_generated=True" if exclude_generated else "Use search_scope='all' instead of exclude_generated=False (or omit for new default 'source')",
                 "removal_version": "2.0.0"
             })
 
@@ -362,7 +388,7 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
                 "include_kinds": include_kinds,
                 "exclude_kinds": exclude_kinds,
                 "substring_matching": substring_matching,
-                "exclude_generated": exclude_generated,
+                "search_scope": effective_search_scope,
                 "tool": "find_symbol"
             }
 
@@ -455,9 +481,9 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         # Add symbol IDs for on-demand body retrieval
         symbol_dicts = _add_symbol_ids(symbol_dicts)
 
-        # Apply generated code exclusion if requested
+        # Apply search scope filtering
         exclusion_metadata = None
-        if exclude_generated:
+        if effective_search_scope == "source":
             from serena.util.file_system import exclude_generated_code
 
             # Extract file paths from symbol_dicts
@@ -492,8 +518,12 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
                     "excluded_files": exclusion_result.excluded_counts,
                     "excluded_patterns": exclusion_result.excluded_patterns,
                     "total_excluded": sum(exclusion_result.excluded_counts.values()),
-                    "include_excluded_instruction": "Use exclude_generated=false to include all files"
+                    "include_excluded_instruction": "Use search_scope='all' to include all files"
                 }
+        elif effective_search_scope == "custom":
+            # Future feature - for now, treat as "source"
+            # TODO: Load custom patterns from config
+            pass
 
         optimized_result = _optimize_symbol_list(symbol_dicts)
 
