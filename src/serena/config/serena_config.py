@@ -195,12 +195,13 @@ class ProjectConfig(ToolInclusionDefinition, ToStringMixin):
             if project_language is None:
                 language_composition = determine_programming_language_composition(str(project_root))
                 if len(language_composition) == 0:
+                    config_path_hint = cls.rel_path_to_project_yml(project_root)
                     raise ValueError(
                         f"No source files found in {project_root}\n\n"
                         f"To use Serena with this project, you need to either:\n"
                         f"1. Add source files in one of the supported languages (Python, JavaScript/TypeScript, Java, C#, Rust, Go, Ruby, C++, PHP, Swift, Elixir, Terraform, Bash, Markdown)\n"
                         f"2. Create a project configuration file manually at:\n"
-                        f"   {os.path.join(project_root, cls.rel_path_to_project_yml())}\n\n"
+                        f"   {config_path_hint}\n\n"
                         f"Example project.yml:\n"
                         f"  project_name: {project_name}\n"
                         f"  language: python  # or typescript, java, csharp, rust, go, ruby, cpp, php, swift, elixir, terraform, bash, markdown\n"
@@ -213,12 +214,26 @@ class ProjectConfig(ToolInclusionDefinition, ToStringMixin):
             config_with_comments["project_name"] = project_name
             config_with_comments["language"] = dominant_language
             if save_to_disk:
-                save_yaml(str(project_root / cls.rel_path_to_project_yml()), config_with_comments, preserve_comments=True)
+                config_path = cls.rel_path_to_project_yml(project_root)
+                save_yaml(str(config_path), config_with_comments, preserve_comments=True)
             return cls._from_dict(config_with_comments)
 
     @classmethod
-    def rel_path_to_project_yml(cls) -> str:
-        return os.path.join(SERENA_MANAGED_DIR_NAME, cls.SERENA_DEFAULT_PROJECT_FILE)
+    def rel_path_to_project_yml(cls, project_root: Path) -> Path:
+        """
+        Get path to project configuration file in centralized storage.
+
+        NOTE: This method now returns an absolute path to the centralized config,
+        not a relative path. The name is kept for backward compatibility.
+
+        Args:
+            project_root: Absolute path to project root
+
+        Returns:
+            Path to ~/.serena/projects/{project-id}/project.yml
+        """
+        from serena.constants import get_project_config_path
+        return get_project_config_path(project_root)
 
     @classmethod
     def _from_dict(cls, data: dict[str, Any]) -> Self:
@@ -251,14 +266,38 @@ class ProjectConfig(ToolInclusionDefinition, ToStringMixin):
     def load(cls, project_root: Path | str, autogenerate: bool = False) -> Self:
         """
         Load a ProjectConfig instance from the path to the project root.
+
+        Looks for config in centralized location first (~/.serena/projects/{id}/project.yml),
+        then falls back to legacy location ({project_root}/.serena/project.yml) for
+        backward compatibility.
         """
-        project_root = Path(project_root)
-        yaml_path = project_root / cls.rel_path_to_project_yml()
-        if not yaml_path.exists():
-            if autogenerate:
-                return cls.autogenerate(project_root)
+        from serena.constants import get_legacy_project_dir
+
+        project_root = Path(project_root).resolve()
+
+        # Try centralized location first
+        centralized_path = cls.rel_path_to_project_yml(project_root)
+        if centralized_path.exists():
+            yaml_path = centralized_path
+        else:
+            # Fall back to legacy location for backward compatibility
+            legacy_dir = get_legacy_project_dir(project_root)
+            legacy_path = legacy_dir / cls.SERENA_DEFAULT_PROJECT_FILE
+            if legacy_path.exists():
+                log.debug(f"Loading project config from legacy location: {legacy_path}")
+                yaml_path = legacy_path
             else:
-                raise FileNotFoundError(f"Project configuration file not found: {yaml_path}")
+                # Neither location has config
+                if autogenerate:
+                    return cls.autogenerate(project_root)
+                else:
+                    raise FileNotFoundError(
+                        f"Project configuration file not found.\n"
+                        f"Looked in:\n"
+                        f"  - Centralized: {centralized_path}\n"
+                        f"  - Legacy: {legacy_path}"
+                    )
+
         with open(yaml_path, encoding="utf-8") as f:
             yaml_data = yaml.safe_load(f)
         if "project_name" not in yaml_data:
@@ -426,9 +465,17 @@ class SerenaConfig(ToolInclusionDefinition, ToStringMixin):
         num_project_migrations = 0
         for path in loaded_commented_yaml["projects"]:
             path = Path(path).resolve()
-            if not path.exists() or (path.is_dir() and not (path / ProjectConfig.rel_path_to_project_yml()).exists()):
-                log.warning(f"Project path {path} does not exist or does not contain a project configuration file, skipping.")
+            if not path.exists():
+                log.warning(f"Project path {path} does not exist, skipping.")
                 continue
+            if path.is_dir():
+                # Check both centralized and legacy locations
+                from serena.constants import get_legacy_project_dir
+                centralized_config = ProjectConfig.rel_path_to_project_yml(path)
+                legacy_config = get_legacy_project_dir(path) / ProjectConfig.SERENA_DEFAULT_PROJECT_FILE
+                if not centralized_config.exists() and not legacy_config.exists():
+                    log.warning(f"Project path {path} does not contain a project configuration file (checked both centralized and legacy locations), skipping.")
+                    continue
             if path.is_file():
                 path = cls._migrate_out_of_project_config_file(path)
                 if path is None:
@@ -486,9 +533,11 @@ class SerenaConfig(ToolInclusionDefinition, ToStringMixin):
                 project_name = path.stem
                 with open(path, "a", encoding="utf-8") as f:
                     f.write(f"\nproject_name: {project_name}")
-            project_root = project_config_data["project_root"]
-            shutil.move(str(path), str(Path(project_root) / ProjectConfig.rel_path_to_project_yml()))
-            return Path(project_root).resolve()
+            project_root = Path(project_config_data["project_root"]).resolve()
+            target_config_path = ProjectConfig.rel_path_to_project_yml(project_root)
+            target_config_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(path), str(target_config_path))
+            return project_root
         except Exception as e:
             log.error(f"Error migrating configuration file: {e}")
             return None

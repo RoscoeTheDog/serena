@@ -72,7 +72,8 @@ class Project:
         return os.path.join(self.project_root, SERENA_MANAGED_DIR_NAME)
 
     def path_to_project_yml(self) -> str:
-        return os.path.join(self.project_root, self.project_config.rel_path_to_project_yml())
+        from pathlib import Path
+        return str(self.project_config.rel_path_to_project_yml(Path(self.project_root)))
 
     def read_file(self, relative_path: str) -> str:
         """

@@ -424,8 +424,10 @@ class ProjectCommands(AutoRegisteringGroup):
     @click.argument("project_path", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
     @click.option("--language", type=str, default=None, help="Programming language; inferred if not specified.")
     def generate_yml(project_path: str, language: str | None = None) -> None:
-        yml_path = os.path.join(project_path, ProjectConfig.rel_path_to_project_yml())
-        if os.path.exists(yml_path):
+        from pathlib import Path
+        project_root = Path(project_path).resolve()
+        yml_path = ProjectConfig.rel_path_to_project_yml(project_root)
+        if yml_path.exists():
             raise FileExistsError(f"Project file {yml_path} already exists.")
         lang_inst = None
         if language:

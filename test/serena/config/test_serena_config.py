@@ -34,7 +34,9 @@ class TestProjectConfigAutogenerate:
         assert "To use Serena with this project" in error_message
         assert "Add source files in one of the supported languages" in error_message
         assert "Create a project configuration file manually" in error_message
-        assert str(Path(".serena") / "project.yml") in error_message
+        # Check that it mentions the centralized config path (contains .serena/projects/)
+        assert ".serena" in error_message and "projects" in error_message
+        assert "project.yml" in error_message
         assert "Example project.yml:" in error_message
         assert f"project_name: {self.project_path.name}" in error_message
         assert "language: python" in error_message
@@ -66,6 +68,8 @@ class TestProjectConfigAutogenerate:
 
     def test_autogenerate_saves_to_disk(self):
         """Test that autogenerate can save the configuration to disk."""
+        from serena.constants import get_project_config_path
+
         # Create a Go file
         go_file = self.project_path / "main.go"
         go_file.write_text("package main\n\nfunc main() {}\n")
@@ -73,9 +77,9 @@ class TestProjectConfigAutogenerate:
         # Run autogenerate with save_to_disk=True
         config = ProjectConfig.autogenerate(self.project_path, save_to_disk=True)
 
-        # Verify the configuration file was created
-        config_path = self.project_path / ".serena" / "project.yml"
-        assert config_path.exists()
+        # Verify the configuration file was created in centralized location
+        config_path = get_project_config_path(self.project_path)
+        assert config_path.exists(), f"Config file not found at {config_path}"
 
         # Verify the content
         assert config.language == Language.GO
@@ -136,3 +140,121 @@ class TestProjectConfigAutogenerate:
 
         # Check example includes comment about language options
         assert any("# or typescript, java, csharp" in line for line in error_lines)
+
+
+class TestProjectConfigCentralizedStorage:
+    """Test class for centralized config storage functionality."""
+
+    def setup_method(self):
+        """Set up test environment before each test method."""
+        self.test_dir = tempfile.mkdtemp()
+        self.project_path = Path(self.test_dir) / "test_project"
+        self.project_path.mkdir(parents=True, exist_ok=True)
+
+    def teardown_method(self):
+        """Clean up test environment after each test method."""
+        shutil.rmtree(self.test_dir)
+
+    def test_load_from_centralized_location(self):
+        """Test that ProjectConfig.load() reads from centralized location."""
+        from serena.constants import get_project_config_path
+
+        # Create a Python file so autogenerate works
+        python_file = self.project_path / "main.py"
+        python_file.write_text("print('hello')\n")
+
+        # Autogenerate config (saves to centralized location)
+        ProjectConfig.autogenerate(self.project_path, save_to_disk=True)
+
+        # Verify config is in centralized location
+        centralized_path = get_project_config_path(self.project_path)
+        assert centralized_path.exists(), f"Config not found at {centralized_path}"
+
+        # Verify it's NOT in the project root
+        legacy_path = self.project_path / ".serena" / "project.yml"
+        assert not legacy_path.exists(), "Config should not be in legacy location"
+
+        # Load the config
+        loaded_config = ProjectConfig.load(self.project_path)
+        assert loaded_config.project_name == self.project_path.name
+        assert loaded_config.language == Language.PYTHON
+
+    def test_load_from_legacy_location(self):
+        """Test backward compatibility: load from legacy .serena/ directory."""
+        from serena.constants import SERENA_MANAGED_DIR_NAME
+
+        # Create a Python file
+        python_file = self.project_path / "main.py"
+        python_file.write_text("print('hello')\n")
+
+        # Manually create config in legacy location
+        legacy_dir = self.project_path / SERENA_MANAGED_DIR_NAME
+        legacy_dir.mkdir(parents=True, exist_ok=True)
+        legacy_config_path = legacy_dir / "project.yml"
+        legacy_config_path.write_text(
+            "project_name: legacy_test\n"
+            "language: python\n"
+        )
+
+        # Load should fall back to legacy location
+        loaded_config = ProjectConfig.load(self.project_path)
+        assert loaded_config.project_name == "legacy_test"
+        assert loaded_config.language == Language.PYTHON
+
+    def test_centralized_takes_precedence_over_legacy(self):
+        """Test that centralized location takes precedence over legacy."""
+        from serena.constants import get_project_config_path, SERENA_MANAGED_DIR_NAME
+
+        # Create configs in BOTH locations
+        centralized_path = get_project_config_path(self.project_path)
+        centralized_path.parent.mkdir(parents=True, exist_ok=True)
+        centralized_path.write_text(
+            "project_name: centralized_test\n"
+            "language: typescript\n"
+        )
+
+        legacy_dir = self.project_path / SERENA_MANAGED_DIR_NAME
+        legacy_dir.mkdir(parents=True, exist_ok=True)
+        legacy_config_path = legacy_dir / "project.yml"
+        legacy_config_path.write_text(
+            "project_name: legacy_test\n"
+            "language: python\n"
+        )
+
+        # Load should prefer centralized
+        loaded_config = ProjectConfig.load(self.project_path)
+        assert loaded_config.project_name == "centralized_test"
+        assert loaded_config.language == Language.TYPESCRIPT
+
+    def test_load_with_autogenerate_creates_centralized(self):
+        """Test that autogenerate creates config in centralized location."""
+        from serena.constants import get_project_config_path
+
+        # Create a Python file
+        python_file = self.project_path / "main.py"
+        python_file.write_text("print('hello')\n")
+
+        # Load with autogenerate=True
+        loaded_config = ProjectConfig.load(self.project_path, autogenerate=True)
+
+        # Verify config was created in centralized location
+        centralized_path = get_project_config_path(self.project_path)
+        assert centralized_path.exists(), f"Config not found at {centralized_path}"
+
+        # Verify it's NOT in legacy location
+        legacy_path = self.project_path / ".serena" / "project.yml"
+        assert not legacy_path.exists(), "Config should not be in legacy location"
+
+        assert loaded_config.language == Language.PYTHON
+
+    def test_error_message_shows_both_locations(self):
+        """Test that error message when config not found shows both locations checked."""
+        # Don't create any config files
+        with pytest.raises(FileNotFoundError) as exc_info:
+            ProjectConfig.load(self.project_path, autogenerate=False)
+
+        error_message = str(exc_info.value)
+        # Should mention it checked both locations
+        assert "Looked in:" in error_message or "not found" in error_message.lower()
+        assert "Centralized:" in error_message or ".serena" in error_message
+        assert "Legacy:" in error_message or ".serena" in error_message

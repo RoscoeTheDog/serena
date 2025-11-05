@@ -148,23 +148,40 @@ list_project_configs() -> list[dict]
 ---
 
 ### Story 4: Refactor ProjectConfig to Use Centralized Paths
-**Status**: unassigned
-**Effort**: 2 days
+**Status**: completed
+**Claimed**: 2025-11-05 03:00
+**Completed**: 2025-11-05 03:45
+**Effort**: 2 days (actual: 0.75 days)
 **Risk Level**: 🔴 HIGH
 **Parent**: Story 2
 
 **Description**: Update `ProjectConfig` class to read/write configs from `~/.serena/projects/` instead of `{project_root}/.serena/`
 
 **Acceptance Criteria**:
-- [ ] Update `ProjectConfig.rel_path_to_project_yml()` to use centralized path
-- [ ] Update `ProjectConfig.load()` to read from centralized location
-- [ ] Update `ProjectConfig.autogenerate()` to save to centralized location
-- [ ] Maintain backward compatibility (read from old location if centralized doesn't exist)
-- [ ] All existing tests pass
-- [ ] Add new tests for centralized path loading
+- [x] Update `ProjectConfig.rel_path_to_project_yml()` to use centralized path
+- [x] Update `ProjectConfig.load()` to read from centralized location
+- [x] Update `ProjectConfig.autogenerate()` to save to centralized location
+- [x] Maintain backward compatibility (read from old location if centralized doesn't exist)
+- [x] All existing tests pass
+- [x] Add new tests for centralized path loading
 
 **Files**:
 - `src/serena/config/serena_config.py`
+- `src/serena/cli.py`
+- `src/serena/project.py`
+- `test/serena/config/test_serena_config.py`
+
+**Implementation Notes**:
+- Refactored `rel_path_to_project_yml()` to accept `project_root` parameter and return absolute path to centralized config
+- Updated `load()` with backward compatibility: tries centralized location first, falls back to legacy `.serena/` directory
+- Updated `autogenerate()` to save configs to centralized location (with proper directory creation)
+- Fixed all call sites across the codebase (serena_config.py, cli.py, project.py)
+- Updated existing tests to work with centralized paths
+- Added comprehensive test suite (`TestProjectConfigCentralizedStorage`):
+  - 5 new test cases covering centralized loading, legacy fallback, precedence, autogenerate, and error messages
+  - All 13 tests passing (8 original + 5 new)
+- Maintained full backward compatibility: existing projects with `.serena/` directories will continue to work
+- Centralized location takes precedence when both exist (migration-friendly)
 
 ---
 
@@ -360,6 +377,27 @@ include_metadata: true           # Rich context for decisions
 - Tools follow claude-context patterns for consistency
 - Total implementation: ~630 lines (implementation + tests)
 - All acceptance criteria met
+
+### 2025-11-05 03:00 - Story 4: unassigned → in_progress
+- Beginning refactor of ProjectConfig to use centralized paths
+
+### 2025-11-05 03:45 - Story 4: in_progress → completed
+- Refactored `ProjectConfig` class to use centralized storage:
+  - Updated `rel_path_to_project_yml()` to accept `project_root` and return absolute centralized path
+  - Updated `load()` with backward compatibility (tries centralized first, falls back to legacy)
+  - Updated `autogenerate()` to save to centralized location with proper directory creation
+  - Updated all call sites in `serena_config.py`, `cli.py`, and `project.py`
+- Maintained full backward compatibility:
+  - Projects with existing `.serena/` directories continue to work
+  - Centralized location takes precedence when both exist
+  - Clear error messages showing both locations checked
+- Updated and expanded test suite:
+  - Fixed 2 existing tests to work with centralized paths
+  - Added 5 new tests in `TestProjectConfigCentralizedStorage` class
+  - All 13 tests passing (100% success rate)
+  - Tests cover: centralized loading, legacy fallback, precedence, autogenerate, error messages
+- Total changes: 4 files modified, ~120 lines of new test code
+- Actual effort: 0.75 days (vs 2 days estimated)
 
 ---
 
