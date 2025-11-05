@@ -134,13 +134,13 @@ class TestAutoOnboardingIntegration:
 
         # Check memory names
         memory_names = [m["name"] for m in created_memories]
-        assert any("tech_stack" in name.lower() for name in memory_names), "Missing tech stack memory"
-        assert any("command" in name.lower() for name in memory_names), "Missing commands memory"
-        assert any("checklist" in name.lower() or "completion" in name.lower() for name in memory_names), "Missing checklist memory"
+        assert any("overview" in name.lower() for name in memory_names), f"Missing project overview memory. Got: {memory_names}"
+        assert any("command" in name.lower() for name in memory_names), f"Missing commands memory. Got: {memory_names}"
+        assert any("checklist" in name.lower() or "completion" in name.lower() for name in memory_names), f"Missing checklist memory. Got: {memory_names}"
 
-        # Verify tech stack memory content
-        tech_stack_memory = next(m for m in created_memories if "tech_stack" in m["name"].lower())
-        content = tech_stack_memory["content"]
+        # Verify project overview memory content (contains tech stack)
+        overview_memory = next(m for m in created_memories if "overview" in m["name"].lower())
+        content = overview_memory["content"]
         assert "Node.js" in content or "npm" in content, "Tech stack should mention Node.js/npm"
         assert "React" in content, "Tech stack should detect React"
         assert "TypeScript" in content, "Tech stack should detect TypeScript"
@@ -189,18 +189,28 @@ class TestAutoOnboardingIntegration:
         # Mock WriteMemoryTool to verify no new memories are created
         created_memories = []
 
-        def mock_write_memory(memory_name, content, max_answer_chars=-1):
-            created_memories.append({
-                "name": memory_name,
-                "content": content
-            })
-            return f"Memory '{memory_name}' created successfully."
+        class MockWriteMemoryTool:
+            def apply(self, memory_name, content, max_answer_chars=-1):
+                created_memories.append({
+                    "name": memory_name,
+                    "content": content
+                })
+                return f"Memory '{memory_name}' created successfully."
+
+        class MockListMemoriesTool:
+            def apply(self, include_metadata=True):
+                # Return existing memory to skip auto-onboarding
+                return json.dumps([{"name": "tech_stack_and_structure.md"}])
+
+        # Set up agent with mock tools
+        from serena.tools.memory_tools import WriteMemoryTool, ListMemoriesTool
+        agent = MockAgent()
+        agent.register_tool(WriteMemoryTool, MockWriteMemoryTool())
+        agent.register_tool(ListMemoriesTool, MockListMemoriesTool())
 
         # Activate the project
-        activate_tool = ActivateProjectTool(MockAgent())
-
-        with patch.object(activate_tool.write_memory_tool, 'apply', side_effect=mock_write_memory):
-            result = activate_tool.apply(project=str(project_dir))
+        activate_tool = ActivateProjectTool(agent)
+        result = activate_tool.apply(project=str(project_dir))
 
         # Assertions
         assert "activated" in result.lower()
@@ -251,28 +261,38 @@ line-length = 100
         # Mock WriteMemoryTool
         created_memories = []
 
-        def mock_write_memory(memory_name, content, max_answer_chars=-1):
-            created_memories.append({
-                "name": memory_name,
-                "content": content
-            })
-            return f"Memory '{memory_name}' created successfully."
+        class MockWriteMemoryTool:
+            def apply(self, memory_name, content, max_answer_chars=-1):
+                created_memories.append({
+                    "name": memory_name,
+                    "content": content
+                })
+                return f"Memory '{memory_name}' created successfully."
+
+        class MockListMemoriesTool:
+            def apply(self, include_metadata=True):
+                # Return empty list to trigger auto-onboarding
+                return json.dumps([])
+
+        # Set up agent with mock tools
+        from serena.tools.memory_tools import WriteMemoryTool, ListMemoriesTool
+        agent = MockAgent()
+        agent.register_tool(WriteMemoryTool, MockWriteMemoryTool())
+        agent.register_tool(ListMemoriesTool, MockListMemoriesTool())
 
         # Activate the project
-        activate_tool = ActivateProjectTool(MockAgent())
-
-        with patch.object(activate_tool.write_memory_tool, 'apply', side_effect=mock_write_memory):
-            result = activate_tool.apply(project=str(project_dir))
+        activate_tool = ActivateProjectTool(agent)
+        result = activate_tool.apply(project=str(project_dir))
 
         # Assertions
         assert "activated" in result.lower()
         assert len(created_memories) >= 3
 
-        # Verify tech stack detects Python/Poetry
-        tech_stack_memory = next(m for m in created_memories if "tech_stack" in m["name"].lower())
-        content = tech_stack_memory["content"]
-        assert "Python" in content, "Should detect Python"
-        assert "Poetry" in content or "pyproject.toml" in content, "Should detect Poetry"
+        # Verify project overview contains Python/Poetry info
+        overview_memory = next(m for m in created_memories if "overview" in m["name"].lower())
+        content = overview_memory["content"]
+        assert "Python" in content or "python" in content, "Should detect Python"
+        assert "Poetry" in content or "poetry" in content or "pyproject.toml" in content, "Should detect Poetry"
 
         # Verify commands memory
         commands_memory = next(m for m in created_memories if "command" in m["name"].lower())
@@ -309,18 +329,28 @@ line-length = 100
         # Mock WriteMemoryTool
         created_memories = []
 
-        def mock_write_memory(memory_name, content, max_answer_chars=-1):
-            created_memories.append({
-                "name": memory_name,
-                "content": content
-            })
-            return f"Memory '{memory_name}' created successfully."
+        class MockWriteMemoryTool:
+            def apply(self, memory_name, content, max_answer_chars=-1):
+                created_memories.append({
+                    "name": memory_name,
+                    "content": content
+                })
+                return f"Memory '{memory_name}' created successfully."
+
+        class MockListMemoriesTool:
+            def apply(self, include_metadata=True):
+                # Return empty list to trigger auto-onboarding
+                return json.dumps([])
+
+        # Set up agent with mock tools
+        from serena.tools.memory_tools import WriteMemoryTool, ListMemoriesTool
+        agent = MockAgent()
+        agent.register_tool(WriteMemoryTool, MockWriteMemoryTool())
+        agent.register_tool(ListMemoriesTool, MockListMemoriesTool())
 
         # Activate the project - should not crash
-        activate_tool = ActivateProjectTool(MockAgent())
-
-        with patch.object(activate_tool.write_memory_tool, 'apply', side_effect=mock_write_memory):
-            result = activate_tool.apply(project=str(project_dir))
+        activate_tool = ActivateProjectTool(agent)
+        result = activate_tool.apply(project=str(project_dir))
 
         # Assertions
         assert "activated" in result.lower(), "Activation should succeed despite malformed JSON"
@@ -350,18 +380,28 @@ line-length = 100
         # Mock WriteMemoryTool
         created_memories = []
 
-        def mock_write_memory(memory_name, content, max_answer_chars=-1):
-            created_memories.append({
-                "name": memory_name,
-                "content": content
-            })
-            return f"Memory '{memory_name}' created successfully."
+        class MockWriteMemoryTool:
+            def apply(self, memory_name, content, max_answer_chars=-1):
+                created_memories.append({
+                    "name": memory_name,
+                    "content": content
+                })
+                return f"Memory '{memory_name}' created successfully."
+
+        class MockListMemoriesTool:
+            def apply(self, include_metadata=True):
+                # Return empty list to trigger auto-onboarding
+                return json.dumps([])
+
+        # Set up agent with mock tools
+        from serena.tools.memory_tools import WriteMemoryTool, ListMemoriesTool
+        agent = MockAgent()
+        agent.register_tool(WriteMemoryTool, MockWriteMemoryTool())
+        agent.register_tool(ListMemoriesTool, MockListMemoriesTool())
 
         # Activate the project
-        activate_tool = ActivateProjectTool(MockAgent())
-
-        with patch.object(activate_tool.write_memory_tool, 'apply', side_effect=mock_write_memory):
-            result = activate_tool.apply(project=str(project_dir))
+        activate_tool = ActivateProjectTool(agent)
+        result = activate_tool.apply(project=str(project_dir))
 
         # Assertions
         assert "activated" in result.lower()
