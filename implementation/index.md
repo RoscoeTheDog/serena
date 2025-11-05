@@ -5,6 +5,26 @@
 **Start Date**: 2025-01-04
 **Target Completion**: TBD
 **Status**: `in_progress`
+**Progress**: 8/14 stories complete (57%) - Phases 1-2 ✅ Complete
+
+---
+
+## 🚀 Quick Start for Agents (Stories 9-14)
+
+**Execution Mode**: Linear single-agent (one story at a time)
+**Current Story**: Story 9 (Verbosity Control System)
+
+**Before You Start**:
+1. Read the **Agent Execution Protocol** section below
+2. Review **Self-Healing Protocol** for auto-fix vs. alert guidance
+3. Understand **Dependencies to Watch** for your story
+4. Follow **Pre-Implementation Validation** checklist
+
+**Self-Healing Strategy**:
+- ✅ **Auto-fix**: Import errors, type conflicts, backward compatibility issues
+- 🚨 **Alert user**: Cascading failures, architectural conflicts, major refactoring
+
+**Need Help?** See full protocol details in "Agent Execution Protocol (Stories 9-14)" section.
 
 ---
 
@@ -1367,22 +1387,30 @@ find_symbol("User", exclude_generated=true)
   - 15+ comprehensive unit tests covering all functionality and edge cases
   - **60-80% token savings** achieved (73-92% depending on match count) ✓
   - Full backward compatibility (detailed is default)
-  - **Phase 2 now 75% complete** (3/4 stories done)
+  - **Phase 2 now 100% complete** (4/4 stories done) ✅ **PHASE 2 COMPLETE**
+- **Sprint Status Review**:
+  - Detected accidental parallel agent execution (Stories 7-8 overlap)
+  - No conflicts or issues detected - all tests passing
+  - Decision: Continue with **linear execution** for Stories 9-14
+  - Self-healing protocol established for remaining stories
 
 ---
 
 ## Sprint Metrics
 
 **Target Token Reduction**: 65-85%
-**Stories Completed**: 8/14
-**Current Phase**: 2 (Intelligent Summarization) - 🔄 **IN PROGRESS** (75% complete - 3/4 stories done)
-**Estimated Total Effort**: 30-38 days
+**Stories Completed**: 8/14 (57%)
+**Current Phase**: 3 (Universal Controls) - ⏳ **READY TO START**
+**Estimated Remaining Effort**: 13-18 days (Stories 9-14)
 
 **Phase Breakdown**:
-- Phase 1 (Foundation): 4 stories, 9-11 days
-- Phase 2 (Intelligent Summarization): 4 stories, 11-14 days
-- Phase 3 (Universal Controls): 2 stories, 5-7 days
-- Phase 4 (Advanced Safe Features): 4 stories, 6-8 days
+- Phase 1 (Foundation): 4 stories, 9-11 days ✅ **COMPLETE**
+- Phase 2 (Intelligent Summarization): 4 stories, 11-14 days ✅ **COMPLETE**
+- Phase 3 (Universal Controls): 2 stories, 5-7 days ⏳ **NEXT**
+- Phase 4 (Advanced Safe Features): 4 stories, 6-8 days ⏳ **PENDING**
+
+**Execution Mode**: Linear single-agent (Stories 9-14)
+**Self-Healing**: Enabled with user alerts for critical issues
 
 ---
 
@@ -1410,10 +1438,139 @@ find_symbol("User", exclude_generated=true)
 
 ---
 
+## Agent Execution Protocol (Stories 9-14)
+
+### Execution Mode: Linear Single-Agent
+
+**Context**: Stories 1-8 were completed successfully (some with accidental parallel execution). Stories 9-14 will proceed with **linear single-agent execution** to maintain context and enable self-healing.
+
+### Linear Execution Path
+
+```
+Story 9 → Story 10 → Story 11 → Story 12 → Story 13 → Story 14
+  ↓         ↓          ↓          ↓          ↓          ↓
+Test     Test       Test       Test       Test       Test
+  ↓         ↓          ↓          ↓          ↓          ↓
+Fix      Fix        Fix        Fix        Fix        Fix
+```
+
+**Rationale**:
+- Single agent maintains full context of previous stories
+- Natural error detection during implementation
+- Integration issues surface immediately at test phase
+- Self-healing capability (agent has context to fix issues)
+
+### Self-Healing Protocol
+
+When implementing Stories 9-14, agents should follow this protocol:
+
+#### 1. **Pre-Implementation Validation** (Before starting each story)
+```
+✓ Read story acceptance criteria
+✓ Identify dependencies on Stories 1-8
+✓ Run existing test suites to establish baseline
+✓ Check for any test failures from previous stories
+```
+
+#### 2. **During Implementation**
+```
+✓ Write tests first (TDD approach when possible)
+✓ Implement feature incrementally
+✓ Run tests frequently (not just at the end)
+✓ Monitor for cascading failures in older tests
+```
+
+#### 3. **Self-Healing Triggers** (Agent should auto-fix if possible)
+
+**AUTO-FIX** (No user intervention needed):
+- Import errors from new code → Add missing imports
+- Type hint conflicts → Update type annotations
+- Test failures due to new parameters → Update test calls with default values
+- Backward compatibility issues → Add default parameters to maintain old behavior
+- Cache invalidation bugs → Update cache key generation logic
+- Minor refactoring needed → Apply refactoring and re-test
+
+**ALERT USER** (Manual inspection needed):
+1. **Cascading Failures**: Tests from Stories 1-8 start failing systematically
+   - Flag: "⚠️ CASCADING FAILURE: Story X tests failing after implementing Story Y"
+   - Include: Which tests are failing, suspected root cause, proposed fix
+
+2. **Architectural Conflicts**: Design decisions from Stories 1-8 conflict with 9-14
+   - Flag: "⚠️ ARCHITECTURAL CONFLICT: Story X design conflicts with Story Y requirements"
+   - Include: Specific conflict, affected code, alternative approaches
+
+3. **Performance Degradation**: Token savings not meeting targets
+   - Flag: "⚠️ PERFORMANCE DEGRADATION: Story X achieving only N% savings (target: M%)"
+   - Include: Measured savings, expected savings, bottleneck analysis
+
+4. **Major Refactoring Needed**: Something fundamental needs to change
+   - Flag: "⚠️ MAJOR REFACTORING REQUIRED: Story X requires changes to Stories 1-8"
+   - Include: Scope of refactoring, affected stories, risk assessment
+
+#### 4. **Post-Implementation Validation**
+```
+✓ All new tests pass
+✓ All existing tests still pass (regression check)
+✓ Acceptance criteria met
+✓ Token savings verified
+✓ Backward compatibility verified
+✓ Syntax validation passed
+```
+
+#### 5. **Story Completion Commit Pattern**
+```bash
+git add <files>
+git commit -m "feat: Complete Story N - <Title>
+
+- Acceptance criteria met: [list key criteria]
+- Tests: [X unit + Y integration tests passing]
+- Token savings: [measured %]
+- Backward compatible: Yes
+- Dependencies: Stories [list]
+
+🤖 Generated with Claude Code
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
+
+### Dependencies to Watch
+
+**Story 9 (Verbosity Control)**:
+- Integrates with: All tools via base class
+- Tests should validate: Stories 1-8 tools work with new verbosity parameter
+
+**Story 10 (Token Estimation)**:
+- Integrates with: Stories 5, 6, 9, 11
+- Tests should validate: Estimation accuracy across all tool outputs
+
+**Story 11 (On-Demand Body)**:
+- Pairs with: Story 5 (Signatures)
+- Tests should validate: Symbol ID stability, body retrieval accuracy
+
+**Stories 12-14**:
+- Independent features, minimal cross-dependencies
+- Can proceed in any order after 9-11
+
+### Success Indicators
+
+✅ **Healthy Implementation**:
+- Tests passing incrementally
+- Token savings meeting targets
+- No regression in previous stories
+- Self-healing applied successfully
+- Clear commit history
+
+🚨 **Needs Manual Review**:
+- Multiple user alerts flagged
+- Major architectural changes proposed
+- Token savings < 50% of target
+- Systematic test failures across multiple stories
+
+---
+
 ## Sprint Completion Checklist
 
 - [x] All Phase 1 stories completed (Stories 1-4) ✅ **DONE**
-- [ ] All Phase 2 stories completed (Stories 5-8)
+- [x] All Phase 2 stories completed (Stories 5-8) ✅ **DONE**
 - [ ] All Phase 3 stories completed (Stories 9-10)
 - [ ] All Phase 4 stories completed (Stories 11-14)
 - [ ] Integration tests pass
