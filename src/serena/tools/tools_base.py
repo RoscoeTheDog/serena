@@ -16,7 +16,13 @@ from serena.prompt_factory import PromptFactory
 from serena.symbol import LanguageServerSymbolRetriever
 from serena.util.class_decorators import singleton
 from serena.util.inspection import iter_subclasses
-from serena.util.token_estimator import FastTokenEstimator, TokenEstimate, get_token_estimator
+from serena.util.token_estimator import (
+    FastTokenEstimator,
+    TokenEstimate,
+    TruncationError,
+    TruncationMetadata,
+    get_token_estimator,
+)
 from solidlsp.ls_exceptions import SolidLSPException
 
 if TYPE_CHECKING:
@@ -299,6 +305,180 @@ class Tool(Component):
         )
         return result
 
+    def _resolve_max_tokens(
+        self,
+        max_tokens: int | None = None,
+        max_answer_chars: int = -1,
+    ) -> int | None:
+        """
+        Resolve max_tokens from new and deprecated parameters.
+
+        :param max_tokens: New token-based limit (takes precedence)
+        :param max_answer_chars: Deprecated char-based limit (-1 = config default)
+        :return: Resolved max_tokens value, or None if no limit
+        """
+        # New parameter takes precedence
+        if max_tokens is not None:
+            return max_tokens
+
+        # Handle deprecated max_answer_chars
+        if max_answer_chars != -1:
+            if max_answer_chars <= 0:
+                return None  # No limit
+            # Convert chars to approximate tokens (chars/4)
+            return max_answer_chars // 4
+
+        # Use config default
+        default_chars = self.agent.serena_config.default_max_tool_answer_chars
+        if default_chars <= 0:
+            return None
+        return default_chars // 4
+
+    def _handle_truncation(
+        self,
+        content: str | dict,
+        max_tokens: int | None = None,
+        truncation: Literal["error", "summary", "paginate"] = "error",
+        narrowing_suggestions: list[str] | None = None,
+        page_cursor: str | None = None,
+    ) -> tuple[str | dict, TruncationMetadata | None]:
+        """
+        Handle content truncation with token-aware limits.
+
+        :param content: Content to potentially truncate (str or dict)
+        :param max_tokens: Maximum tokens allowed (None = no limit)
+        :param truncation: Truncation mode ('error', 'summary', 'paginate')
+        :param narrowing_suggestions: Suggestions for narrowing the query
+        :param page_cursor: Optional cursor for pagination
+        :return: Tuple of (potentially modified content, truncation metadata or None)
+        :raises TruncationError: If truncation='error' and content exceeds max_tokens
+        """
+        # If no max_tokens specified, no truncation needed
+        if max_tokens is None:
+            return content, None
+
+        # Estimate token count
+        estimator = self._get_token_estimator()
+        if isinstance(content, dict):
+            actual_tokens = estimator.estimate_json(content)
+        else:
+            actual_tokens = estimator.estimate_text(content)
+
+        # Check if truncation is needed
+        if actual_tokens <= max_tokens:
+            # No truncation needed - return metadata showing all content included
+            metadata = TruncationMetadata(
+                total_tokens=actual_tokens,
+                included_tokens=actual_tokens,
+                truncated=False,
+            )
+            return content, metadata
+
+        # Content exceeds limit - handle based on truncation mode
+        if truncation == "error":
+            # Error mode: raise descriptive error with suggestions
+            error_msg = (
+                f"Content too large: {actual_tokens} tokens (max: {max_tokens} tokens). "
+                f"Consider narrowing your query or increasing max_tokens."
+            )
+            if narrowing_suggestions:
+                error_msg += f"\n\nSuggestions:\n" + "\n".join(f"  • {s}" for s in narrowing_suggestions)
+
+            raise TruncationError(
+                message=error_msg,
+                actual_tokens=actual_tokens,
+                max_tokens=max_tokens,
+                narrowing_suggestions=narrowing_suggestions,
+            )
+
+        elif truncation == "summary":
+            # Summary mode: truncate intelligently and add metadata
+            target_chars = max_tokens * 4  # Approximate char limit
+
+            if isinstance(content, str):
+                # For strings, truncate at a reasonable boundary
+                truncated_content = content[:target_chars]
+                # Try to truncate at line boundary for cleaner output
+                last_newline = truncated_content.rfind('\n')
+                if last_newline > target_chars * 0.8:  # If within 80% of limit
+                    truncated_content = truncated_content[:last_newline]
+
+                included_tokens = estimator.estimate_text(truncated_content)
+
+                metadata = TruncationMetadata(
+                    total_tokens=actual_tokens,
+                    included_tokens=included_tokens,
+                    truncated=True,
+                    truncation_strategy="summary",
+                    expansion_hint=f"Use max_tokens={actual_tokens} or truncation='paginate' to get full content",
+                    narrowing_suggestions=narrowing_suggestions,
+                )
+
+                return truncated_content, metadata
+
+            else:
+                # For dicts, return summary view
+                # This is a simplified implementation - tools can override for smarter summaries
+                summary = {
+                    "_summary": f"Showing partial results ({max_tokens}/{actual_tokens} tokens)",
+                    "_truncated": True,
+                }
+
+                metadata = TruncationMetadata(
+                    total_tokens=actual_tokens,
+                    included_tokens=max_tokens,
+                    truncated=True,
+                    truncation_strategy="summary",
+                    expansion_hint=f"Use max_tokens={actual_tokens} to get full results",
+                    narrowing_suggestions=narrowing_suggestions,
+                )
+
+                return summary, metadata
+
+        elif truncation == "paginate":
+            # Paginate mode: return first page with cursor for next page
+            # This is a basic implementation - tools should override for proper pagination
+            target_chars = max_tokens * 4
+
+            if isinstance(content, str):
+                # Simple string pagination
+                truncated_content = content[:target_chars]
+                last_newline = truncated_content.rfind('\n')
+                if last_newline > target_chars * 0.8:
+                    truncated_content = truncated_content[:last_newline]
+
+                included_tokens = estimator.estimate_text(truncated_content)
+
+                # Create cursor (simplified - tools should implement proper cursors)
+                next_cursor = f"offset:{len(truncated_content)}"
+
+                metadata = TruncationMetadata(
+                    total_tokens=actual_tokens,
+                    included_tokens=included_tokens,
+                    truncated=True,
+                    truncation_strategy="paginate",
+                    expansion_hint="Use the next_page cursor to continue",
+                    next_page_cursor=next_cursor,
+                )
+
+                return truncated_content, metadata
+
+            else:
+                # Dict pagination - simplified
+                metadata = TruncationMetadata(
+                    total_tokens=actual_tokens,
+                    included_tokens=max_tokens,
+                    truncated=True,
+                    truncation_strategy="paginate",
+                    expansion_hint="Pagination not fully supported for this content type",
+                )
+
+                return content, metadata
+
+        else:
+            # Should never reach here due to Literal type
+            raise ValueError(f"Invalid truncation mode: {truncation}")
+
     def _resolve_verbosity(
         self,
         verbosity: Literal["minimal", "normal", "detailed", "auto"] = "auto"
@@ -425,19 +605,29 @@ class Tool(Component):
         self,
         result: str | dict,
         token_estimate: TokenEstimate | None = None,
+        truncation_metadata: TruncationMetadata | None = None,
     ) -> str:
         """
-        Add token estimation metadata to tool response.
+        Add token estimation and truncation metadata to tool response.
 
         :param result: Tool result (string or dict)
         :param token_estimate: Optional pre-computed token estimate
+        :param truncation_metadata: Optional truncation metadata
         :return: Result with token metadata appended
         """
-        if token_estimate is None:
-            # Auto-estimate if not provided
+        metadata = {}
+
+        # Add token estimate if provided or auto-estimate
+        if token_estimate is None and truncation_metadata is None:
+            # Auto-estimate if neither is provided
             token_estimate = self._estimate_tokens(result)
 
-        metadata = {"_tokens": token_estimate.to_dict()}
+        if token_estimate is not None:
+            metadata["_tokens"] = token_estimate.to_dict()
+
+        # Add truncation metadata if provided
+        if truncation_metadata is not None:
+            metadata["_truncation"] = truncation_metadata.to_dict()
 
         # If result is a dictionary (structured output), add metadata to it
         if isinstance(result, dict):
@@ -446,8 +636,11 @@ class Tool(Component):
             return json.dumps(result_with_metadata, indent=2)
 
         # If result is a string, append metadata
-        metadata_str = json.dumps(metadata, indent=2)
-        return f"{result}\n\n{metadata_str}"
+        if metadata:
+            metadata_str = json.dumps(metadata, indent=2)
+            return f"{result}\n\n{metadata_str}"
+        else:
+            return result
 
     def is_active(self) -> bool:
         return self.agent.tool_is_active(self.__class__)

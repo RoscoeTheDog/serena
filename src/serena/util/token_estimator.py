@@ -53,6 +53,49 @@ class TokenEstimate:
         return result
 
 
+@dataclass
+class TruncationMetadata:
+    """Metadata about content truncation."""
+
+    total_tokens: int
+    """Total tokens available (before truncation)"""
+
+    included_tokens: int
+    """Tokens actually included in response"""
+
+    truncated: bool
+    """Whether content was truncated"""
+
+    truncation_strategy: str | None = None
+    """Strategy used for truncation (e.g., 'summary', 'semantic', 'paginate')"""
+
+    expansion_hint: str | None = None
+    """Hint for how to get full content"""
+
+    next_page_cursor: str | None = None
+    """Cursor for paginated results"""
+
+    narrowing_suggestions: list[str] | None = None
+    """Suggestions for narrowing the query"""
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary, omitting None values."""
+        result: dict[str, Any] = {
+            "total_available": self.total_tokens,
+            "returned": self.included_tokens,
+            "truncated": self.truncated,
+        }
+        if self.truncation_strategy is not None:
+            result["strategy"] = self.truncation_strategy
+        if self.expansion_hint is not None:
+            result["expansion_hint"] = self.expansion_hint
+        if self.next_page_cursor is not None:
+            result["next_page"] = self.next_page_cursor
+        if self.narrowing_suggestions is not None:
+            result["narrowing_suggestions"] = self.narrowing_suggestions
+        return result
+
+
 class FastTokenEstimator:
     """
     Fast token estimator using char/4 approximation.
@@ -260,3 +303,33 @@ def get_token_estimator() -> FastTokenEstimator:
     if _global_estimator is None:
         _global_estimator = FastTokenEstimator()
     return _global_estimator
+
+
+class TruncationError(Exception):
+    """
+    Raised when content exceeds token limits with truncation='error'.
+
+    Provides actionable guidance for narrowing queries.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        actual_tokens: int,
+        max_tokens: int,
+        narrowing_suggestions: list[str] | None = None,
+    ):
+        super().__init__(message)
+        self.actual_tokens = actual_tokens
+        self.max_tokens = max_tokens
+        self.narrowing_suggestions = narrowing_suggestions or []
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert error details to dictionary for structured output."""
+        return {
+            "error": "content_too_large",
+            "message": str(self),
+            "actual_tokens": self.actual_tokens,
+            "max_tokens": self.max_tokens,
+            "narrowing_suggestions": self.narrowing_suggestions,
+        }
