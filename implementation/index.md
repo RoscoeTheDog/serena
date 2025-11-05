@@ -99,21 +99,23 @@ This provides:
 ---
 
 ### Story 3: Add MCP Config Management Tools
-**Status**: unassigned
-**Effort**: 1.5 days
+**Status**: completed
+**Claimed**: 2025-11-05 02:00
+**Completed**: 2025-11-05 02:30
+**Effort**: 1.5 days (actual: 0.5 days)
 **Risk Level**: 🟢 LOW
 **Parent**: Story 1
 
 **Description**: Add MCP tools for agents to inspect and modify project configurations (similar to claude-context)
 
 **Acceptance Criteria**:
-- [ ] Add `get_project_config(project_path)` tool
-- [ ] Add `update_project_config(project_path, **settings)` tool
-- [ ] Add `reset_project_config(project_path)` tool (back to defaults)
-- [ ] Add `list_project_configs()` tool (show all configured projects)
-- [ ] Tools have agent-friendly descriptions and examples
-- [ ] Tools validate inputs with clear error messages
-- [ ] Unit tests for all config management tools
+- [x] Add `get_project_config(project_path)` tool
+- [x] Add `update_project_config(project_path, **settings)` tool
+- [x] Add `reset_project_config(project_path)` tool (back to defaults)
+- [x] Add `list_project_configs()` tool (show all configured projects)
+- [x] Tools have agent-friendly descriptions and examples
+- [x] Tools validate inputs with clear error messages
+- [x] Unit tests for all config management tools
 
 **Tool Signatures**:
 ```python
@@ -122,6 +124,26 @@ update_project_config(project_path: str, **settings) -> dict
 reset_project_config(project_path: str) -> dict
 list_project_configs() -> list[dict]
 ```
+
+**Implementation Notes**:
+- Added 4 new MCP tools to `src/serena/tools/config_tools.py`:
+  - `GetProjectConfigTool` - Retrieve project configuration (supports both centralized and legacy storage)
+  - `UpdateProjectConfigTool` - Update project settings (auto-migrates from legacy to centralized)
+  - `ResetProjectConfigTool` - Reset config to defaults (preserves project_name and language)
+  - `ListProjectConfigsTool` - List all configured projects with summaries
+- All tools return JSON for easy parsing by agents
+- Tools follow claude-context MCP tool patterns (similar naming, structure, behavior)
+- Comprehensive test suite in `test/serena/tools/test_config_management_tools.py`:
+  - 15 test cases covering all tools
+  - Tests for centralized, legacy, and migration scenarios
+  - Integration test for complete workflow (get -> update -> reset)
+  - All tests passing on Windows platform
+- Tools properly handle:
+  - Path resolution (absolute/relative)
+  - Centralized vs legacy storage detection
+  - Automatic migration from legacy to centralized
+  - Error cases with helpful error messages
+  - Validation of configuration settings
 
 ---
 
@@ -319,6 +341,25 @@ include_metadata: true           # Rich context for decisions
 - Created manual test script for quick validation
 - All tests pass on Windows platform
 - Total implementation: ~400 lines (including tests and docs)
+
+### 2025-11-05 02:00 - Story 3: unassigned → in_progress
+- Beginning implementation of MCP config management tools
+
+### 2025-11-05 02:30 - Story 3: in_progress → completed
+- Implemented 4 MCP tools in `src/serena/tools/config_tools.py`:
+  - `GetProjectConfigTool` - Retrieve project configuration (JSON output)
+  - `UpdateProjectConfigTool` - Update settings with auto-migration from legacy
+  - `ResetProjectConfigTool` - Reset to defaults (preserves name/language)
+  - `ListProjectConfigsTool` - List all projects with summaries
+- Created comprehensive test suite (`test/serena/tools/test_config_management_tools.py`):
+  - 15 test cases, 5 test classes
+  - Tests for all CRUD operations on configs
+  - Legacy migration scenarios
+  - Integration test for complete workflow
+  - All tests passing (15/15) on Windows platform
+- Tools follow claude-context patterns for consistency
+- Total implementation: ~630 lines (implementation + tests)
+- All acceptance criteria met
 
 ---
 

@@ -1,5 +1,7 @@
 import json
 import platform
+from pathlib import Path
+from typing import Any
 
 from serena.config.context_mode import SerenaAgentMode
 from serena.tools import Tool, ToolMarkerDoesNotRequireActiveProject, ToolMarkerOptional
@@ -9,6 +11,11 @@ from serena.tools.onboarding_helpers import (
     detect_code_style,
     generate_commands_memory,
     generate_completion_checklist,
+)
+from serena.constants import (
+    get_centralized_project_dir,
+    get_project_config_path,
+    get_legacy_project_dir,
 )
 
 
@@ -237,3 +244,370 @@ class GetCurrentConfigTool(Tool, ToolMarkerOptional):
         Print the current configuration of the agent, including the active and available projects, tools, contexts, and modes.
         """
         return self.agent.get_current_config_overview()
+
+
+class GetProjectConfigTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMarkerOptional):
+    """
+    Retrieve current project configuration from centralized storage.
+    Similar to claude-context's get_codebase_config tool.
+    """
+
+    def apply(self, project_path: str) -> str:
+        """
+        Retrieve current project configuration.
+
+        Args:
+            project_path: Absolute or relative path to project root
+
+        Returns:
+            JSON string containing:
+            - project_name: Project name
+            - language: Programming language
+            - storage_location: "centralized" or "legacy"
+            - config_path: Actual path to config file
+            - ignored_paths: List of ignored paths
+            - read_only: Whether project is read-only
+            - ignore_all_files_in_gitignore: Whether to ignore gitignored files
+            - initial_prompt: Initial prompt for the project
+            - encoding: File encoding
+            - excluded_tools: List of excluded tools
+            - included_optional_tools: List of included optional tools
+
+        Example:
+            get_project_config("/path/to/project")
+        """
+        from serena.config.serena_config import ProjectConfig
+        import yaml
+
+        project_root = Path(project_path).resolve()
+        if not project_root.exists():
+            return json.dumps({
+                "error": f"Project root not found: {project_root}"
+            }, indent=2)
+
+        # Try centralized location first
+        centralized_path = get_project_config_path(project_root)
+        legacy_path = get_legacy_project_dir(project_root) / "project.yml"
+
+        config_path = None
+        storage_location = None
+
+        if centralized_path.exists():
+            config_path = centralized_path
+            storage_location = "centralized"
+        elif legacy_path.exists():
+            config_path = legacy_path
+            storage_location = "legacy"
+        else:
+            return json.dumps({
+                "error": f"No project configuration found at {centralized_path} or {legacy_path}",
+                "hint": "Use activate_project to create a new project configuration"
+            }, indent=2)
+
+        # Load the config
+        try:
+            with open(config_path, encoding="utf-8") as f:
+                config_data = yaml.safe_load(f)
+
+            result = {
+                "project_name": config_data.get("project_name", project_root.name),
+                "language": config_data.get("language", "unknown"),
+                "storage_location": storage_location,
+                "config_path": str(config_path),
+                "ignored_paths": config_data.get("ignored_paths", []),
+                "read_only": config_data.get("read_only", False),
+                "ignore_all_files_in_gitignore": config_data.get("ignore_all_files_in_gitignore", True),
+                "initial_prompt": config_data.get("initial_prompt", ""),
+                "encoding": config_data.get("encoding", "utf-8"),
+                "excluded_tools": config_data.get("excluded_tools", []),
+                "included_optional_tools": config_data.get("included_optional_tools", [])
+            }
+
+            return json.dumps(result, indent=2)
+
+        except Exception as e:
+            return json.dumps({
+                "error": f"Failed to load project configuration: {str(e)}"
+            }, indent=2)
+
+
+class UpdateProjectConfigTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMarkerOptional):
+    """
+    Update project configuration settings in centralized storage.
+    Similar to claude-context's update_codebase_config tool.
+    """
+
+    def apply(self, project_path: str, **settings: Any) -> str:
+        """
+        Update project configuration settings.
+
+        Args:
+            project_path: Absolute or relative path to project root
+            **settings: Configuration keys to update (e.g., project_name, language, ignored_paths, etc.)
+
+        Returns:
+            JSON string with updated configuration
+
+        Valid settings:
+            - project_name (str): Project name
+            - language (str): Programming language
+            - ignored_paths (list): List of paths to ignore
+            - read_only (bool): Whether project is read-only
+            - ignore_all_files_in_gitignore (bool): Whether to ignore gitignored files
+            - initial_prompt (str): Initial prompt for the project
+            - encoding (str): File encoding
+            - excluded_tools (list): List of tools to exclude
+            - included_optional_tools (list): List of optional tools to include
+
+        Example:
+            update_project_config("/path/to/project", read_only=True, ignored_paths=["temp/", "cache/"])
+        """
+        from serena.config.serena_config import ProjectConfig
+        from serena.util.general import load_yaml, save_yaml
+
+        project_root = Path(project_path).resolve()
+        if not project_root.exists():
+            return json.dumps({
+                "error": f"Project root not found: {project_root}"
+            }, indent=2)
+
+        # Ensure we're working with centralized storage
+        centralized_path = get_project_config_path(project_root)
+        legacy_path = get_legacy_project_dir(project_root) / "project.yml"
+
+        # If config exists in legacy but not centralized, load from legacy
+        if not centralized_path.exists() and legacy_path.exists():
+            # Migrate from legacy to centralized
+            get_centralized_project_dir(project_root).mkdir(parents=True, exist_ok=True)
+            import shutil
+            shutil.copy2(legacy_path, centralized_path)
+
+        # Load existing config or create new one
+        if centralized_path.exists():
+            config_data = load_yaml(centralized_path, preserve_comments=True)
+        else:
+            # Create default config
+            return json.dumps({
+                "error": f"No project configuration found. Use activate_project to create one first.",
+                "hint": f"Expected at: {centralized_path}"
+            }, indent=2)
+
+        # Update settings
+        for key, value in settings.items():
+            if key in ["project_name", "language", "ignored_paths", "read_only",
+                      "ignore_all_files_in_gitignore", "initial_prompt", "encoding",
+                      "excluded_tools", "included_optional_tools"]:
+                config_data[key] = value
+            else:
+                return json.dumps({
+                    "error": f"Invalid setting: {key}",
+                    "valid_settings": ["project_name", "language", "ignored_paths", "read_only",
+                                      "ignore_all_files_in_gitignore", "initial_prompt", "encoding",
+                                      "excluded_tools", "included_optional_tools"]
+                }, indent=2)
+
+        # Save updated config
+        try:
+            save_yaml(str(centralized_path), config_data, preserve_comments=True)
+
+            result = {
+                "updated": True,
+                "config_path": str(centralized_path),
+                "storage_location": "centralized",
+                "updated_settings": list(settings.keys()),
+                "current_config": {
+                    "project_name": config_data.get("project_name"),
+                    "language": config_data.get("language"),
+                    "ignored_paths": config_data.get("ignored_paths", []),
+                    "read_only": config_data.get("read_only", False),
+                    "ignore_all_files_in_gitignore": config_data.get("ignore_all_files_in_gitignore", True),
+                    "initial_prompt": config_data.get("initial_prompt", ""),
+                    "encoding": config_data.get("encoding", "utf-8"),
+                    "excluded_tools": config_data.get("excluded_tools", []),
+                    "included_optional_tools": config_data.get("included_optional_tools", [])
+                }
+            }
+
+            return json.dumps(result, indent=2)
+
+        except Exception as e:
+            return json.dumps({
+                "error": f"Failed to update project configuration: {str(e)}"
+            }, indent=2)
+
+
+class ResetProjectConfigTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMarkerOptional):
+    """
+    Reset project configuration to safe defaults.
+    Similar to claude-context's reset_codebase_config tool.
+    """
+
+    def apply(self, project_path: str) -> str:
+        """
+        Reset project configuration to safe defaults.
+
+        Args:
+            project_path: Absolute or relative path to project root
+
+        Returns:
+            JSON string with reset configuration
+
+        Note: This will preserve project_name and language but reset all other settings to defaults.
+
+        Example:
+            reset_project_config("/path/to/project")
+        """
+        from serena.config.serena_config import ProjectConfig
+        from serena.util.general import load_yaml, save_yaml
+
+        project_root = Path(project_path).resolve()
+        if not project_root.exists():
+            return json.dumps({
+                "error": f"Project root not found: {project_root}"
+            }, indent=2)
+
+        centralized_path = get_project_config_path(project_root)
+
+        if not centralized_path.exists():
+            return json.dumps({
+                "error": f"No project configuration found at {centralized_path}",
+                "hint": "Use activate_project to create a new project configuration"
+            }, indent=2)
+
+        # Load existing config to preserve name and language
+        try:
+            config_data = load_yaml(centralized_path, preserve_comments=True)
+            project_name = config_data.get("project_name", project_root.name)
+            language = config_data.get("language", "python")
+
+            # Reset to defaults
+            default_config = {
+                "project_name": project_name,
+                "language": language,
+                "ignored_paths": [],
+                "read_only": False,
+                "ignore_all_files_in_gitignore": True,
+                "initial_prompt": "",
+                "encoding": "utf-8",
+                "excluded_tools": [],
+                "included_optional_tools": []
+            }
+
+            # Save reset config
+            save_yaml(str(centralized_path), default_config, preserve_comments=False)
+
+            result = {
+                "reset": True,
+                "config_path": str(centralized_path),
+                "storage_location": "centralized",
+                "preserved": ["project_name", "language"],
+                "current_config": default_config
+            }
+
+            return json.dumps(result, indent=2)
+
+        except Exception as e:
+            return json.dumps({
+                "error": f"Failed to reset project configuration: {str(e)}"
+            }, indent=2)
+
+
+class ListProjectConfigsTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMarkerOptional):
+    """
+    List all configured projects with their configurations.
+    Similar to claude-context's list_codebase_configs tool.
+    """
+
+    def apply(self) -> str:
+        """
+        List all configured projects.
+
+        Returns:
+            JSON string containing list of projects with:
+            - project_name: Project name
+            - project_path: Resolved project path (if resolvable)
+            - storage_location: "centralized" or "legacy"
+            - config_path: Path to config file
+            - language: Programming language
+            - config_summary: Key configuration settings
+
+        Example:
+            list_project_configs()
+        """
+        import yaml
+
+        projects = []
+        centralized_projects_dir = Path.home() / ".serena" / "projects"
+
+        # Scan centralized projects directory
+        if centralized_projects_dir.exists():
+            for project_dir in centralized_projects_dir.iterdir():
+                if project_dir.is_dir():
+                    config_path = project_dir / "project.yml"
+                    if config_path.exists():
+                        try:
+                            with open(config_path, encoding="utf-8") as f:
+                                config_data = yaml.safe_load(f)
+
+                            # Try to resolve project path from registered projects
+                            project_root = None
+                            for registered in self.agent.serena_config.projects:
+                                if get_centralized_project_dir(Path(registered.path)).name == project_dir.name:
+                                    project_root = registered.path
+                                    break
+
+                            projects.append({
+                                "project_name": config_data.get("project_name", "unknown"),
+                                "project_path": str(project_root) if project_root else f"<unresolvable: {project_dir.name}>",
+                                "storage_location": "centralized",
+                                "config_path": str(config_path),
+                                "language": config_data.get("language", "unknown"),
+                                "config_summary": {
+                                    "read_only": config_data.get("read_only", False),
+                                    "ignored_paths_count": len(config_data.get("ignored_paths", [])),
+                                    "has_initial_prompt": bool(config_data.get("initial_prompt", "")),
+                                    "excluded_tools_count": len(config_data.get("excluded_tools", [])),
+                                    "included_optional_tools_count": len(config_data.get("included_optional_tools", []))
+                                }
+                            })
+                        except Exception as e:
+                            projects.append({
+                                "project_name": "error",
+                                "error": f"Failed to load config from {config_path}: {str(e)}"
+                            })
+
+        # Also check for legacy projects (projects with .serena/ in their root)
+        for registered in self.agent.serena_config.projects:
+            legacy_path = get_legacy_project_dir(Path(registered.path)) / "project.yml"
+            centralized_path = get_project_config_path(Path(registered.path))
+
+            # Only include legacy if no centralized config exists
+            if legacy_path.exists() and not centralized_path.exists():
+                try:
+                    with open(legacy_path, encoding="utf-8") as f:
+                        config_data = yaml.safe_load(f)
+
+                    projects.append({
+                        "project_name": config_data.get("project_name", "unknown"),
+                        "project_path": str(registered.path),
+                        "storage_location": "legacy",
+                        "config_path": str(legacy_path),
+                        "language": config_data.get("language", "unknown"),
+                        "config_summary": {
+                            "read_only": config_data.get("read_only", False),
+                            "ignored_paths_count": len(config_data.get("ignored_paths", [])),
+                            "has_initial_prompt": bool(config_data.get("initial_prompt", "")),
+                            "excluded_tools_count": len(config_data.get("excluded_tools", [])),
+                            "included_optional_tools_count": len(config_data.get("included_optional_tools", []))
+                        },
+                        "note": "Legacy storage - consider migrating with update_project_config"
+                    })
+                except Exception as e:
+                    pass  # Skip errors for legacy configs
+
+        result = {
+            "total_projects": len(projects),
+            "projects": projects
+        }
+
+        return json.dumps(result, indent=2)
