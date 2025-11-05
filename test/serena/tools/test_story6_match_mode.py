@@ -321,58 +321,6 @@ def test_backward_compat_parameter_priority(temp_project):
     assert len(symbols) >= 5
 
 
-# ===== Performance Tests =====
-
-def test_performance_hint_glob(temp_project):
-    """Test that glob mode includes performance hint."""
-    tmpdir, project, agent = temp_project
-    tool = FindSymbolTool(agent)
-
-    result = json.loads(tool.apply(
-        name_path="User*Service",
-        relative_path="services.py",
-        match_mode="glob"
-    ))
-
-    # Should have performance hint
-    performance_hint = result.get("_performance_hint")
-    assert performance_hint is not None
-    assert "glob" in performance_hint.lower() or "moderately fast" in performance_hint.lower()
-
-
-def test_performance_hint_regex(temp_project):
-    """Test that regex mode includes performance hint."""
-    tmpdir, project, agent = temp_project
-    tool = FindSymbolTool(agent)
-
-    result = json.loads(tool.apply(
-        name_path="User.*Service",
-        relative_path="services.py",
-        match_mode="regex"
-    ))
-
-    # Should have performance hint
-    performance_hint = result.get("_performance_hint")
-    assert performance_hint is not None
-    assert "regex" in performance_hint.lower() or "slower" in performance_hint.lower()
-
-
-def test_no_performance_hint_exact(temp_project):
-    """Test that exact mode does NOT include performance hint."""
-    tmpdir, project, agent = temp_project
-    tool = FindSymbolTool(agent)
-
-    result = json.loads(tool.apply(
-        name_path="UserService",
-        relative_path="services.py",
-        match_mode="exact"
-    ))
-
-    # Should NOT have performance hint (exact is already optimal)
-    performance_hint = result.get("_performance_hint")
-    assert performance_hint is None
-
-
 # ===== Edge Cases =====
 
 def test_invalid_regex_pattern(temp_project):

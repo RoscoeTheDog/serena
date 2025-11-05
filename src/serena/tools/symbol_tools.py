@@ -306,31 +306,25 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         :param exclude_kinds: Optional. List of LSP symbol kind integers to exclude. Takes precedence over `include_kinds`.
             If not provided, no kinds are excluded.
         :param match_mode: Match mode for the last segment of `name_path`. Options:
-            - "exact" (default, recommended): Fast exact match - use when you know the precise symbol name
+            - "exact" (default): Exact match - use when you know the precise symbol name
             - "substring": Match if pattern is substring of symbol name - use for exploratory searches
             - "glob": Support wildcards (* and ?) - use for pattern-based searches (e.g., "User*Service")
             - "regex": Full regex power - use for complex patterns (e.g., "User.*Service")
 
             Examples:
-                # Exact match (fastest)
+                # Exact match - when you know the precise name
                 find_symbol("UserService")  # Only matches "UserService"
 
-                # Substring match
+                # Substring match - for exploratory searches
                 find_symbol("Service", match_mode="substring")  # Matches "UserService", "AuthService", etc.
 
-                # Glob pattern (NEW capability)
+                # Glob pattern - for simple wildcards
                 find_symbol("User*Service", match_mode="glob")  # Matches "UserAuthService", "UserApiService", etc.
                 find_symbol("User?Service", match_mode="glob")  # Matches "UserAService", "UserBService", etc.
 
-                # Regex pattern (NEW capability)
+                # Regex pattern - for complex patterns
                 find_symbol("User.*Service", match_mode="regex")  # Matches "UserAuthService", "UserApiService", etc.
                 find_symbol("User[A-Z]+Service", match_mode="regex")  # More complex patterns
-
-            Performance notes:
-            - "exact" is fastest (O(1) comparison)
-            - "substring" is fast for short patterns
-            - "glob" is moderately fast (simple wildcard expansion)
-            - "regex" can be slower for complex patterns
         :param substring_matching: [DEPRECATED] Use match_mode="substring" instead. If provided, overrides match_mode.
             This parameter will be removed in version 2.0.0.
         :param search_scope: Controls which files to search. Options:
@@ -589,14 +583,6 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         # Add deprecation warnings if any deprecated params were used
         if deprecation_warnings:
             optimized_result["_deprecated"] = deprecation_warnings
-
-        # Add performance hints for slower match modes
-        if effective_match_mode in ("glob", "regex"):
-            performance_notes = {
-                "glob": "Glob matching is moderately fast. For better performance, use match_mode='exact' if you know the precise name.",
-                "regex": "Regex matching can be slower for complex patterns. Consider using match_mode='glob' for simple wildcards or match_mode='exact' for precise matches."
-            }
-            optimized_result["_performance_hint"] = performance_notes.get(effective_match_mode)
 
         # Cache the result if single-file query
         if use_cache:

@@ -424,19 +424,18 @@ find_symbol("User", search_scope="all")  # ← Explicit opt-in for everything
 
 **Acceptance Criteria**:
 - [x] Add new parameter: `match_mode: Literal["exact", "substring", "glob", "regex"] = "exact"`
-  - `"exact"`: Fast exact match (default)
+  - `"exact"`: Exact match (default)
   - `"substring"`: Current `substring_matching=True` behavior
   - `"glob"`: Support wildcards like `User*Service`
   - `"regex"`: Full regex power
 - [x] Deprecate `substring_matching` parameter (made optional with None default)
 - [x] Mapping: `substring_matching=True` → `match_mode="substring"`
-- [x] Add performance metadata: `_performance_hint` for slow modes (glob and regex)
 - [x] Add examples for each mode in docstring (comprehensive examples with all 4 modes)
 - [x] Implement glob matching (new feature using fnmatch)
 - [x] Implement regex matching (new feature with error handling)
 - [x] Add validation: regex mode validates pattern is valid (returns error for invalid patterns)
 - [~] All tests pass (test suite created, cannot run due to Python 3.13 vs <3.12 requirement)
-- [x] Add comprehensive tests for each match mode (30+ tests covering all scenarios)
+- [x] Add comprehensive tests for each match mode (27+ tests covering all scenarios)
 
 **Implementation Notes**:
 - **Core Changes**:
@@ -447,18 +446,17 @@ find_symbol("User", search_scope="all")  # ← Explicit opt-in for everything
 - **Glob Implementation**: Uses `fnmatch.fnmatch()` for simple wildcard patterns (* and ?)
 - **Regex Implementation**: Uses `re.search()` with try/except for invalid patterns (falls back to exact match)
 - **Validation**: Regex patterns validated early with helpful error messages on failure
-- **Performance Hints**: Added `_performance_hint` metadata for glob and regex modes
 - **Deprecation**: substring_matching shows deprecation warning with clear migration guidance
 - **Parameter Priority**: substring_matching takes precedence over match_mode for backward compatibility
 - **Cache Keys**: Updated to use `match_mode` instead of `substring_matching`
+- **Design Philosophy**: No performance hints - agents should choose the right tool for accuracy, not worry about server performance
 
 **Testing**:
 - Created comprehensive test suite (`test_story6_match_mode.py`)
-- 30+ tests covering:
+- 27+ tests covering:
   - Unit tests for all 4 match modes (exact, substring, glob, regex)
   - Backward compatibility (substring_matching=True/False)
   - Deprecation warnings and migration guidance
-  - Performance hints for slow modes
   - Edge cases (invalid regex, case sensitivity, no matches)
   - Integration tests (with output_format, include_kinds, depth)
   - Documentation examples validation
@@ -472,10 +470,11 @@ find_symbol("User", search_scope="all")  # ← Explicit opt-in for everything
 2. **Regex Matching**: Full regex power for complex patterns
    - `User.*Service` matches any User...Service pattern
    - `User[A-Z]+Service` matches with specific character classes
-3. **Performance Awareness**: Agents get hints about slower match modes
-4. **Better Errors**: Invalid regex patterns return descriptive errors with suggestions
+3. **Better Errors**: Invalid regex patterns return descriptive errors with suggestions
 
 **Token Savings**: Estimated 20-40% reduction by enabling agents to use exact mode (default) instead of substring mode when they know the precise symbol name
+
+**Design Decision**: Removed performance hints to prioritize accuracy over performance. Agents should use the match mode that best fits their search needs without worrying about server-side performance implications.
 
 **Migration Strategy**:
 ```python
