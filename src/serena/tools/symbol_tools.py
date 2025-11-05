@@ -9,6 +9,7 @@ from collections.abc import Sequence
 from copy import copy
 from typing import Any, Literal
 
+from serena.text_utils import extract_usage_pattern
 from serena.tools import (
     SUCCESS_RESULT,
     Tool,
@@ -378,6 +379,8 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
         relative_path: str,
         include_kinds: list[int] = [],  # noqa: B006
         exclude_kinds: list[int] = [],  # noqa: B006
+        context_lines: int = 1,
+        extract_pattern: bool = True,
         max_answer_chars: int = -1,
     ) -> str:
         """
@@ -389,6 +392,10 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
             Note that here you can't pass a directory but must pass a file.
         :param include_kinds: same as in the `find_symbol` tool.
         :param exclude_kinds: same as in the `find_symbol` tool.
+        :param context_lines: number of lines of context to show before and after the reference (default: 1).
+            Set to 0 for just the reference line, or higher for more surrounding code.
+        :param extract_pattern: if True, extract the usage pattern (e.g., "foo.bar(x, y)") from the reference line
+            for more concise output. If False, shows full lines without pattern extraction (default: True).
         :param max_answer_chars: same as in the `find_symbol` tool.
         :return: a list of JSON objects with the symbols referencing the requested symbol
         """
@@ -396,6 +403,10 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
         parsed_include_kinds: Sequence[SymbolKind] | None = [SymbolKind(k) for k in include_kinds] if include_kinds else None
         parsed_exclude_kinds: Sequence[SymbolKind] | None = [SymbolKind(k) for k in exclude_kinds] if exclude_kinds else None
         symbol_retriever = self.create_language_server_symbol_retriever()
+        
+        # First, find the symbol to get its name for pattern extraction
+        target_symbol_name = name_path.split('/')[-1]  # Get the last component of the name path
+        
         references_in_symbols = symbol_retriever.find_referencing_symbols(
             name_path,
             relative_file_path=relative_path,
@@ -411,9 +422,36 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
                 ref_relative_path = ref.symbol.location.relative_path
                 assert ref_relative_path is not None, f"Referencing symbol {ref.symbol.name} has no relative path, this is likely a bug."
                 content_around_ref = self.project.retrieve_content_around_line(
-                    relative_file_path=ref_relative_path, line=ref.line, context_lines_before=1, context_lines_after=1
+                    relative_file_path=ref_relative_path, 
+                    line=ref.line, 
+                    context_lines_before=context_lines, 
+                    context_lines_after=context_lines
                 )
-                ref_dict["content_around_reference"] = content_around_ref.to_display_string()
+                
+                # Extract the reference line for pattern extraction
+                reference_line = None
+                for text_line in content_around_ref.matched_lines:
+                    if text_line.line_number == ref.line:
+                        reference_line = text_line.line_content
+                        break
+                
+                if extract_pattern and reference_line:
+                    # Extract usage pattern from the reference line
+                    usage_pattern = extract_usage_pattern(reference_line, target_symbol_name)
+                    if usage_pattern:
+                        ref_dict["usage_pattern"] = usage_pattern
+                    ref_dict["full_line"] = reference_line
+                    ref_dict["reference_line"] = ref.line
+                else:
+                    # Fall back to full context
+                    ref_dict["content_around_reference"] = content_around_ref.to_display_string()
+                
+                # Add metadata about context
+                ref_dict["context_lines"] = context_lines
+                if extract_pattern:
+                    ref_dict["pattern_extracted"] = True
+                    ref_dict["expand_context_hint"] = f"Use context_lines={context_lines + 2} for more surrounding code"
+                    
             reference_dicts.append(ref_dict)
         optimized_result = _optimize_symbol_list(reference_dicts)
         result = json.dumps(optimized_result)

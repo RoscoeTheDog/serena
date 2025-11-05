@@ -366,3 +366,80 @@ def search_files(
 
     log.info(f"Found {len(matches)} total matches across {len(filtered_paths)} files")
     return matches
+
+
+def extract_usage_pattern(line_content: str, symbol_name: str) -> str | None:
+    """
+    Extract the usage pattern of a symbol from a line of code.
+    
+    Attempts to extract minimal but sufficient context showing how a symbol is used,
+    such as function calls, imports, assignments, or property access.
+    
+    :param line_content: The line of code containing the symbol reference
+    :param symbol_name: The name of the symbol being referenced
+    :return: Extracted pattern string, or None if no clear pattern found
+    
+    Examples:
+        - "result = foo.bar(x, y)" with symbol "bar" → "foo.bar(x, y)"
+        - "from auth import authenticate" with symbol "authenticate" → "import authenticate"
+        - "user.profile.get_name()" with symbol "get_name" → "user.profile.get_name()"
+        - "x = calculate(a, b)" with symbol "calculate" → "calculate(a, b)"
+    """
+    if not symbol_name or not line_content:
+        return None
+    
+    # Strip leading/trailing whitespace
+    stripped = line_content.strip()
+    
+    # Pattern 1: Import statements
+    # from X import symbol, from X.Y import symbol
+    import_match = re.search(rf'from\s+[\w.]+\s+import\s+.*\b{re.escape(symbol_name)}\b', stripped)
+    if import_match:
+        return f"import {symbol_name}"
+    
+    # import X.symbol, import X as Y
+    if stripped.startswith('import ') and symbol_name in stripped:
+        return f"import {symbol_name}"
+    
+    # Pattern 2: Function/method calls
+    # Try to find the symbol followed by parentheses, capturing the full call
+    # Handles: foo(), obj.foo(), obj.bar.foo(), foo(x, y), etc.
+    
+    # Find the symbol with optional preceding object/module path and following call
+    call_pattern = rf'([\w.]*\.)?{re.escape(symbol_name)}\s*\([^)]*\)'
+    call_match = re.search(call_pattern, stripped)
+    if call_match:
+        return call_match.group(0)
+    
+    # Pattern 3: Chained method calls or property access
+    # user.profile.get_name(), obj.attr.method()
+    chain_pattern = rf'[\w.]*\.{re.escape(symbol_name)}(?:\([^)]*\)|\.[\w.]*)?'
+    chain_match = re.search(chain_pattern, stripped)
+    if chain_match:
+        return chain_match.group(0)
+    
+    # Pattern 4: Assignment or argument
+    # x = symbol, func(symbol), return symbol
+    # Look for the symbol as a standalone identifier
+    standalone_pattern = rf'\b{re.escape(symbol_name)}\b'
+    if re.search(standalone_pattern, stripped):
+        # Try to get some context around it
+        # Find assignment: "var = symbol"
+        assign_match = re.search(rf'[\w_][\w\d_]*\s*=\s*{re.escape(symbol_name)}\b', stripped)
+        if assign_match:
+            return assign_match.group(0)
+        
+        # Find in function call: "func(symbol)"
+        arg_match = re.search(rf'[\w_][\w\d_]*\s*\(\s*[^)]*{re.escape(symbol_name)}\b[^)]*\)', stripped)
+        if arg_match:
+            return arg_match.group(0)
+        
+        # Return statement: "return symbol"
+        if stripped.startswith('return ') and symbol_name in stripped:
+            return f"return {symbol_name}"
+        
+        # Just return the symbol name as last resort
+        return symbol_name
+    
+    # No pattern found
+    return None
