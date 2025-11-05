@@ -16,6 +16,7 @@ from serena.prompt_factory import PromptFactory
 from serena.symbol import LanguageServerSymbolRetriever
 from serena.util.class_decorators import singleton
 from serena.util.inspection import iter_subclasses
+from serena.util.token_estimator import FastTokenEstimator, TokenEstimate, get_token_estimator
 from solidlsp.ls_exceptions import SolidLSPException
 
 if TYPE_CHECKING:
@@ -387,6 +388,66 @@ class Tool(Component):
                 is_read=is_read,
                 file_path=file_path,
             )
+
+    def _get_token_estimator(self) -> FastTokenEstimator:
+        """
+        Get the global token estimator instance.
+
+        :return: FastTokenEstimator for token calculations
+        """
+        return get_token_estimator()
+
+    def _estimate_tokens(
+        self,
+        content: str | dict,
+        verbosity_used: Literal["minimal", "normal", "detailed"] | None = None,
+    ) -> TokenEstimate:
+        """
+        Estimate tokens for current content with verbosity breakdown.
+
+        :param content: Content to estimate (string or dict)
+        :param verbosity_used: Current verbosity level (for breakdown)
+        :return: TokenEstimate with current and alternative verbosity estimates
+        """
+        estimator = self._get_token_estimator()
+
+        if verbosity_used is not None:
+            return estimator.estimate_with_verbosity_breakdown(content, verbosity_used)
+        else:
+            # Simple estimation without verbosity breakdown
+            if isinstance(content, dict):
+                current_tokens = estimator.estimate_json(content)
+            else:
+                current_tokens = estimator.estimate_text(content)
+            return TokenEstimate(current=current_tokens)
+
+    def _add_token_metadata(
+        self,
+        result: str | dict,
+        token_estimate: TokenEstimate | None = None,
+    ) -> str:
+        """
+        Add token estimation metadata to tool response.
+
+        :param result: Tool result (string or dict)
+        :param token_estimate: Optional pre-computed token estimate
+        :return: Result with token metadata appended
+        """
+        if token_estimate is None:
+            # Auto-estimate if not provided
+            token_estimate = self._estimate_tokens(result)
+
+        metadata = {"_tokens": token_estimate.to_dict()}
+
+        # If result is a dictionary (structured output), add metadata to it
+        if isinstance(result, dict):
+            result_with_metadata = result.copy()
+            result_with_metadata.update(metadata)
+            return json.dumps(result_with_metadata, indent=2)
+
+        # If result is a string, append metadata
+        metadata_str = json.dumps(metadata, indent=2)
+        return f"{result}\n\n{metadata_str}"
 
     def is_active(self) -> bool:
         return self.agent.tool_is_active(self.__class__)
