@@ -22,13 +22,9 @@ class Project:
         self.project_config = project_config
         self.is_newly_created = is_newly_created
 
-        # create .gitignore file in the project's Serena data folder if not yet present
-        serena_data_gitignore_path = os.path.join(self.path_to_serena_data_folder(), ".gitignore")
-        if not os.path.exists(serena_data_gitignore_path):
-            os.makedirs(os.path.dirname(serena_data_gitignore_path), exist_ok=True)
-            log.info(f"Creating .gitignore file in {serena_data_gitignore_path}")
-            with open(serena_data_gitignore_path, "w", encoding="utf-8") as f:
-                f.write(f"/{SolidLanguageServer.CACHE_FOLDER_NAME}\n")
+        # NOTE: No longer creating .serena/ directory in project root.
+        # Project configs and memories now live in centralized location:
+        # ~/.serena/projects/{project-id}/
 
         # gather ignored paths from the project configuration and gitignore files
         ignored_patterns = project_config.ignored_paths
