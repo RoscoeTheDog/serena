@@ -426,7 +426,8 @@ class SearchForPatternTool(Tool):
         restrict_search_to_code_files: bool = False,
         exclude_generated: bool = False,
         max_answer_chars: int = -1,
-        output_mode: str = "detailed",
+        result_format: Literal["summary", "detailed"] | None = None,
+        output_mode: str | None = None,
     ) -> str:
         """
         Offers a flexible search for arbitrary patterns in the codebase, including the
@@ -480,15 +481,39 @@ class SearchForPatternTool(Tool):
             which is why it is the default.
         :param exclude_generated: If True, exclude generated/vendor code (node_modules, __pycache__, migrations, etc.).
             Default is False for backward compatibility. When enabled, response includes exclusion metadata.
-        :param output_mode: controls the level of detail in the output. Options:
-            - "summary": Returns counts by file and first 10 matches (60-80% token savings)
-            - "detailed": Returns all matches with full context (current default for backward compatibility)
+        :param result_format: Controls the level of detail in the output. Options:
+            - "summary": Returns counts by file and first 10 matches (60-80% token savings, DEFAULT)
+            - "detailed": Returns all matches with full context (explicit opt-in for complete results)
+            Default is "summary" for optimal token efficiency. Use "detailed" when you need full match context.
+        :param output_mode: DEPRECATED. Use result_format instead. This parameter is maintained for backward
+            compatibility but will be removed in v2.0.0. If provided, shows deprecation warning.
         :return: A mapping of file paths to lists of matched consecutive lines (detailed mode),
                  or a JSON summary with counts and preview (summary mode).
         """
         abs_path = os.path.join(self.get_project_root(), relative_path)
         if not os.path.exists(abs_path):
             raise FileNotFoundError(f"Relative path {relative_path} does not exist.")
+
+        # Handle parameter deprecation and resolution
+        deprecation_warning = None
+        actual_result_format = result_format
+
+        # Priority: result_format > output_mode > default
+        if result_format is not None:
+            # New parameter takes precedence
+            actual_result_format = result_format
+        elif output_mode is not None:
+            # Deprecated parameter provided
+            actual_result_format = output_mode  # type: ignore
+            deprecation_warning = {
+                "parameter": "output_mode",
+                "replacement": "result_format",
+                "removal_version": "2.0.0",
+                "migration": f"Use result_format='{output_mode}' instead of output_mode='{output_mode}'"
+            }
+        else:
+            # Use new default: "summary"
+            actual_result_format = "summary"
 
         if restrict_search_to_code_files:
             matches = self.project.search_source_files_for_pattern(
@@ -552,23 +577,33 @@ class SearchForPatternTool(Tool):
                     "include_excluded_instruction": "Use exclude_generated=false to include all files"
                 }
 
-        # Handle output mode
-        if output_mode == "summary":
+        # Handle result format
+        if actual_result_format == "summary":
             summary = self._generate_summary_output(file_to_matches, substring_pattern, max_answer_chars)
-            # Add exclusion metadata to summary if present
+            summary_dict = json.loads(summary)
+
+            # Add exclusion metadata if present
             if exclusion_metadata:
-                summary_dict = json.loads(summary)
                 summary_dict["_excluded"] = exclusion_metadata
-                return json.dumps(summary_dict)
-            return summary
+
+            # Add deprecation warning if deprecated parameter was used
+            if deprecation_warning:
+                summary_dict["_deprecated"] = deprecation_warning
+
+            return json.dumps(summary_dict, indent=2)
         else:
-            # Default: detailed mode (backward compatible)
+            # Detailed mode
+            result_dict = file_to_matches.copy()
+
+            # Add exclusion metadata if present
             if exclusion_metadata:
-                result_dict = file_to_matches.copy()
                 result_dict["_excluded"] = exclusion_metadata
-                result = json.dumps(result_dict)
-            else:
-                result = json.dumps(file_to_matches)
+
+            # Add deprecation warning if deprecated parameter was used
+            if deprecation_warning:
+                result_dict["_deprecated"] = deprecation_warning
+
+            result = json.dumps(result_dict)
             return self._limit_length(result, max_answer_chars)
     
     def _generate_summary_output(
@@ -619,7 +654,7 @@ class SearchForPatternTool(Tool):
             "total_matches": total_matches,
             "by_file": dict(sorted_files[:20]),  # Limit to top 20 files
             "preview": preview,
-            "output_mode": "summary"
+            "result_format": "summary"
         }
         
         # Add hint if there are more files
@@ -631,11 +666,22 @@ class SearchForPatternTool(Tool):
                 "matches": remaining_matches
             }
         
-        # Add instructions for full results
+        # Add expansion hint if there are more results available
         if total_matches > 10:
-            summary["full_results_available"] = (
-                f"Use output_mode='detailed' to see all {total_matches} matches"
+            summary["_expansion_hint"] = (
+                f"Use result_format='detailed' to see all {total_matches} matches with full context"
             )
-        
+
+        # Add token estimates
+        # Estimate: preview is ~10 matches, detailed would be all matches
+        # Rough estimate: each match in preview ~100 chars, detailed ~300 chars per match
+        preview_tokens = min(10, total_matches) * 25  # ~100 chars / 4 = 25 tokens
+        detailed_tokens = total_matches * 75  # ~300 chars / 4 = 75 tokens
+        summary["_token_estimate"] = {
+            "current": preview_tokens,
+            "detailed": detailed_tokens,
+            "savings_pct": int((1 - preview_tokens / max(detailed_tokens, 1)) * 100) if detailed_tokens > 0 else 0
+        }
+
         result = json.dumps(summary, indent=2)
         return self._limit_length(result, max_answer_chars)
