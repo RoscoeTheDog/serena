@@ -84,8 +84,64 @@ class MemoriesManager:
             f.write(content)
         return f"Memory {name} written."
 
-    def list_memories(self) -> list[str]:
-        return [f.name.replace(".md", "") for f in self._memory_dir.iterdir() if f.is_file()]
+    def list_memories(self, include_metadata: bool = False, preview_lines: int = 3) -> list[str] | list[dict]:
+        """
+        List available memories.
+
+        Args:
+            include_metadata: If True, return detailed metadata for each memory
+            preview_lines: Number of lines to include in preview (default: 3)
+
+        Returns:
+            List of memory names (if include_metadata=False) or list of dicts with metadata
+        """
+        if not include_metadata:
+            # Backward compatible: return simple list of names
+            return [f.name.replace(".md", "") for f in self._memory_dir.iterdir() if f.is_file()]
+
+        # Enhanced mode: return metadata for each memory
+        memories = []
+        for f in self._memory_dir.iterdir():
+            if not f.is_file():
+                continue
+
+            name = f.name.replace(".md", "")
+            stat = f.stat()
+
+            # Read file for preview and line count
+            try:
+                with open(f, encoding="utf-8") as file:
+                    lines = file.readlines()
+                    content = "".join(lines)
+
+                    # Generate preview (first N lines)
+                    preview = "".join(lines[:preview_lines]).rstrip()
+                    if len(lines) > preview_lines:
+                        preview += f"\n... ({len(lines) - preview_lines} more lines)"
+
+                    # Token estimation (chars / 4)
+                    estimated_tokens = len(content) // 4
+
+                    memories.append({
+                        "name": name,
+                        "size_kb": round(stat.st_size / 1024, 2),
+                        "last_modified": f"{stat.st_mtime:.0f}",  # Unix timestamp
+                        "preview": preview,
+                        "estimated_tokens": estimated_tokens,
+                        "lines": len(lines)
+                    })
+            except Exception as e:
+                # If we can't read the file, return basic info
+                memories.append({
+                    "name": name,
+                    "size_kb": round(stat.st_size / 1024, 2),
+                    "last_modified": f"{stat.st_mtime:.0f}",
+                    "preview": f"<Error reading file: {e}>",
+                    "estimated_tokens": 0,
+                    "lines": 0
+                })
+
+        return memories
 
     def delete_memory(self, name: str) -> str:
         memory_file_path = self._get_memory_file_path(name)

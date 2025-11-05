@@ -40,14 +40,52 @@ class ReadMemoryTool(Tool):
 
 class ListMemoriesTool(Tool):
     """
-    Lists memories in Serena's project-specific memory store.
+    Lists memories in Serena's project-specific memory store with optional metadata.
     """
 
-    def apply(self) -> str:
+    def apply(self, include_metadata: bool = False, preview_lines: int = 3) -> str:
         """
         List available memories. Any memory can be read using the `read_memory` tool.
+
+        Args:
+            include_metadata: If True, include size, last_modified, preview, estimated_tokens, and lines
+            preview_lines: Number of lines to include in preview (default: 3, only used if include_metadata=True)
+
+        Returns:
+            JSON string containing either:
+            - Simple list of memory names (if include_metadata=False, backward compatible)
+            - List of dicts with metadata (if include_metadata=True):
+              {
+                "name": str,
+                "size_kb": float,
+                "last_modified": str (Unix timestamp),
+                "preview": str (first N lines),
+                "estimated_tokens": int,
+                "lines": int
+              }
+
+        Example with metadata:
+            [
+              {
+                "name": "authentication_flow",
+                "size_kb": 12.5,
+                "last_modified": "1704396000",
+                "preview": "# Authentication Flow\\n\\nThe system uses JWT tokens...\\n... (142 more lines)",
+                "estimated_tokens": 3200,
+                "lines": 145
+              }
+            ]
+
+        Token Savings:
+        - Without metadata: List of names only (~50 tokens for 10 memories)
+        - With metadata: Preview + metadata (~200 tokens vs ~3000 for reading all files)
+        - Savings: ~60-80% when used to decide which memories to read
         """
-        return json.dumps(self.memories_manager.list_memories())
+        result = self.memories_manager.list_memories(
+            include_metadata=include_metadata,
+            preview_lines=preview_lines
+        )
+        return json.dumps(result, indent=2 if include_metadata else None)
 
 
 class DeleteMemoryTool(Tool):

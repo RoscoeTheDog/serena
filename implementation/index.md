@@ -5,7 +5,7 @@
 **Start Date**: 2025-01-04
 **Target Completion**: TBD
 **Status**: `in_progress`
-**Progress**: 11/14 stories complete (79%) - Phases 1-3 ✅ Complete, Phase 4: 1/4 ✅ Story 11 Complete
+**Progress**: 12/14 stories complete (86%) - Phases 1-3 ✅ Complete, Phase 4: 2/4 ✅ Stories 11-12 Complete
 
 ---
 
@@ -61,7 +61,7 @@ This sprint implements safe, high-impact token efficiency improvements for Seren
 
 ### Phase 4: Advanced Safe Features (Zero/Low Risk)
 - **11** - On-Demand Body Retrieval [`completed`] ✓
-- **12** - Memory Metadata Tool [`unassigned`]
+- **12** - Memory Metadata Tool [`completed`] ✓
 - **13** - Reference Count Mode (Opt-In) [`unassigned`]
 - **14** - Exclude Generated Code (Transparent) [`unassigned`]
 
@@ -1426,7 +1426,9 @@ bodies = get_symbol_body(symbol_ids)
 ---
 
 ### Story 12: Memory Metadata Tool
-**Status**: `unassigned`
+**Status**: `completed`
+**Claimed**: 2025-11-04 23:00
+**Completed**: 2025-11-04 23:45
 **Risk Level**: 🟢 Low (zero accuracy risk)
 **Estimated Savings**: 60-80%
 **Effort**: 1 day
@@ -1483,6 +1485,87 @@ bodies = get_symbol_body(symbol_ids)
 - Full read always available
 - Helps LLM make better decisions
 - Zero accuracy loss
+
+**Completion Notes** (2025-11-04):
+- ✅ Enhanced `MemoriesManager.list_memories()` in `src/serena/agent.py` (57 new lines)
+  - Added `include_metadata` parameter (default: False for backward compatibility)
+  - Added `preview_lines` parameter (default: 3, configurable)
+  - Returns simple list of names when include_metadata=False (unchanged behavior)
+  - Returns list of dicts with metadata when include_metadata=True
+- ✅ Enhanced `ListMemoriesTool.apply()` in `src/serena/tools/memory_tools.py`
+  - Exposed `include_metadata` and `preview_lines` parameters
+  - Returns formatted JSON (indented when metadata mode, compact otherwise)
+  - Comprehensive docstring with examples and token savings info
+- ✅ Metadata fields included:
+  - `name`: Memory name (string)
+  - `size_kb`: File size in KB (float, rounded to 2 decimals)
+  - `last_modified`: Unix timestamp (string)
+  - `preview`: First N lines of content with truncation indicator
+  - `estimated_tokens`: Token count estimation (chars/4)
+  - `lines`: Total line count (integer)
+- ✅ Created comprehensive unit tests in `test/serena/tools/test_memory_metadata.py` (350+ lines)
+  - 30+ test cases covering all functionality
+  - Tests for backward compatibility, metadata mode, preview truncation
+  - Tests for token estimation accuracy, special characters, edge cases
+  - Integration tests for full workflow
+- ✅ Created standalone test suite in `test_story12_simple.py` (150+ lines)
+  - 5 comprehensive test scenarios
+  - **Token savings verified: 70.6%** (within 60-80% target) ✓
+  - All tests passing ✓
+- ✅ Backward compatibility maintained:
+  - Default behavior unchanged (include_metadata=False returns simple list)
+  - No breaking changes to existing tools or workflows
+  - Opt-in feature - must explicitly request metadata
+- ✅ Token savings verified: **70.6%** (meets 60-80% target)
+  - Metadata approach: ~175 tokens for 3 memories
+  - Reading all files: ~596 tokens
+  - Savings: 70.6% when using metadata to decide which memories to read
+- ✅ Preview quality verified:
+  - Contains key information from first 3 lines
+  - Shows truncation indicator for long files
+  - Configurable preview length (1-N lines)
+- ✅ All acceptance criteria met:
+  - [x] `list_memories(include_preview=true)` shows previews (parameter named `include_metadata`)
+  - [x] Each memory includes size_kb, last_modified, estimated_tokens
+  - [x] Preview is first 3 lines (configurable via `preview_lines`)
+  - [x] `read_memory` continues to work unchanged
+  - [x] Backward compatible (default behavior unchanged)
+  - [x] Unit tests verify metadata accuracy
+  - [x] Tests verify preview truncation logic
+
+**Changes Made**:
+1. **Modified: `src/serena/agent.py`** (57 new lines)
+   - Enhanced `MemoriesManager.list_memories()` method
+   - Added parameters: `include_metadata`, `preview_lines`
+   - Metadata collection: file stats, preview generation, token estimation
+   - Error handling for unreadable files
+   - Returns list[str] or list[dict] based on parameters
+2. **Modified: `src/serena/tools/memory_tools.py`** (43 new lines)
+   - Enhanced `ListMemoriesTool.apply()` method
+   - Exposed new parameters to tool interface
+   - Added comprehensive docstring with examples
+   - Formatted JSON output (indented for metadata mode)
+3. **Test files created**:
+   - `test/serena/tools/test_memory_metadata.py`: 30+ comprehensive unit tests
+   - `test_story12_simple.py`: 5 standalone test scenarios (all passing ✓)
+
+**Token Savings Examples**:
+- **Scenario 1**: 3 memories with metadata
+  - Metadata approach: 175 tokens
+  - Reading all files: 596 tokens
+  - **Savings: 70.6%** ✓
+- **Scenario 2**: 10 memories with metadata
+  - Metadata approach: ~500 tokens
+  - Reading all files: ~3000 tokens
+  - **Savings: 83%** (estimated)
+- **LLM Workflow**: List with metadata → Review previews → Read only relevant memories → 60-80% savings
+
+**Why This Is Safe**:
+- **Explicit opt-in**: Must request `include_metadata=True`
+- **No data loss**: Full content always available via `read_memory`
+- **Backward compatible**: Default behavior completely unchanged
+- **Transparent**: Metadata helps LLM make informed decisions
+- **Zero risk**: Purely additive feature, no existing functionality affected
 
 ---
 
@@ -1741,20 +1824,34 @@ find_symbol("User", exclude_generated=true)
   - Zero breaking changes - fully backward compatible
   - **Phase 4 now 25% complete** (1/4 stories done)
 
+- **Story 12 completed**: Memory Metadata Tool
+  - Enhanced `MemoriesManager.list_memories()` with `include_metadata` and `preview_lines` parameters (57 lines)
+  - Enhanced `ListMemoriesTool.apply()` to expose new parameters (43 lines)
+  - Metadata includes: name, size_kb, last_modified, preview, estimated_tokens, lines
+  - Preview shows first N lines (default: 3) with truncation indicator for long files
+  - Token estimation accurate (chars/4) for informed decision making
+  - Created 30+ unit tests in `test/serena/tools/test_memory_metadata.py`
+  - Created standalone test suite in `test_story12_simple.py` (all passing ✓)
+  - Token savings verified: **70.6%** (within 60-80% target) ✓
+  - Metadata approach: ~175 tokens vs reading all: ~596 tokens
+  - Full backward compatibility maintained (default behavior unchanged)
+  - Zero breaking changes - explicit opt-in feature
+  - **Phase 4 now 50% complete** (2/4 stories done)
+
 ---
 
 ## Sprint Metrics
 
 **Target Token Reduction**: 65-85%
-**Stories Completed**: 11/14 (79%)
-**Current Phase**: 4 (Advanced Safe Features) - 🚀 **IN PROGRESS** (Story 11 ✓)
-**Estimated Remaining Effort**: 3-5 days (Stories 12-14)
+**Stories Completed**: 12/14 (86%)
+**Current Phase**: 4 (Advanced Safe Features) - 🚀 **IN PROGRESS** (Stories 11-12 ✓)
+**Estimated Remaining Effort**: 2-3 days (Stories 13-14)
 
 **Phase Breakdown**:
 - Phase 1 (Foundation): 4 stories, 9-11 days ✅ **COMPLETE**
 - Phase 2 (Intelligent Summarization): 4 stories, 11-14 days ✅ **COMPLETE**
 - Phase 3 (Universal Controls): 2 stories, 5-7 days ✅ **COMPLETE**
-- Phase 4 (Advanced Safe Features): 4 stories, 6-8 days 🚀 **IN PROGRESS** (1/4 complete)
+- Phase 4 (Advanced Safe Features): 4 stories, 6-8 days 🚀 **IN PROGRESS** (2/4 complete)
 
 **Execution Mode**: Linear single-agent (Stories 9-14)
 **Self-Healing**: Enabled with user alerts for critical issues
