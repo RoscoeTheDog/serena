@@ -62,19 +62,38 @@ class LinesRead:
 
 class MemoriesManager:
     def __init__(self, project_root: str):
-        self._memory_dir = Path(get_serena_managed_in_project_dir(project_root)) / "memories"
-        self._memory_dir.mkdir(parents=True, exist_ok=True)
+        from serena.constants import get_project_memories_path, get_legacy_project_dir
 
-    def _get_memory_file_path(self, name: str) -> Path:
+        self._project_root = Path(project_root).resolve()
+        # Use centralized location for new memories
+        self._memory_dir = get_project_memories_path(self._project_root)
+        # Legacy location for backward compatibility
+        self._legacy_memory_dir = get_legacy_project_dir(self._project_root) / "memories"
+
+    def _get_memory_file_path(self, name: str, check_legacy: bool = False) -> Path:
         # strip all .md from the name. Models tend to get confused, sometimes passing the .md extension and sometimes not.
         name = name.replace(".md", "")
         filename = f"{name}.md"
+
+        if check_legacy:
+            # Check legacy location first for backward compatibility
+            legacy_path = self._legacy_memory_dir / filename
+            if legacy_path.exists():
+                return legacy_path
+
         return self._memory_dir / filename
 
     def load_memory(self, name: str) -> str:
-        memory_file_path = self._get_memory_file_path(name)
+        # Try centralized location first, fall back to legacy
+        memory_file_path = self._get_memory_file_path(name, check_legacy=False)
         if not memory_file_path.exists():
-            return f"Memory file {name} not found, consider creating it with the `write_memory` tool if you need it."
+            # Try legacy location
+            legacy_path = self._get_memory_file_path(name, check_legacy=True)
+            if legacy_path.exists():
+                memory_file_path = legacy_path
+            else:
+                return f"Memory file {name} not found, consider creating it with the `write_memory` tool if you need it."
+
         with open(memory_file_path, encoding="utf-8") as f:
             return f.read()
 
@@ -105,17 +124,30 @@ class MemoriesManager:
             # Rare: Just get names
             names = list_memories(include_metadata=False)
         """
+        # Collect memory files from both centralized and legacy locations
+        memory_files = {}  # name -> path (centralized takes precedence)
+
+        # Add legacy memories first
+        if self._legacy_memory_dir.exists():
+            for f in self._legacy_memory_dir.iterdir():
+                if f.is_file() and f.suffix == ".md":
+                    name = f.name.replace(".md", "")
+                    memory_files[name] = f
+
+        # Add/override with centralized memories (takes precedence)
+        if self._memory_dir.exists():
+            for f in self._memory_dir.iterdir():
+                if f.is_file() and f.suffix == ".md":
+                    name = f.name.replace(".md", "")
+                    memory_files[name] = f
+
         if not include_metadata:
             # Backward compatible: return simple list of names
-            return [f.name.replace(".md", "") for f in self._memory_dir.iterdir() if f.is_file()]
+            return list(memory_files.keys())
 
         # Enhanced mode: return metadata for each memory
         memories = []
-        for f in self._memory_dir.iterdir():
-            if not f.is_file():
-                continue
-
-            name = f.name.replace(".md", "")
+        for name, f in memory_files.items():
             stat = f.stat()
 
             # Read file for preview and line count
@@ -154,9 +186,19 @@ class MemoriesManager:
         return memories
 
     def delete_memory(self, name: str) -> str:
-        memory_file_path = self._get_memory_file_path(name)
-        memory_file_path.unlink()
-        return f"Memory {name} deleted."
+        # Try centralized location first
+        memory_file_path = self._get_memory_file_path(name, check_legacy=False)
+        if memory_file_path.exists():
+            memory_file_path.unlink()
+            return f"Memory {name} deleted."
+
+        # Try legacy location
+        legacy_path = self._get_memory_file_path(name, check_legacy=True)
+        if legacy_path.exists():
+            legacy_path.unlink()
+            return f"Memory {name} deleted."
+
+        return f"Memory file {name} not found."
 
 
 class AvailableTools:
