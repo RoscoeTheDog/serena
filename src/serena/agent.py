@@ -231,6 +231,10 @@ class SerenaAgent:
         self.memories_manager: MemoriesManager | None = None
         self.lines_read: LinesRead | None = None
 
+        # Initialize session tracker for verbosity control and phase detection
+        from serena.util.session_tracker import SessionTracker
+        self.session_tracker: SessionTracker | None = SessionTracker()
+
         # set the active modes
         if modes is None:
             modes = SerenaAgentMode.load_default_modes()

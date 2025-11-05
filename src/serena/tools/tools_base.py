@@ -1,10 +1,11 @@
 import inspect
+import json
 import os
 from abc import ABC
 from collections.abc import Iterable
 from dataclasses import dataclass
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Protocol, Self, TypeVar
+from typing import TYPE_CHECKING, Any, Literal, Protocol, Self, TypeVar
 
 from mcp.server.fastmcp.utilities.func_metadata import FuncMetadata, func_metadata
 from sensai.util import logging
@@ -296,6 +297,96 @@ class Tool(Component):
             + "Please try a more specific tool query or raise the max_answer_chars parameter."
         )
         return result
+
+    def _resolve_verbosity(
+        self,
+        verbosity: Literal["minimal", "normal", "detailed", "auto"] = "auto"
+    ) -> Literal["minimal", "normal", "detailed"]:
+        """
+        Resolve verbosity level based on requested level and session context.
+
+        :param verbosity: Requested verbosity level
+        :return: Resolved verbosity level (minimal, normal, or detailed)
+        """
+        if verbosity == "auto":
+            # Use session tracker to recommend verbosity
+            if hasattr(self.agent, 'session_tracker') and self.agent.session_tracker is not None:
+                return self.agent.session_tracker.recommend_verbosity()
+            else:
+                # Fallback to normal if no session tracker
+                return "normal"
+        else:
+            # Use explicit verbosity level
+            return verbosity
+
+    def _add_verbosity_metadata(
+        self,
+        result: str | dict,
+        verbosity_used: Literal["minimal", "normal", "detailed"],
+        estimated_tokens_full: int | None = None,
+    ) -> str:
+        """
+        Add verbosity metadata to tool response for transparency.
+
+        :param result: Tool result (string or dict)
+        :param verbosity_used: Verbosity level that was used
+        :param estimated_tokens_full: Optional token estimate for full detailed output
+        :return: Result with verbosity metadata appended
+        """
+        # Get phase reason from session tracker if available
+        verbosity_reason = "explicit_request"
+        if hasattr(self.agent, 'session_tracker') and self.agent.session_tracker is not None:
+            verbosity_reason = self.agent.session_tracker.get_phase_reason()
+
+        metadata = {
+            "_verbosity": {
+                "verbosity_used": verbosity_used,
+                "verbosity_reason": verbosity_reason,
+                "upgrade_available": verbosity_used != "detailed",
+            }
+        }
+
+        if estimated_tokens_full is not None and verbosity_used != "detailed":
+            metadata["_verbosity"]["estimated_tokens_full"] = estimated_tokens_full
+            metadata["_verbosity"]["upgrade_hint"] = f"Use verbosity='detailed' to get full output (~{estimated_tokens_full} tokens)"
+        elif verbosity_used == "minimal":
+            metadata["_verbosity"]["upgrade_hint"] = "Use verbosity='normal' or verbosity='detailed' for more information"
+        elif verbosity_used == "normal":
+            metadata["_verbosity"]["upgrade_hint"] = "Use verbosity='detailed' for full output"
+
+        # If result is a dictionary (structured output), add metadata to it
+        if isinstance(result, dict):
+            result_with_metadata = result.copy()
+            result_with_metadata.update(metadata)
+            return json.dumps(result_with_metadata, indent=2)
+
+        # If result is a string, append metadata
+        metadata_str = json.dumps(metadata, indent=2)
+        return f"{result}\n\n{metadata_str}"
+
+    def _record_tool_call_for_session(
+        self,
+        is_edit: bool = False,
+        is_search: bool = False,
+        is_read: bool = False,
+        file_path: str | None = None,
+    ) -> None:
+        """
+        Record tool call in session tracker for phase detection.
+
+        :param is_edit: Whether this is an edit operation
+        :param is_search: Whether this is a search operation
+        :param is_read: Whether this is a read operation
+        :param file_path: Optional file path for tracking file access patterns
+        """
+        if hasattr(self.agent, 'session_tracker') and self.agent.session_tracker is not None:
+            self.agent.session_tracker.record_tool_call(
+                tool_name=self.get_name(),
+                is_edit=is_edit,
+                is_search=is_search,
+                is_read=is_read,
+                file_path=file_path,
+            )
 
     def is_active(self) -> bool:
         return self.agent.tool_is_active(self.__class__)
