@@ -179,53 +179,6 @@ class TestProjectConfigCentralizedStorage:
         assert loaded_config.project_name == self.project_path.name
         assert loaded_config.language == Language.PYTHON
 
-    def test_load_from_legacy_location(self):
-        """Test backward compatibility: load from legacy .serena/ directory."""
-        from serena.constants import SERENA_MANAGED_DIR_NAME
-
-        # Create a Python file
-        python_file = self.project_path / "main.py"
-        python_file.write_text("print('hello')\n")
-
-        # Manually create config in legacy location
-        legacy_dir = self.project_path / SERENA_MANAGED_DIR_NAME
-        legacy_dir.mkdir(parents=True, exist_ok=True)
-        legacy_config_path = legacy_dir / "project.yml"
-        legacy_config_path.write_text(
-            "project_name: legacy_test\n"
-            "language: python\n"
-        )
-
-        # Load should fall back to legacy location
-        loaded_config = ProjectConfig.load(self.project_path)
-        assert loaded_config.project_name == "legacy_test"
-        assert loaded_config.language == Language.PYTHON
-
-    def test_centralized_takes_precedence_over_legacy(self):
-        """Test that centralized location takes precedence over legacy."""
-        from serena.constants import get_project_config_path, SERENA_MANAGED_DIR_NAME
-
-        # Create configs in BOTH locations
-        centralized_path = get_project_config_path(self.project_path)
-        centralized_path.parent.mkdir(parents=True, exist_ok=True)
-        centralized_path.write_text(
-            "project_name: centralized_test\n"
-            "language: typescript\n"
-        )
-
-        legacy_dir = self.project_path / SERENA_MANAGED_DIR_NAME
-        legacy_dir.mkdir(parents=True, exist_ok=True)
-        legacy_config_path = legacy_dir / "project.yml"
-        legacy_config_path.write_text(
-            "project_name: legacy_test\n"
-            "language: python\n"
-        )
-
-        # Load should prefer centralized
-        loaded_config = ProjectConfig.load(self.project_path)
-        assert loaded_config.project_name == "centralized_test"
-        assert loaded_config.language == Language.TYPESCRIPT
-
     def test_load_with_autogenerate_creates_centralized(self):
         """Test that autogenerate creates config in centralized location."""
         from serena.constants import get_project_config_path
@@ -247,14 +200,33 @@ class TestProjectConfigCentralizedStorage:
 
         assert loaded_config.language == Language.PYTHON
 
-    def test_error_message_shows_both_locations(self):
-        """Test that error message when config not found shows both locations checked."""
+    def test_error_message_shows_centralized_location(self):
+        """Test that error message when config not found shows centralized location."""
+        from serena.constants import get_project_config_path
+
         # Don't create any config files
         with pytest.raises(FileNotFoundError) as exc_info:
             ProjectConfig.load(self.project_path, autogenerate=False)
 
         error_message = str(exc_info.value)
-        # Should mention it checked both locations
-        assert "Looked in:" in error_message or "not found" in error_message.lower()
-        assert "Centralized:" in error_message or ".serena" in error_message
-        assert "Legacy:" in error_message or ".serena" in error_message
+        # Should mention the centralized location
+        centralized_path = get_project_config_path(self.project_path)
+        assert str(centralized_path) in error_message or ".serena" in error_message
+        assert "not found" in error_message.lower()
+        # Should NOT mention legacy location
+        assert "Legacy:" not in error_message
+
+    def test_load_fails_cleanly_when_config_missing(self):
+        """Test that load() fails cleanly with clear error when config doesn't exist."""
+        from serena.constants import get_project_config_path
+
+        # Don't create any config files
+        centralized_path = get_project_config_path(self.project_path)
+
+        with pytest.raises(FileNotFoundError) as exc_info:
+            ProjectConfig.load(self.project_path, autogenerate=False)
+
+        error_message = str(exc_info.value)
+        # Should have a clear, helpful error message
+        assert "not found" in error_message.lower()
+        assert str(centralized_path) in error_message or "project.yml" in error_message

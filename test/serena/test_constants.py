@@ -12,7 +12,6 @@ import pytest
 
 from serena.constants import (
     get_centralized_project_dir,
-    get_legacy_project_dir,
     get_project_config_path,
     get_project_identifier,
     get_project_memories_path,
@@ -232,31 +231,6 @@ class TestGetProjectMemoriesPath:
             assert result1.exists()
 
 
-class TestGetLegacyProjectDir:
-    """Test get_legacy_project_dir() function."""
-
-    def test_returns_correct_path(self):
-        """Should return {project_root}/.serena/"""
-        test_path = Path("/home/user/projects/myapp")
-        result = get_legacy_project_dir(test_path)
-
-        # Should be .serena subdirectory of project root
-        assert result == test_path / ".serena"
-        assert result.name == ".serena"
-        assert result.parent == test_path
-
-    def test_does_not_create_directory(self):
-        """Should NOT create directory (read-only operation)."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            test_path = Path(tmpdir) / "test_project"
-            test_path.mkdir()
-
-            result = get_legacy_project_dir(test_path)
-
-            # Directory should NOT exist (we didn't create it)
-            assert not result.exists()
-
-
 class TestCrossPlatformCompatibility:
     """Test cross-platform compatibility of path helpers."""
 
@@ -324,14 +298,12 @@ class TestIntegrationScenarios:
             centralized_dir = get_centralized_project_dir(project_root)
             config_path = get_project_config_path(project_root)
             memories_path = get_project_memories_path(project_root)
-            legacy_dir = get_legacy_project_dir(project_root)
 
             # Verify structure
             assert len(project_id) == 16
             assert centralized_dir.exists()
             assert memories_path.exists()
             assert config_path.parent.exists()
-            assert not legacy_dir.exists()  # No legacy dir for new project
 
             # Verify relationships
             assert config_path.parent == centralized_dir

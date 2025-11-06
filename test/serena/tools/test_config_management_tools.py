@@ -25,7 +25,6 @@ from serena.tools.config_tools import (
 from serena.constants import (
     get_centralized_project_dir,
     get_project_config_path,
-    get_legacy_project_dir,
 )
 
 
@@ -83,38 +82,6 @@ class TestGetProjectConfigTool:
         assert result["read_only"] is True
         assert result["ignored_paths"] == ["temp/", "cache/"]
         assert result["initial_prompt"] == "Test prompt"
-
-    def test_get_config_from_legacy_storage(self, tmp_path):
-        """Test getting config from legacy storage when centralized doesn't exist."""
-        # Setup
-        project_root = tmp_path / "test_project"
-        project_root.mkdir()
-
-        # Create legacy config
-        legacy_dir = get_legacy_project_dir(project_root)
-        legacy_dir.mkdir(parents=True, exist_ok=True)
-        legacy_config_path = legacy_dir / "project.yml"
-
-        config_data = {
-            "project_name": "legacy_project",
-            "language": "typescript",
-            "ignored_paths": [],
-            "read_only": False,
-        }
-
-        with open(legacy_config_path, "w") as f:
-            yaml.dump(config_data, f)
-
-        # Execute
-        agent = MockAgent()
-        tool = GetProjectConfigTool(agent=agent)
-        result_str = tool.apply(project_path=str(project_root))
-        result = json.loads(result_str)
-
-        # Assert
-        assert result["project_name"] == "legacy_project"
-        assert result["language"] == "typescript"
-        assert result["storage_location"] == "legacy"
 
     def test_get_config_nonexistent_project(self, tmp_path):
         """Test getting config for nonexistent project."""
@@ -246,44 +213,6 @@ class TestUpdateProjectConfigTool:
         assert "error" in result
         assert "Invalid setting" in result["error"]
         assert "valid_settings" in result
-
-    def test_update_migrates_from_legacy(self, tmp_path):
-        """Test that update automatically migrates from legacy to centralized."""
-        # Setup
-        project_root = tmp_path / "test_project"
-        project_root.mkdir()
-
-        # Create legacy config only
-        legacy_dir = get_legacy_project_dir(project_root)
-        legacy_dir.mkdir(parents=True, exist_ok=True)
-        legacy_config_path = legacy_dir / "project.yml"
-
-        legacy_config = {
-            "project_name": "legacy_project",
-            "language": "typescript",
-            "read_only": False,
-        }
-
-        with open(legacy_config_path, "w") as f:
-            yaml.dump(legacy_config, f)
-
-        # Execute
-        agent = MockAgent()
-        tool = UpdateProjectConfigTool(agent=agent)
-        result_str = tool.apply(project_path=str(project_root), read_only=True)
-        result = json.loads(result_str)
-
-        # Assert
-        assert result["updated"] is True
-        assert result["storage_location"] == "centralized"
-
-        # Verify centralized config was created
-        centralized_path = get_project_config_path(project_root)
-        assert centralized_path.exists()
-
-        with open(centralized_path) as f:
-            migrated_config = yaml.safe_load(f)
-        assert migrated_config["read_only"] is True
 
 
 class TestResetProjectConfigTool:
@@ -430,45 +359,6 @@ class TestListProjectConfigsTool:
         project_names = [p.get("project_name") for p in result["projects"]]
         assert "project_0" in project_names
         assert "project_1" in project_names
-
-    def test_list_legacy_project(self, tmp_path):
-        """Test listing a legacy project."""
-        # Setup
-        project_root = tmp_path / "legacy_project"
-        project_root.mkdir()
-
-        # Create legacy config only
-        legacy_dir = get_legacy_project_dir(project_root)
-        legacy_dir.mkdir(parents=True, exist_ok=True)
-        legacy_config_path = legacy_dir / "project.yml"
-
-        config_data = {
-            "project_name": "legacy_project",
-            "language": "typescript",
-        }
-
-        with open(legacy_config_path, "w") as f:
-            yaml.dump(config_data, f)
-
-        mock_registered = Mock()
-        mock_registered.path = str(project_root)
-
-        agent = MockAgent()
-        agent.serena_config.projects = [mock_registered]
-
-        # Execute
-        tool = ListProjectConfigsTool(agent=agent)
-        result_str = tool.apply()
-        result = json.loads(result_str)
-
-        # Assert - Note: The tool might find both centralized (from auto-migration) and legacy
-        found = False
-        for proj in result["projects"]:
-            if proj.get("project_name") == "legacy_project":
-                found = True
-                # Accept either legacy or centralized (due to potential auto-migration)
-                assert proj["storage_location"] in ["legacy", "centralized"]
-        assert found, "legacy_project not found in results"
 
     def test_list_empty_projects(self, tmp_path):
         """Test listing when no projects exist."""
