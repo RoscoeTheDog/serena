@@ -546,79 +546,59 @@ class SerenaAgent:
     def find_parent_serena_project(self, start_path: str) -> Optional[str]:
         """
         Traverse upward from start_path to find an existing Serena project.
-        
+
         Detection strategy:
         1. Start from the requested path
-        2. Traverse upward looking for:
-           - Existing .serena/ directory (primary indicator)
-           - Registered project in serena_config
-           - Git boundary (.git directory) as fallback heuristic
-        3. Stop at filesystem root
-        
+        2. Traverse upward checking if each parent is registered in centralized storage
+        3. Return the topmost registered parent project (utmost ancestor)
+        4. Stop at filesystem root
+
+        Note: Projects are registered in ~/.serena/serena_config.yml
+        Legacy .serena/ directories in project roots are no longer checked.
+
         :param start_path: The path to start searching from
         :return: Path to parent project root if found, None otherwise
         """
-        from serena.constants import SERENA_MANAGED_DIR_NAME
-        
         # Resolve to absolute path and handle symlinks
         try:
             current_path = Path(start_path).resolve()
         except Exception:
             return None
-            
+
         if not current_path.exists() or not current_path.is_dir():
             return None
-        
-        # Store the original path to avoid returning it
-        original_path = current_path
-        
+
         # Get filesystem root for this platform
         # On Windows: drive root (e.g., C:\)
         # On Unix: /
         root_parts = current_path.parts[0:1]  # First part is the root
-        
+
+        # Track the utmost parent project found
+        utmost_parent = None
+
         # Traverse upward from parent of current_path
         current_path = current_path.parent
-        
+
         while current_path.parts != root_parts and len(current_path.parts) > 0:
-            # Check for .serena/ directory (primary indicator)
-            serena_dir = current_path / SERENA_MANAGED_DIR_NAME
-            if serena_dir.exists() and serena_dir.is_dir():
-                # Verify this is actually a registered project or has valid config
-                current_path_str = str(current_path)
-                
-                # Check if already registered in serena_config
-                existing_project = self.serena_config.get_project(current_path_str)
-                if existing_project is not None:
-                    log.info(f"Found parent Serena project at {current_path_str} (registered)")
-                    return current_path_str
-                
-                # Check if has valid project config even if not registered
-                from serena.config.serena_config import ProjectConfig
-                try:
-                    ProjectConfig.load(current_path, autogenerate=False)
-                    log.info(f"Found parent Serena project at {current_path_str} (has .serena/project.yml)")
-                    return current_path_str
-                except Exception:
-                    # .serena exists but no valid config, continue searching
-                    pass
-            
-            # Check if we've hit a git boundary (fallback heuristic)
-            # Only use .git as a stopping point, not as a project indicator
-            git_dir = current_path / ".git"
-            if git_dir.exists() and serena_dir.exists():
-                # Found .git and .serena together - this is a project root
-                current_path_str = str(current_path)
-                log.info(f"Found parent Serena project at {current_path_str} (has .serena/ at git root)")
-                return current_path_str
-            
+            current_path_str = str(current_path)
+
+            # Check if this path is registered in centralized storage
+            existing_project = self.serena_config.get_project(current_path_str)
+            if existing_project is not None:
+                # Found a registered parent - keep going to find utmost parent
+                utmost_parent = current_path_str
+                log.info(f"Found registered parent Serena project at {current_path_str}")
+
             # Move up one directory
             if current_path.parent == current_path:
                 # Reached filesystem root
                 break
             current_path = current_path.parent
-        
-        return None
+
+        if utmost_parent:
+            log.info(f"Returning utmost parent Serena project: {utmost_parent}")
+
+        return utmost_parent
 
     def load_project_from_path_or_name(self, project_root_or_name: str, autogenerate: bool, local_only: bool = False) -> Project | None:
         """
