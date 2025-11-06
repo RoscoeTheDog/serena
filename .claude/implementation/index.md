@@ -91,19 +91,30 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 ---
 
 ### Story 3: Remove Legacy Code from ProjectConfig
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-05 16:10
+**Completed**: 2025-11-05 16:25
 **Parent**: Story 1
 **Description**: Simplify `ProjectConfig.load()` to only check centralized storage location, removing legacy fallback logic.
 
 **Acceptance Criteria**:
-- [ ] Remove legacy directory check from `load()` method (lines 282-285)
-- [ ] Simplify error message to show only centralized location
-- [ ] Update `load()` to fail fast if centralized config doesn't exist (when autogenerate=False)
-- [ ] All existing tests pass with centralized-only logic
-- [ ] No references to legacy config path in load logic
+- [x] Remove legacy directory check from `load()` method (lines 282-285)
+- [x] Simplify error message to show only centralized location
+- [x] Update `load()` to fail fast if centralized config doesn't exist (when autogenerate=False)
+- [x] All existing tests pass with centralized-only logic (1 expected failure for Story 5)
+- [x] No references to legacy config path in load logic
 
 **Files to Modify**:
 - `src/serena/config/serena_config.py` (ProjectConfig.load method)
+
+**Implementation Notes**:
+- Removed legacy import `from serena.constants import get_legacy_project_dir`
+- Removed legacy fallback logic (lines 283-298) that checked `get_legacy_project_dir()`
+- Simplified error message to show only centralized location path
+- Updated `from_config_file()` validation to check only centralized location
+- All references to `get_legacy_project_dir` removed from `serena_config.py`
+- Test results: 12 passed, 1 expected failure (`test_load_from_legacy_location` to be removed in Story 5)
+- Total impact: ~14 lines removed, cleaner error messages
 
 **Impact**: ~5 line removals, cleaner error messages
 
@@ -237,9 +248,20 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 - Total impact: ~19 lines removed, 3 methods simplified
 - Verified no `_legacy_memory_dir` references remain in src/
 
+### 2025-11-05 16:25 - Story 3 Completed
+- ✅ Removed all legacy code from ProjectConfig class
+- Changes made:
+  - Removed `get_legacy_project_dir` import from `ProjectConfig.load()`
+  - Removed legacy fallback logic (lines 283-298) that checked legacy `.serena/` directory
+  - Simplified error message to show only centralized location
+  - Updated `SerenaConfig.from_config_file()` validation to check only centralized location
+  - Removed all references to `get_legacy_project_dir` from `serena_config.py`
+- Total impact: ~14 lines removed, cleaner error messages
+- Test results: 12 passed, 1 expected failure (legacy test to be removed in Story 5)
+- Verified no `get_legacy_project_dir` references remain in `src/serena/config/`
+
 ### Next Steps
-- Story 3: Remove Legacy Code from ProjectConfig (ready to start)
-- Stories 3-4 can run in parallel
+- Story 4: Deprecate or Remove get_legacy_project_dir() (ready to start)
 - Story 5: Update Tests (depends on Stories 2-4)
 
 ---

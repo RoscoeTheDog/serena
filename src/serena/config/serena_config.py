@@ -267,36 +267,23 @@ class ProjectConfig(ToolInclusionDefinition, ToStringMixin):
         """
         Load a ProjectConfig instance from the path to the project root.
 
-        Looks for config in centralized location first (~/.serena/projects/{id}/project.yml),
-        then falls back to legacy location ({project_root}/.serena/project.yml) for
-        backward compatibility.
+        Looks for config in centralized location (~/.serena/projects/{id}/project.yml).
         """
-        from serena.constants import get_legacy_project_dir
-
         project_root = Path(project_root).resolve()
 
-        # Try centralized location first
+        # Check centralized location
         centralized_path = cls.rel_path_to_project_yml(project_root)
         if centralized_path.exists():
             yaml_path = centralized_path
         else:
-            # Fall back to legacy location for backward compatibility
-            legacy_dir = get_legacy_project_dir(project_root)
-            legacy_path = legacy_dir / cls.SERENA_DEFAULT_PROJECT_FILE
-            if legacy_path.exists():
-                log.debug(f"Loading project config from legacy location: {legacy_path}")
-                yaml_path = legacy_path
+            # Config not found in centralized location
+            if autogenerate:
+                return cls.autogenerate(project_root)
             else:
-                # Neither location has config
-                if autogenerate:
-                    return cls.autogenerate(project_root)
-                else:
-                    raise FileNotFoundError(
-                        f"Project configuration file not found.\n"
-                        f"Looked in:\n"
-                        f"  - Centralized: {centralized_path}\n"
-                        f"  - Legacy: {legacy_path}"
-                    )
+                raise FileNotFoundError(
+                    f"Project configuration file not found.\n"
+                    f"Expected location: {centralized_path}"
+                )
 
         with open(yaml_path, encoding="utf-8") as f:
             yaml_data = yaml.safe_load(f)
@@ -469,12 +456,10 @@ class SerenaConfig(ToolInclusionDefinition, ToStringMixin):
                 log.warning(f"Project path {path} does not exist, skipping.")
                 continue
             if path.is_dir():
-                # Check both centralized and legacy locations
-                from serena.constants import get_legacy_project_dir
+                # Check centralized location
                 centralized_config = ProjectConfig.rel_path_to_project_yml(path)
-                legacy_config = get_legacy_project_dir(path) / ProjectConfig.SERENA_DEFAULT_PROJECT_FILE
-                if not centralized_config.exists() and not legacy_config.exists():
-                    log.warning(f"Project path {path} does not contain a project configuration file (checked both centralized and legacy locations), skipping.")
+                if not centralized_config.exists():
+                    log.warning(f"Project path {path} does not contain a project configuration file (expected at {centralized_config}), skipping.")
                     continue
             if path.is_file():
                 path = cls._migrate_out_of_project_config_file(path)
