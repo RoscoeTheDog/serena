@@ -81,7 +81,7 @@ This gives ChatGPT the same powers as a remote developer on your machine.
 - **NEVER expose your API key**
 - **Only expose this server when needed**, and monitor its use.
 
-In your project’s `.serena/project.yml` or global config, you can disable tools like:
+In your project's configuration file (`~/.serena/projects/{project-id}/project.yml`) or global config (`~/.serena/serena_config.yml`), you can disable tools like:
 
 ```yaml
 excluded_tools:

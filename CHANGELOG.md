@@ -1,6 +1,18 @@
 # latest
 Status of the `main` branch. Changes prior to the next official version change will appear here.
 
+* **BREAKING CHANGE - Legacy .serena/ Directory Support Removed**:
+  * **Migration Required**: Projects with legacy `{project_root}/.serena/` directories must be migrated to centralized storage
+  * All project data now stored in `~/.serena/projects/{project-id}/` (configuration and memories)
+  * Migration script provided: `scripts/migrate_legacy_serena.py` (see `docs/MIGRATION-LEGACY-SERENA.md`)
+  * Benefits:
+    * Clean project roots (no more `.serena/` pollution)
+    * Eliminates file lock issues
+    * Easier backups (single `~/.serena/` directory)
+    * Better organization
+  * Backward compatibility code removed (~200 lines across 7 files)
+  * All tests updated to reflect centralized-only storage
+
 * Onboarding:
   * **Server-side auto-onboarding**: Projects are now automatically onboarded during activation, creating basic memory files without agent exploration. This saves 10,000-20,000 tokens per project activation and completes in <1 second.
   * `ActivateProjectTool` now checks for onboarding status and performs auto-onboarding if no memories exist

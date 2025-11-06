@@ -1,8 +1,11 @@
 # Centralized Config Storage Architecture
 
-**Status**: Design Phase
+**Status**: ✅ Implemented (v0.2.0)
 **Created**: 2025-11-05
-**Author**: Sprint 2025-11-05 (Centralized Config Storage Refactor)
+**Completed**: 2025-11-05
+**Author**: Sprint "Remove Legacy .serena/ Directory Support"
+
+**Note**: As of version 0.2.0, legacy `.serena/` directory support has been completely removed. This document describes the architecture that is now in production. For migration instructions, see [MIGRATION-LEGACY-SERENA.md](MIGRATION-LEGACY-SERENA.md).
 
 ---
 

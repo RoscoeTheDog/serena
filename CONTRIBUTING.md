@@ -72,4 +72,8 @@ An example script for running tools is provided in [scripts/demo_run_tools.py](s
 
 ## Adding a New Supported Language
 
-See the corresponding [memory](.serena/memories/adding_new_language_support_guide.md).
+Documentation for adding new language support is planned. In the meantime, you can:
+1. Review existing language server implementations in `src/solidlsp/language_servers/`
+2. Study the language server protocol (LSP) documentation
+3. Create a new adapter class following the pattern of existing language servers
+4. Submit a pull request with your implementation and tests

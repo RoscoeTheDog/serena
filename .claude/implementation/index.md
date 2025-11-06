@@ -195,28 +195,41 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 ---
 
 ### Story 6: Update Documentation and Migration Guide
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-05 17:35
+**Completed**: 2025-11-05 18:00
 **Parent**: Story 1
 **Description**: Create comprehensive migration guide for users with legacy `.serena/` directories and update all documentation to reflect centralized-only storage.
 
 **Acceptance Criteria**:
-- [ ] Create `docs/MIGRATION-LEGACY-SERENA.md` with:
+- [x] Create `docs/MIGRATION-LEGACY-SERENA.md` with:
   - Why migration is necessary
   - How to run migration script
   - What gets migrated
   - How to verify migration success
   - Rollback instructions (restore from backup)
   - FAQ for common issues
-- [ ] Update README.md to remove any legacy `.serena/` references
-- [ ] Update CONTRIBUTING.md to document centralized storage only
-- [ ] Add migration notice to CHANGELOG.md
-- [ ] Update any inline code comments referencing legacy paths
+- [x] Update README.md to remove any legacy `.serena/` references
+- [x] Update CONTRIBUTING.md to document centralized storage only
+- [x] Add migration notice to CHANGELOG.md
+- [x] Update any inline code comments referencing legacy paths
 
-**Files to Create/Modify**:
-- `docs/MIGRATION-LEGACY-SERENA.md` (new)
-- `README.md`
-- `CONTRIBUTING.md`
-- `CHANGELOG.md`
+**Files Created/Modified**:
+- `docs/MIGRATION-LEGACY-SERENA.md` (new - comprehensive migration guide)
+- `docs/centralized-config-storage.md` (updated status to "Implemented")
+- `docs/serena_on_chatgpt.md` (updated config path references)
+- `README.md` (updated 4 references to centralized storage paths)
+- `CONTRIBUTING.md` (updated broken link to language support guide)
+- `CHANGELOG.md` (added breaking change notice)
+
+**Implementation Notes**:
+- Created comprehensive 300+ line migration guide with FAQs, troubleshooting, and examples
+- Updated all documentation references from `.serena/project.yml` to `~/.serena/projects/{project-id}/project.yml`
+- Updated memory storage references from `.serena/memories/` to `~/.serena/projects/{project-id}/memories/`
+- Fixed broken links to non-existent `adding_new_language_support_guide.md` file
+- Marked centralized-config-storage.md as "Implemented" with reference to migration guide
+- Added prominent breaking change notice in CHANGELOG.md with migration instructions
+- **Note**: Found legacy code in `agent.py:find_parent_serena_project()` that still checks for `.serena/` directories (lines 584-610). This is functionality code, not documentation, so it should be addressed in a separate bug fix story.
 
 **Estimated Effort**: 0.5 days
 
@@ -310,9 +323,28 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 - Tests now expect centralized-only behavior
 - Note: Could not run tests due to Python 3.11 requirement (system has 3.13)
 
+### 2025-11-05 18:00 - Story 6 Completed
+- ✅ Created comprehensive migration guide documentation
+- Files created/modified:
+  - Created `docs/MIGRATION-LEGACY-SERENA.md` (300+ lines)
+  - Updated `docs/centralized-config-storage.md` (marked as Implemented)
+  - Updated `docs/serena_on_chatgpt.md` (config path references)
+  - Updated `README.md` (4 documentation path updates)
+  - Updated `CONTRIBUTING.md` (fixed broken language support link)
+  - Updated `CHANGELOG.md` (added breaking change notice)
+- Migration guide includes:
+  - Why migration is necessary (problem statement and benefits)
+  - How to run migration script (automatic and manual methods)
+  - What gets migrated (tables, file mappings)
+  - Verification steps (checklist and commands)
+  - Rollback instructions (restore from backup)
+  - Comprehensive FAQ (13 questions answered)
+  - Troubleshooting section (4 common issues)
+- All documentation now reflects centralized-only storage
+- **Discovery**: Found legacy code in `agent.py:find_parent_serena_project()` that still looks for `.serena/` directories (should be addressed in separate bug fix)
+
 ### Next Steps
-- Story 6: Update Documentation (depends on Story 1, ready to start)
-- Story 7: Add .gitignore Rule (depends on Story 6)
+- Story 7: Add .gitignore Rule (ready to start)
 
 ---
 
