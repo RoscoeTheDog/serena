@@ -70,7 +70,7 @@ token_count_estimator: TIKTOKEN_GPT4O
 # To add a project, within a chat, simply ask Serena to "activate the project /path/to/project" or,
 # if the project was previously added, "activate the project <project name>".
 # By default, the project's name will be the name of the directory containing the project, but you may change it
-# by editing the (auto-generated) project configuration file `/path/project/project/.serena/project.yml` file.
+# by editing the (auto-generated) project configuration file `~/.serena/projects/{project-id}/project.yml` file.
 # If you want to maintain full control of the project configuration, create the project.yml file manually and then
 # instruct Serena to activate the project by its path for first-time activation.
 # NOTE: Make sure there are no name collisions in the names of registered projects.

@@ -345,16 +345,18 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 ---
 
 ### Story 10: Update Template File Path Reference
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-05 19:00
+**Completed**: 2025-11-05 19:05
 **Parent**: Story 6
 **Description**: Update template configuration file to reference centralized storage location instead of legacy path.
 
 **Acceptance Criteria**:
-- [ ] Update path reference in `serena_config.template.yml` line 73
-- [ ] Change from `/path/project/project/.serena/project.yml`
-- [ ] Change to `~/.serena/projects/{project-id}/project.yml`
-- [ ] Update any other legacy path references in template
-- [ ] Verify template file is consistent with documentation
+- [x] Update path reference in `serena_config.template.yml` line 73
+- [x] Change from `/path/project/project/.serena/project.yml`
+- [x] Change to `~/.serena/projects/{project-id}/project.yml`
+- [x] Update any other legacy path references in template
+- [x] Verify template file is consistent with documentation
 
 **Files to Modify**:
 - `src/serena/resources/serena_config.template.yml`
@@ -363,6 +365,13 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 - Line 73 still references legacy path in comment
 - Should match documentation and centralized storage architecture
 - Simple find-replace fix
+
+**Implementation Notes**:
+- Updated line 73 path reference from `/path/project/project/.serena/project.yml` to `~/.serena/projects/{project-id}/project.yml`
+- Verified no other legacy path references exist in template (grep search confirmed)
+- Template now consistent with centralized storage architecture
+- Template matches updated documentation from Story 6
+- Total impact: 1 line updated (comment only, no functional change)
 
 **QA Finding Reference**: Issue discovered during QA review on 2025-11-05
 
