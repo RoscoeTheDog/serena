@@ -1,71 +1,160 @@
-# Serena Utility Scripts
+# Scripts Directory
 
-This directory contains utility scripts for managing Serena MCP servers.
+This directory contains utility scripts for Serena development, installation, and maintenance.
 
-## kill_serena_servers.py
+## Installation & Configuration
 
-Kill all running Serena MCP server instances. Useful when you need to restart servers or clean up stuck processes.
+### `install.js`
+Node.js script for automated Serena installation and configuration.
+- Detects platform and environment
+- Configures MCP server settings
+- Sets up initial project structure
 
-### Usage
-
+**Usage**:
 ```bash
-# Safe dry run - see what would be killed
-python scripts/kill_serena_servers.py --dry-run
+node scripts/install.js
+```
 
-# Gracefully terminate all Serena servers
+### `verify.js`
+Verification script to validate Serena installation and configuration.
+- Checks dependencies
+- Verifies MCP server configuration
+- Tests basic functionality
+
+**Usage**:
+```bash
+node scripts/verify.js
+```
+
+### `install-config.json`
+Configuration file for the installation script containing platform-specific settings.
+
+## Migration & Legacy Support
+
+### `migrate_legacy_serena.py`
+Migration script for moving from legacy `.serena/` project-root storage to centralized `~/.serena/projects/` storage.
+- Migrates memories, configuration, and cache
+- Creates backups before migration
+- Supports dry-run mode for testing
+
+**Usage**:
+```bash
+# Dry run (preview changes)
+python scripts/migrate_legacy_serena.py --dry-run /path/to/project
+
+# Actual migration
+python scripts/migrate_legacy_serena.py /path/to/project
+```
+
+**Related**: See Story 1 from the legacy-serena-removal sprint (commit 413df77)
+
+## Process Management
+
+### `kill_serena_servers.py`
+Python script to terminate all running Serena MCP server processes.
+- Cross-platform support
+- Finds processes by name and command line
+- Graceful shutdown with fallback to forced termination
+
+**Usage**:
+```bash
 python scripts/kill_serena_servers.py
-
-# Force kill if processes won't terminate
-python scripts/kill_serena_servers.py --force
-
-# Show detailed process information
-python scripts/kill_serena_servers.py --verbose --dry-run
 ```
 
-### Quick Wrappers
+### `kill_serena.sh`
+Unix/Linux/macOS shell script for terminating Serena processes.
 
-**Windows:**
-```cmd
-scripts\kill_serena.bat
-```
-
-**Unix/Linux/macOS:**
+**Usage**:
 ```bash
 ./scripts/kill_serena.sh
 ```
 
-### How It Works
+### `kill_serena.bat`
+Windows batch script for terminating Serena processes.
 
-The script uses **three detection methods** to reliably identify Serena MCP servers:
+**Usage**:
+```cmd
+scripts\kill_serena.bat
+```
 
-1. **Environment Variable** (Most Reliable)
-   - Checks for `SERENA_MCP_SERVER=1` environment variable
-   - Set automatically by Serena when the MCP server starts
-   - **Validates** the process is actually Serena (not child processes like Pyright)
-   - Child processes inherit env vars, so command line is double-checked
-   - Works even if the command line is obscured
+## Development & Testing
 
-2. **Process Name** (If Available)
-   - Checks if process name is `serena-mcp-server`
-   - Requires `setproctitle` package (optional dependency)
+### `demo_run_tools.py`
+Demonstration script showing how to run Serena tools programmatically without MCP.
+- Examples of tool usage
+- Useful for testing and development
+- No LLM required
 
-3. **Command Line Pattern** (Fallback)
-   - Python processes running:
-     - `serena.mcp_server`
-     - `-m serena`
-     - `serena/mcp_server` or `serena\mcp_server`
-     - Any command line containing both "serena" and "mcp"
+**Usage**:
+```bash
+python scripts/demo_run_tools.py
+```
 
-### When to Use
+### `gen_prompt_factory.py`
+Generates the `PromptFactory` class from Jinja2 prompt templates.
+- Auto-generates typed Python class from YAML templates
+- Part of the interprompt system
+- Run after modifying prompt templates
 
-- After making code changes to Serena that require a restart
-- When a Serena server is stuck or hanging
-- Before running tests to ensure clean environment
-- When you can't differentiate which Python processes are Serena
+**Usage**:
+```bash
+python scripts/gen_prompt_factory.py
+```
 
-### Notes
+### `print_tool_overview.py`
+Prints an overview of all available Serena tools.
+- Lists tool names and descriptions
+- Useful for documentation generation
 
-- Uses graceful termination (SIGTERM) by default
-- Use `--force` for immediate kill (SIGKILL) if processes won't stop
-- May require admin/sudo privileges on some systems
-- After killing, MCP clients (like Claude Code) may need to be restarted to reconnect
+**Usage**:
+```bash
+python scripts/print_tool_overview.py
+```
+
+### `print_mode_context_options.py`
+Displays available modes and contexts for Serena configuration.
+- Lists all built-in modes
+- Shows available contexts
+- Helps with MCP server configuration
+
+**Usage**:
+```bash
+python scripts/print_mode_context_options.py
+```
+
+### `mcp_server.py`
+Simple script to start the Serena MCP server directly.
+- Alternative to `uv run serena start-mcp-server`
+- Useful for development and debugging
+
+**Usage**:
+```bash
+python scripts/mcp_server.py
+```
+
+### `agno_agent.py`
+Integration script for running Serena with the Agno framework.
+- Enables Serena to work with any LLM via Agno
+- Provides agent-mode functionality
+
+**Usage**:
+```bash
+python scripts/agno_agent.py
+```
+
+## Platform Support
+
+Most Python scripts are cross-platform (Windows, macOS, Linux). Shell scripts (`.sh`) are for Unix-like systems, and batch scripts (`.bat`) are for Windows.
+
+For process management, use the appropriate script for your platform:
+- **Windows**: `kill_serena.bat` or `kill_serena_servers.py`
+- **Unix/Linux/macOS**: `kill_serena.sh` or `kill_serena_servers.py`
+
+## Contributing
+
+When adding new scripts:
+1. Add appropriate documentation to this README
+2. Include usage examples
+3. Add cross-platform support where applicable
+4. Use descriptive filenames
+5. Add executable permissions for shell scripts (`chmod +x`)
