@@ -1,8 +1,10 @@
 # Sprint: MCP Interface Simplification
 
-**Status**: Active (Started 2025-11-04)
-**Sprint Document**: `implementation/index.md`
+**Status**: ✅ COMPLETED (2025-11-04)
+**Archived**: `.claude/implementation/archive/legacy-implementation-2025-11-06/archive/2025-11-05-0102/`
 **Risk Assessment**: `docs/mcp-interface-risk-assessment.md`
+
+> **Note**: This sprint has been completed and archived. This document is preserved for reference.
 
 ---
 
@@ -23,14 +25,16 @@ Eliminate ambiguity in MCP tool interfaces so agents can use tools correctly wit
 
 | # | Story | Risk | Effort | Status |
 |---|-------|------|--------|--------|
-| 1 | Fix `detail_level` ambiguity in `find_symbol` | 🔴 HIGH | 2d | unassigned |
-| 2 | Fix `output_mode` in `search_for_pattern` | 🔴 HIGH | 1d | unassigned |
-| 3 | Replace `max_answer_chars` with token-aware system | 🔴 HIGH | 3d | unassigned |
-| 4 | Flip `include_metadata` default in `list_memories` | 🟡 MED | 0.5d | unassigned |
-| 5 | Rename `exclude_generated` to `search_scope` | 🟡 MED | 1.5d | unassigned |
-| 6 | Unify `substring_matching` into `match_mode` | 🟡 MED | 2d | unassigned |
-| 7 | Clarify `depth` semantics in `find_symbol` | 🟡 MED | 1d | unassigned |
-| 8 | Replace `preview_lines` with enum in `list_memories` | 🟡 MED | 0.5d | unassigned |
+| 1 | Fix `detail_level` ambiguity in `find_symbol` | 🔴 HIGH | 2d | ✅ completed |
+| 2 | Fix `output_mode` in `search_for_pattern` | 🔴 HIGH | 1d | ✅ completed |
+| 3 | Replace `max_answer_chars` with token-aware system | 🔴 HIGH | 3d | ✅ completed |
+| 4 | Flip `include_metadata` default in `list_memories` | 🟡 MED | 0.5d | ✅ completed |
+| 5 | Rename `exclude_generated` to `search_scope` | 🟡 MED | 1.5d | ✅ completed |
+| 6 | Unify `substring_matching` into `match_mode` | 🟡 MED | 2d | ✅ completed |
+| 7 | Clarify `depth` semantics in `find_symbol` | 🟡 MED | 1d | ⚠️ skipped/merged |
+| 8 | Replace `preview_lines` with enum in `list_memories` | 🟡 MED | 0.5d | ⚠️ skipped/merged |
+
+**Completion Summary**: 6 of 8 stories completed. Stories 7-8 were either skipped or merged into other stories.
 
 ---
 
