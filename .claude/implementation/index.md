@@ -236,19 +236,28 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 ---
 
 ### Story 7: Add .gitignore Rule for Legacy .serena/ Directories
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-05 18:05
+**Completed**: 2025-11-05 18:10
 **Parent**: Story 6
 **Description**: Update `.gitignore` to explicitly ignore legacy `.serena/` directories in project roots, preventing accidental commits.
 
 **Acceptance Criteria**:
-- [ ] Add `/.serena/` to `.gitignore` (note leading slash for root-only)
-- [ ] Add comment explaining this is legacy, centralized storage is in `~/.serena/`
-- [ ] Verify rule doesn't conflict with centralized `~/.serena/` (which is in user home, not project)
-- [ ] Test that `.serena/` in project root is ignored
-- [ ] Test that backup archives `.serena.backup-*.tar.gz` are ignored
+- [x] Add `/.serena/` to `.gitignore` (note leading slash for root-only)
+- [x] Add comment explaining this is legacy, centralized storage is in `~/.serena/`
+- [x] Verify rule doesn't conflict with centralized `~/.serena/` (which is in user home, not project)
+- [x] Test that `.serena/` in project root is ignored
+- [x] Test that backup archives `.serena.backup-*.tar.gz` are ignored
 
-**Files to Modify**:
+**Files Modified**:
 - `.gitignore`
+
+**Implementation Notes**:
+- Updated existing `.serena/` rule (line 221) to `/.serena/` with leading slash for root-only matching
+- Added comprehensive comment block explaining legacy status and centralized storage location
+- Added rule for backup archives: `/.serena.backup-*.tar.gz`
+- Verified no conflicts: `.gitignore` rules only affect project repository, centralized storage is in `~/.serena/` (user home)
+- Total changes: Replaced 1 line with 7 lines (explanatory comments + 2 ignore rules)
 
 **Estimated Effort**: 0.1 days
 
@@ -343,8 +352,17 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 - All documentation now reflects centralized-only storage
 - **Discovery**: Found legacy code in `agent.py:find_parent_serena_project()` that still looks for `.serena/` directories (should be addressed in separate bug fix)
 
+### 2025-11-05 18:10 - Story 7 Completed
+- ✅ Updated `.gitignore` to prevent accidental commits of legacy directories
+- Changes made:
+  - Updated `.serena/` to `/.serena/` (root-only matching with leading slash)
+  - Added comprehensive comment explaining legacy status and centralized storage
+  - Added rule for backup archives: `/.serena.backup-*.tar.gz`
+  - Verified no conflicts with centralized storage in `~/.serena/` (user home)
+- Total impact: Replaced 1 line with 7 lines (comments + ignore rules)
+
 ### Next Steps
-- Story 7: Add .gitignore Rule (ready to start)
+- ✅ Sprint complete! All 7 stories finished.
 
 ---
 

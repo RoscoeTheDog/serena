@@ -218,7 +218,14 @@ pylint.html
 
 tmp/
 
-.serena/
+# Legacy .serena/ directories (DEPRECATED)
+# Note: Serena now uses centralized storage in ~/.serena/ (user home directory)
+# This rule prevents accidental commits of legacy project-root .serena/ directories
+/.serena/
+
+# Legacy .serena backup archives created by migration script
+/.serena.backup-*.tar.gz
+
 .vscode/
 
 # Claude settings
