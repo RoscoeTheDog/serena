@@ -37,7 +37,8 @@ SERENA_LOG_FORMAT = "%(levelname)-5s %(asctime)-15s [%(threadName)s] %(name)s:%(
 
 
 # Centralized Project Storage Helpers
-# Added in Story 2: Implement Path Resolution Helpers
+# All project data is stored in ~/.serena/projects/{project-id}/
+# Legacy {project_root}/.serena/ directories are no longer supported
 
 def get_project_identifier(project_root: Path) -> str:
     """
@@ -145,23 +146,3 @@ def get_project_memories_path(project_root: Path) -> Path:
     return memories_dir
 
 
-def get_legacy_project_dir(project_root: Path) -> Path:
-    """
-    Get the legacy (old) .serena directory path in project root.
-
-    This function is used for backward compatibility checks during migration.
-    The legacy directory structure was:
-    - {project_root}/.serena/project.yml
-    - {project_root}/.serena/memories/
-
-    Args:
-        project_root: Absolute path to project root
-
-    Returns:
-        Path to {project_root}/.serena/
-
-    Example:
-        >>> get_legacy_project_dir(Path("/home/user/myapp"))
-        Path("/home/user/myapp/.serena")
-    """
-    return project_root / SERENA_MANAGED_DIR_NAME

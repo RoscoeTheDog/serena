@@ -123,23 +123,36 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 ---
 
 ### Story 4: Deprecate or Remove get_legacy_project_dir()
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-05 16:30
+**Completed**: 2025-11-05 16:45
 **Parent**: Stories 2, 3
 **Description**: Handle the `get_legacy_project_dir()` helper function - either mark as deprecated or remove entirely if no longer needed.
 
 **Acceptance Criteria**:
-- [ ] Audit all usages of `get_legacy_project_dir()` in codebase (verify removed by Stories 2-3)
-- [ ] If usages remain: Add deprecation warning with removal date
-- [ ] If no usages remain: Remove function entirely
-- [ ] Update `constants.py` docstrings to reflect current storage architecture
-- [ ] Update any references in comments or documentation
+- [x] Audit all usages of `get_legacy_project_dir()` in codebase (verify removed by Stories 2-3)
+- [x] If usages remain: Add deprecation warning with removal date
+- [x] If no usages remain: Remove function entirely
+- [x] Update `constants.py` docstrings to reflect current storage architecture
+- [x] Update any references in comments or documentation
 
 **Files to Modify**:
 - `src/serena/constants.py`
+- `src/serena/tools/config_tools.py`
 
 **Decision Point**: Deprecate vs Remove
 - Remove if: Stories 2-3 eliminate all usages
 - Deprecate if: External users may be calling this function
+
+**Implementation Notes**:
+- Removed `get_legacy_project_dir` import from `config_tools.py`
+- Removed legacy fallback logic from `get_project_config()` (lines 287-304)
+- Removed legacy on-the-fly migration from `update_project_config()` (lines 365-384)
+- Removed legacy project discovery from `list_projects()` (lines 561-588)
+- Removed `get_legacy_project_dir()` function from `constants.py` (21 lines)
+- Updated storage architecture comment in `constants.py` to clarify legacy support removed
+- Verified zero references to `get_legacy_project_dir` remain in `src/` directory
+- Total impact: ~60 lines removed, 3 tools simplified to centralized-only storage
 
 **Estimated Effort**: 0.25 days
 
@@ -260,9 +273,21 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 - Test results: 12 passed, 1 expected failure (legacy test to be removed in Story 5)
 - Verified no `get_legacy_project_dir` references remain in `src/serena/config/`
 
+### 2025-11-05 16:45 - Story 4 Completed
+- ✅ Removed `get_legacy_project_dir()` function and all remaining usages
+- Changes made:
+  - Removed `get_legacy_project_dir` import from `config_tools.py`
+  - Removed legacy fallback logic from `get_project_config()` tool
+  - Removed legacy on-the-fly migration from `update_project_config()` tool
+  - Removed legacy project discovery from `list_projects()` tool
+  - Removed `get_legacy_project_dir()` function definition from `constants.py`
+  - Updated storage architecture comment to clarify legacy support removed
+- Total impact: ~60 lines removed, 3 MCP tools simplified to centralized-only storage
+- Verified zero references to `get_legacy_project_dir` remain in `src/` directory
+
 ### Next Steps
-- Story 4: Deprecate or Remove get_legacy_project_dir() (ready to start)
-- Story 5: Update Tests (depends on Stories 2-4)
+- Story 5: Update Tests (depends on Stories 2-4, ready to start)
+- Story 6: Update Documentation (depends on Story 1)
 
 ---
 

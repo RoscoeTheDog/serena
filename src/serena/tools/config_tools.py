@@ -15,7 +15,6 @@ from serena.tools.onboarding_helpers import (
 from serena.constants import (
     get_centralized_project_dir,
     get_project_config_path,
-    get_legacy_project_dir,
 )
 
 
@@ -285,24 +284,16 @@ class GetProjectConfigTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMark
                 "error": f"Project root not found: {project_root}"
             }, indent=2)
 
-        # Try centralized location first
-        centralized_path = get_project_config_path(project_root)
-        legacy_path = get_legacy_project_dir(project_root) / "project.yml"
+        # Check centralized location only
+        config_path = get_project_config_path(project_root)
 
-        config_path = None
-        storage_location = None
-
-        if centralized_path.exists():
-            config_path = centralized_path
-            storage_location = "centralized"
-        elif legacy_path.exists():
-            config_path = legacy_path
-            storage_location = "legacy"
-        else:
+        if not config_path.exists():
             return json.dumps({
-                "error": f"No project configuration found at {centralized_path} or {legacy_path}",
+                "error": f"No project configuration found at {config_path}",
                 "hint": "Use activate_project to create a new project configuration"
             }, indent=2)
+
+        storage_location = "centralized"
 
         # Load the config
         try:
@@ -371,26 +362,17 @@ class UpdateProjectConfigTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolM
                 "error": f"Project root not found: {project_root}"
             }, indent=2)
 
-        # Ensure we're working with centralized storage
+        # Use centralized storage only
         centralized_path = get_project_config_path(project_root)
-        legacy_path = get_legacy_project_dir(project_root) / "project.yml"
 
-        # If config exists in legacy but not centralized, load from legacy
-        if not centralized_path.exists() and legacy_path.exists():
-            # Migrate from legacy to centralized
-            get_centralized_project_dir(project_root).mkdir(parents=True, exist_ok=True)
-            import shutil
-            shutil.copy2(legacy_path, centralized_path)
-
-        # Load existing config or create new one
-        if centralized_path.exists():
-            config_data = load_yaml(centralized_path, preserve_comments=True)
-        else:
-            # Create default config
+        # Load existing config
+        if not centralized_path.exists():
             return json.dumps({
                 "error": f"No project configuration found. Use activate_project to create one first.",
                 "hint": f"Expected at: {centralized_path}"
             }, indent=2)
+
+        config_data = load_yaml(centralized_path, preserve_comments=True)
 
         # Update settings
         for key, value in settings.items():
@@ -575,35 +557,6 @@ class ListProjectConfigsTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMa
                                 "project_name": "error",
                                 "error": f"Failed to load config from {config_path}: {str(e)}"
                             })
-
-        # Also check for legacy projects (projects with .serena/ in their root)
-        for registered in self.agent.serena_config.projects:
-            legacy_path = get_legacy_project_dir(Path(registered.path)) / "project.yml"
-            centralized_path = get_project_config_path(Path(registered.path))
-
-            # Only include legacy if no centralized config exists
-            if legacy_path.exists() and not centralized_path.exists():
-                try:
-                    with open(legacy_path, encoding="utf-8") as f:
-                        config_data = yaml.safe_load(f)
-
-                    projects.append({
-                        "project_name": config_data.get("project_name", "unknown"),
-                        "project_path": str(registered.path),
-                        "storage_location": "legacy",
-                        "config_path": str(legacy_path),
-                        "language": config_data.get("language", "unknown"),
-                        "config_summary": {
-                            "read_only": config_data.get("read_only", False),
-                            "ignored_paths_count": len(config_data.get("ignored_paths", [])),
-                            "has_initial_prompt": bool(config_data.get("initial_prompt", "")),
-                            "excluded_tools_count": len(config_data.get("excluded_tools", [])),
-                            "included_optional_tools_count": len(config_data.get("included_optional_tools", []))
-                        },
-                        "note": "Legacy storage - consider migrating with update_project_config"
-                    })
-                except Exception as e:
-                    pass  # Skip errors for legacy configs
 
         result = {
             "total_projects": len(projects),
