@@ -42,7 +42,6 @@ from typing import List, Dict, Any, Optional
 try:
     from serena.constants import (
         get_project_identifier,
-        get_legacy_project_dir,
         get_centralized_project_dir,
         SERENA_MANAGED_DIR_NAME,
     )

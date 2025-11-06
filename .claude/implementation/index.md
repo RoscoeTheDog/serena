@@ -309,15 +309,17 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 ---
 
 ### Story 9: Fix Migration Script Import Issue
-**Status**: unassigned
+**Status**: completed
+**Claimed**: 2025-11-05 18:50
+**Completed**: 2025-11-05 18:55
 **Parent**: Story 1
 **Description**: Fix migration script to not import `get_legacy_project_dir()` which was removed in Story 4.
 
 **Acceptance Criteria**:
-- [ ] Remove `get_legacy_project_dir` from import statement in migration script
-- [ ] Use only fallback implementation (already exists in script)
-- [ ] Verify migration script runs without import errors
-- [ ] Test migration script with dry-run mode
+- [x] Remove `get_legacy_project_dir` from import statement in migration script
+- [x] Use only fallback implementation (already exists in script)
+- [x] Verify migration script runs without import errors
+- [x] Test migration script with dry-run mode
 
 **Files to Modify**:
 - `scripts/migrate_legacy_serena.py`
@@ -327,6 +329,14 @@ This sprint will remove legacy support entirely, provide a migration tool for ex
 - Story 4 removed this function
 - Fallback implementation exists (lines 62-64) but import fails first
 - Solution: Remove from import, rely solely on fallback
+
+**Implementation Notes**:
+- Removed `get_legacy_project_dir` from import statement (line 45)
+- Fallback implementation (lines 62-64) now handles all cases
+- Verified script runs without import errors (--help command successful)
+- Tested with dry-run mode: successfully discovered 2 legacy projects
+- Script uses fallback implementations as expected
+- Total impact: 1 line removed from import statement
 
 **QA Finding Reference**: Issue discovered during QA review on 2025-11-05
 
