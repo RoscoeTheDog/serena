@@ -814,7 +814,7 @@ class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
         
         # Read old content if diff or full format requested
         if response_format in ("diff", "full"):
-            full_path = os.path.join(self.agent.project_root, relative_path)
+            full_path = os.path.join(self.agent.get_project_root(), relative_path)
             with open(full_path, "r", encoding="utf-8") as f:
                 old_content = f.read()
         
@@ -842,7 +842,7 @@ class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
             }, indent=2)
         
         elif response_format == "full":
-            full_path = os.path.join(self.agent.project_root, relative_path)
+            full_path = os.path.join(self.agent.get_project_root(), relative_path)
             with open(full_path, "r", encoding="utf-8") as f:
                 new_content = f.read()
             return json.dumps({
@@ -855,7 +855,7 @@ class ReplaceSymbolBodyTool(Tool, ToolMarkerSymbolicEdit):
             }, indent=2)
         
         else:  # diff (default)
-            full_path = os.path.join(self.agent.project_root, relative_path)
+            full_path = os.path.join(self.agent.get_project_root(), relative_path)
             with open(full_path, "r", encoding="utf-8") as f:
                 new_content = f.read()
             
@@ -910,7 +910,7 @@ class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
         
         # Read old content if diff or full format requested
         if response_format in ("diff", "full"):
-            full_path = os.path.join(self.agent.project_root, relative_path)
+            full_path = os.path.join(self.agent.get_project_root(), relative_path)
             with open(full_path, "r", encoding="utf-8") as f:
                 old_content = f.read()
         
@@ -934,7 +934,7 @@ class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
             }, indent=2)
         
         elif response_format == "full":
-            full_path = os.path.join(self.agent.project_root, relative_path)
+            full_path = os.path.join(self.agent.get_project_root(), relative_path)
             with open(full_path, "r", encoding="utf-8") as f:
                 new_content = f.read()
             return json.dumps({
@@ -947,7 +947,7 @@ class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
             }, indent=2)
         
         else:  # diff (default)
-            full_path = os.path.join(self.agent.project_root, relative_path)
+            full_path = os.path.join(self.agent.get_project_root(), relative_path)
             with open(full_path, "r", encoding="utf-8") as f:
                 new_content = f.read()
             
@@ -991,7 +991,7 @@ class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
         
         # Read old content if diff or full format requested
         if response_format in ("diff", "full"):
-            full_path = os.path.join(self.agent.project_root, relative_path)
+            full_path = os.path.join(self.agent.get_project_root(), relative_path)
             with open(full_path, "r", encoding="utf-8") as f:
                 old_content = f.read()
         
@@ -1015,7 +1015,7 @@ class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
             }, indent=2)
         
         elif response_format == "full":
-            full_path = os.path.join(self.agent.project_root, relative_path)
+            full_path = os.path.join(self.agent.get_project_root(), relative_path)
             with open(full_path, "r", encoding="utf-8") as f:
                 new_content = f.read()
             return json.dumps({
@@ -1028,7 +1028,7 @@ class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
             }, indent=2)
         
         else:  # diff (default)
-            full_path = os.path.join(self.agent.project_root, relative_path)
+            full_path = os.path.join(self.agent.get_project_root(), relative_path)
             with open(full_path, "r", encoding="utf-8") as f:
                 new_content = f.read()
             
