@@ -242,7 +242,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Rename ide-assistant to claude-code Context",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "2",
       "phase": "implementation",
       "phase_order": 2,
@@ -258,7 +258,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Rename ide-assistant to claude-code Context",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "2",
       "phase": "testing",
       "phase_order": 3,
@@ -269,7 +269,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/2-plan.yaml"
+      }
     },
     "3.d": {
       "type": "discovery",

@@ -144,7 +144,7 @@ class SerenaInstaller {
                     args: [
                         "--from", "git+https://github.com/RoscoeTheDog/serena",
                         "serena", "start-mcp-server",
-                        "--context", "ide-assistant"
+                        "--context", "claude-code"
                     ]
                 }
             }
@@ -184,7 +184,7 @@ class SerenaInstaller {
             }
 
             // Build the claude mcp add command for Serena
-            const command = 'claude mcp add serena uvx -- --from git+https://github.com/RoscoeTheDog/serena serena start-mcp-server --context ide-assistant -s user';
+            const command = 'claude mcp add serena uvx -- --from git+https://github.com/RoscoeTheDog/serena serena start-mcp-server --context claude-code -s user';
 
             // Execute the command to add MCP server to Claude Code CLI
             this.log('Adding Serena MCP server to Claude Code CLI with user scope...');
@@ -199,7 +199,7 @@ class SerenaInstaller {
                 this.success('Claude Code CLI MCP server already configured');
             } else {
                 this.log(`Warning: Failed to configure Claude Code CLI: ${error.message}`, 'error');
-                this.log('You may need to manually run: claude mcp add serena uvx -- --from git+https://github.com/RoscoeTheDog/serena serena start-mcp-server --context ide-assistant -s user');
+                this.log('You may need to manually run: claude mcp add serena uvx -- --from git+https://github.com/RoscoeTheDog/serena serena start-mcp-server --context claude-code -s user');
             }
         }
     }

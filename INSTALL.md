@@ -114,7 +114,7 @@ This guide provides automated installation scripts for setting up the Serena MCP
    ```
    You should see:
    ```
-   serena: uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant - ✓ Connected
+   serena: uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context claude-code - ✓ Connected
    ```
 
 ## What the Installation Does
@@ -136,7 +136,7 @@ The automated installation script:
 ### ✅ **Claude Code CLI Configuration**
 - Adds Serena MCP server globally with user scope using:
   ```bash
-  claude mcp add serena uvx -s user -- --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant
+  claude mcp add serena uvx -s user -- --from git+https://github.com/oraios/serena serena start-mcp-server --context claude-code
   ```
 - Handles existing server configurations gracefully
 - Makes Serena available from any terminal/directory
@@ -147,7 +147,7 @@ If you prefer manual installation or the automated script doesn't work:
 
 ### Claude Code CLI (Manual)
 ```bash
-claude mcp add serena uvx -s user -- --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant
+claude mcp add serena uvx -s user -- --from git+https://github.com/oraios/serena serena start-mcp-server --context claude-code
 ```
 
 ### Claude Desktop (Manual)
@@ -160,7 +160,7 @@ Add to your `claude_desktop_config.json`:
       "args": [
         "--from", "git+https://github.com/oraios/serena",
         "serena", "start-mcp-server",
-        "--context", "ide-assistant"
+        "--context", "claude-code"
       ]
     }
   }
@@ -225,13 +225,13 @@ The Serena project requires Python 3.11.x, but uvx handles this automatically. Y
 
 2. Check if the server starts manually:
    ```bash
-   uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant
+   uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context claude-code
    ```
 
 3. Remove and re-add the server:
    ```bash
    claude mcp remove serena -s user
-   claude mcp add serena uvx -s user -- --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant
+   claude mcp add serena uvx -s user -- --from git+https://github.com/oraios/serena serena start-mcp-server --context claude-code
    ```
 
 ### Configuration Issues
@@ -257,7 +257,9 @@ This installation creates:
 1. **Global Configuration**: Serena is configured with user scope (`-s user`) making it available from any directory
 2. **Cross-Platform**: Works on Windows, macOS, and Linux
 3. **uvx Integration**: Uses uvx to handle Python dependencies and Serena execution automatically
-4. **IDE Assistant Context**: Configured with `--context ide-assistant` for optimal Claude integration
+4. **Claude Code Context**: Configured with `--context claude-code` for optimal Claude integration
+
+> **Migration Note**: If you previously used `--context ide-assistant`, it will continue to work with a deprecation warning. We recommend updating to `claude-code` for consistency with upstream naming conventions.
 
 ## Installation Features
 

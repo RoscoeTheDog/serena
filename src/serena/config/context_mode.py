@@ -166,6 +166,14 @@ class SerenaAgentContext(ToolInclusionDefinition, ToStringMixin):
     @classmethod
     def from_name(cls, name: str) -> Self:
         """Load a registered Serena context."""
+        # Handle deprecation mapping
+        if name == "ide-assistant":
+            log.warning(
+                "Context 'ide-assistant' is deprecated. Please use 'claude-code' instead. "
+                "Automatically redirecting to 'claude-code' for backwards compatibility."
+            )
+            name = "claude-code"
+
         context_path = cls.get_path(name)
         return cls.from_yaml(context_path)
 
@@ -203,8 +211,10 @@ class SerenaAgentContext(ToolInclusionDefinition, ToStringMixin):
 class RegisteredContext(Enum):
     """A registered context."""
 
+    CLAUDE_CODE = "claude-code"
+    """For Serena running within Claude Code or similar assistants with built-in file/shell tools."""
     IDE_ASSISTANT = "ide-assistant"
-    """For Serena running within an assistant that already has basic tools, like Claude Code, Cline, Cursor, etc."""
+    """DEPRECATED: Use claude-code instead. For backwards compatibility only."""
     DESKTOP_APP = "desktop-app"
     """For Serena running within Claude Desktop or a similar app which does not have built-in tools for code editing."""
     AGENT = "agent"
