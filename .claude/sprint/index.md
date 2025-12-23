@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 14:55:33
+**Generated**: 2025-12-23 15:06:09
 
 ---
 
@@ -15,13 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 17.9%
+- **Completion**: 21.4%
 
 ### By Status
 
-- completed: 5
+- completed: 6
 - in_progress: 1
-- pending: 16
+- pending: 15
 - unassigned: 6
 
 ### By Type
@@ -52,11 +52,11 @@
   - Dependencies: Story 2
 
   ### Story 2.i: Implementation: Rename ide-assistant to claude-code Context
-  **Status**: unassigned | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 2
 
   ### Story 2.t: Testing: Rename ide-assistant to claude-code Context
-  **Status**: pending | **Type**: testing
+  **Status**: unassigned | **Type**: testing
   - Dependencies: Story 2
 
   ### Story 3.d: Discovery: Merge Upstream Config Module Changes
