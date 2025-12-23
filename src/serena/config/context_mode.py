@@ -145,6 +145,8 @@ class SerenaAgentContext(ToolInclusionDefinition, ToStringMixin):
         # Ensure backwards compatibility for tool_description_overrides
         if "tool_description_overrides" not in data:
             data["tool_description_overrides"] = {}
+        # Remove single_project field (used for context behavior, not part of dataclass)
+        data.pop("single_project", None)
         return cls(name=name, **data)
 
     @classmethod

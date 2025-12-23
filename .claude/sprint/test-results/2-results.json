@@ -1,0 +1,114 @@
+{
+  "story_id": "2",
+  "phase": "testing",
+  "executed_by": "testing:2.t",
+  "timestamp": "2025-12-23T20:30:00Z",
+
+  "summary": {
+    "total_tests": 13,
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate": 100,
+    "duration_ms": 390
+  },
+
+  "categories": {
+    "unit": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "coverage": null,
+      "tests": [
+        "test_claude_code_context_loads",
+        "test_ide_assistant_context_loads_with_deprecation",
+        "test_claude_code_enum_exists",
+        "test_ide_assistant_enum_exists_but_deprecated",
+        "test_claude_code_has_fork_customizations",
+        "test_claude_code_has_single_project_flag"
+      ]
+    },
+    "integration": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "coverage": null,
+      "tests": [
+        "test_enum_load_method_works",
+        "test_ide_assistant_enum_load_redirects",
+        "test_context_list_includes_both_names",
+        "test_context_files_exist"
+      ]
+    },
+    "security": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "vulnerabilities": [],
+      "tests": [
+        "test_no_security_tools_accidentally_enabled",
+        "test_excluded_tools_list_preserved_exactly",
+        "test_deprecation_message_format"
+      ]
+    }
+  },
+
+  "failures": [],
+
+  "acceptance_criteria_coverage": {
+    "AC-2.t.1": {
+      "covered": true,
+      "tests": ["test_enum_load_method_works"],
+      "reason": "MCP server starts with --context claude-code (verified via enum load)"
+    },
+    "AC-2.t.2": {
+      "covered": true,
+      "tests": ["test_ide_assistant_context_loads_with_deprecation", "test_ide_assistant_enum_load_redirects"],
+      "reason": "Backwards compatibility verified with deprecation warning"
+    },
+    "AC-2.i.1": {
+      "covered": true,
+      "tests": ["test_claude_code_context_loads"],
+      "reason": "claude-code.yml context file loads successfully"
+    },
+    "AC-2.i.2": {
+      "covered": true,
+      "tests": ["test_ide_assistant_context_loads_with_deprecation", "test_deprecation_message_format"],
+      "reason": "Deprecation mapping verified with proper warning"
+    },
+    "AC-2.i.3": {
+      "covered": true,
+      "tests": ["test_claude_code_has_single_project_flag"],
+      "reason": "single_project: true field verified in YAML"
+    }
+  },
+
+  "recommendations": [],
+
+  "threshold_check": {
+    "blocking_threshold": 90,
+    "result": "perfect",
+    "action": "none"
+  },
+
+  "outcome": "passed",
+  "blocking": false,
+
+  "implementation_fixes": [
+    {
+      "file": "src/serena/config/context_mode.py",
+      "change": "Added single_project field handling in from_yaml() to prevent TypeError",
+      "reason": "YAML field not part of dataclass, needed to be popped during loading"
+    }
+  ],
+
+  "notes": [
+    "All test requirements from plan satisfied",
+    "100% pass rate achieved",
+    "Unit tests verify context loading and enum registration",
+    "Integration tests verify backwards compatibility and file existence",
+    "Security tests verify excluded_tools preservation and no accidental tool enabling",
+    "Deprecation warning properly logged when using ide-assistant context",
+    "Fork customizations (excluded_tools, custom prompt, single_project) preserved"
+  ]
+}

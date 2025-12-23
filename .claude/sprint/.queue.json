@@ -39,7 +39,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Rename ide-assistant to claude-code Context",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "2.d",
@@ -258,7 +258,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Rename ide-assistant to claude-code Context",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "2",
       "phase": "testing",
       "phase_order": 3,
