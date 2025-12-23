@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 15:28:48
+**Generated**: 2025-12-23 15:31:30
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 32.1%
+- **Completion**: 35.7%
 
 ### By Status
 
-- completed: 9
-- in_progress: 3
-- pending: 12
-- unassigned: 4
+- completed: 10
+- in_progress: 2
+- pending: 11
+- unassigned: 5
 
 ### By Type
 
@@ -72,11 +72,11 @@
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: Update Context YAML Files
-  **Status**: in_progress | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: Update Context YAML Files
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 4
 
   ### Story 4.t: Testing: Update Context YAML Files
