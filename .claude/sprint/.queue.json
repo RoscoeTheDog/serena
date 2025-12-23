@@ -15,7 +15,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Analyze Upstream Conflicts with Fork Enhancements",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "1.d",
@@ -209,7 +209,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Analyze Upstream Conflicts with Fork Enhancements",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "1",
       "phase": "testing",
       "phase_order": 3,

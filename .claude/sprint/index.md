@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 14:40:51
+**Generated**: 2025-12-23 14:48:23
 
 ---
 
@@ -15,14 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 7.1%
+- **Completion**: 14.3%
 
 ### By Status
 
-- completed: 2
-- in_progress: 1
+- completed: 4
 - pending: 18
-- unassigned: 7
+- unassigned: 6
 
 ### By Type
 
@@ -44,7 +43,7 @@
   - Dependencies: Story 1
 
   ### Story 1.t: Testing: Analyze Upstream Conflicts with Fork Enhancements
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Rename ide-assistant to claude-code Context
