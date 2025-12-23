@@ -39,7 +39,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Rename ide-assistant to claude-code Context",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "2.d",
@@ -229,7 +229,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Rename ide-assistant to claude-code Context",
-      "status": "pending",
+      "status": "completed",
       "parent": "2",
       "phase": "discovery",
       "phase_order": 1,
@@ -242,14 +242,17 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Rename ide-assistant to claude-code Context",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "2",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/2-plan.yaml"
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
     },
     "2.t": {
       "type": "testing",

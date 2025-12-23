@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 14:48:23
+**Generated**: 2025-12-23 14:55:33
 
 ---
 
@@ -15,12 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 14.3%
+- **Completion**: 17.9%
 
 ### By Status
 
-- completed: 4
-- pending: 18
+- completed: 5
+- in_progress: 1
+- pending: 16
 - unassigned: 6
 
 ### By Type
@@ -47,11 +48,11 @@
   - Dependencies: Story 1
 
   ### Story 2.d: Discovery: Rename ide-assistant to claude-code Context
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 2
 
   ### Story 2.i: Implementation: Rename ide-assistant to claude-code Context
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 2
 
   ### Story 2.t: Testing: Rename ide-assistant to claude-code Context
