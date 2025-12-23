@@ -193,7 +193,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Analyze Upstream Conflicts with Fork Enhancements",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "1",
       "phase": "implementation",
       "phase_order": 2,
@@ -209,7 +209,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Analyze Upstream Conflicts with Fork Enhancements",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "1",
       "phase": "testing",
       "phase_order": 3,
@@ -220,7 +220,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/1-plan.yaml"
+      }
     },
     "2.d": {
       "type": "discovery",
