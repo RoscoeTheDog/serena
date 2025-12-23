@@ -64,7 +64,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Merge Upstream Config Module Changes",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "3.d",
@@ -88,7 +88,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Update Context YAML Files",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": null,
       "children": [
         "4.d",
@@ -278,7 +278,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Merge Upstream Config Module Changes",
-      "status": "pending",
+      "status": "completed",
       "parent": "3",
       "phase": "discovery",
       "phase_order": 1,
@@ -291,14 +291,17 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Merge Upstream Config Module Changes",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "3",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
       "file": null,
-      "requires_artifact": "plans/3-plan.yaml"
+      "requires_artifact": "plans/3-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/3-plan.yaml"
+      }
     },
     "3.t": {
       "type": "testing",
@@ -321,7 +324,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Update Context YAML Files",
-      "status": "pending",
+      "status": "in_progress",
       "parent": "4",
       "phase": "discovery",
       "phase_order": 1,

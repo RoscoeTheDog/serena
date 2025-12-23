@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 15:16:58
+**Generated**: 2025-12-23 15:28:48
 
 ---
 
@@ -15,13 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 28.6%
+- **Completion**: 32.1%
 
 ### By Status
 
-- completed: 8
-- pending: 15
-- unassigned: 5
+- completed: 9
+- in_progress: 3
+- pending: 12
+- unassigned: 4
 
 ### By Type
 
@@ -59,11 +60,11 @@
   - Dependencies: Story 2
 
   ### Story 3.d: Discovery: Merge Upstream Config Module Changes
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 3
 
   ### Story 3.i: Implementation: Merge Upstream Config Module Changes
-  **Status**: pending | **Type**: implementation
+  **Status**: unassigned | **Type**: implementation
   - Dependencies: Story 3
 
   ### Story 3.t: Testing: Merge Upstream Config Module Changes
@@ -71,7 +72,7 @@
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: Update Context YAML Files
-  **Status**: pending | **Type**: discovery
+  **Status**: in_progress | **Type**: discovery
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: Update Context YAML Files
