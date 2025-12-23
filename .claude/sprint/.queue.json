@@ -291,7 +291,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Merge Upstream Config Module Changes",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "3",
       "phase": "implementation",
       "phase_order": 2,
@@ -307,7 +307,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Merge Upstream Config Module Changes",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "3",
       "phase": "testing",
       "phase_order": 3,
@@ -318,7 +318,10 @@
         "unit",
         "integration",
         "security"
-      ]
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/3-plan.yaml"
+      }
     },
     "4.d": {
       "type": "discovery",
@@ -337,7 +340,7 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Update Context YAML Files",
-      "status": "unassigned",
+      "status": "in_progress",
       "parent": "4",
       "phase": "implementation",
       "phase_order": 2,
