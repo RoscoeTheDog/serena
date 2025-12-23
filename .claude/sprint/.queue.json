@@ -1,0 +1,504 @@
+{
+  "version": "4.0.0",
+  "sprint": {
+    "id": "upstream-sync-v0.2.0",
+    "name": "Upstream Sync",
+    "version": "0.2.0",
+    "status": "active",
+    "branch": "dev",
+    "created": "2025-12-23 14:16",
+    "queue_version": "2.0.0",
+    "queue_strategy": "interleaved"
+  },
+  "stories": {
+    "1": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "1.d",
+        "1.i",
+        "1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "2"
+      ],
+      "file": "stories/1-analyze-upstream-conflicts.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "2": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Rename ide-assistant to claude-code Context",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "2.d",
+        "2.i",
+        "2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "3",
+        "4"
+      ],
+      "file": "stories/2-rename-ide-assistant-to-claude-code.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "3": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Merge Upstream Config Module Changes",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "3.d",
+        "3.i",
+        "3.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "5"
+      ],
+      "file": "stories/3-merge-upstream-config-module.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "4": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Update Context YAML Files",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "4.d",
+        "4.i",
+        "4.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/4-update-context-yaml-files.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "5": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Merge Tool and Resource Updates",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "5.d",
+        "5.i",
+        "5.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "6"
+      ],
+      "file": "stories/5-merge-tool-and-resource-updates.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "6": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Run Integration Tests",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "6.d",
+        "6.i",
+        "6.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "7"
+      ],
+      "file": "stories/6-run-integration-tests.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "7": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Update Documentation and Migration Guide",
+      "status": "unassigned",
+      "parent": null,
+      "children": [
+        "7.d",
+        "7.i",
+        "7.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/7-update-documentation.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "pending",
+      "parent": "1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/1-plan.yaml"
+    },
+    "1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "pending",
+      "parent": "1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/1-plan.yaml"
+    },
+    "1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "pending",
+      "parent": "1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Rename ide-assistant to claude-code Context",
+      "status": "pending",
+      "parent": "2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/2-plan.yaml"
+    },
+    "2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Rename ide-assistant to claude-code Context",
+      "status": "pending",
+      "parent": "2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/2-plan.yaml"
+    },
+    "2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Rename ide-assistant to claude-code Context",
+      "status": "pending",
+      "parent": "2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "3.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Merge Upstream Config Module Changes",
+      "status": "pending",
+      "parent": "3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/3-plan.yaml"
+    },
+    "3.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Merge Upstream Config Module Changes",
+      "status": "pending",
+      "parent": "3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/3-plan.yaml"
+    },
+    "3.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Merge Upstream Config Module Changes",
+      "status": "pending",
+      "parent": "3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "4.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update Context YAML Files",
+      "status": "pending",
+      "parent": "4",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/4-plan.yaml"
+    },
+    "4.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update Context YAML Files",
+      "status": "pending",
+      "parent": "4",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/4-plan.yaml"
+    },
+    "4.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update Context YAML Files",
+      "status": "pending",
+      "parent": "4",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "5.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Merge Tool and Resource Updates",
+      "status": "pending",
+      "parent": "5",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/5-plan.yaml"
+    },
+    "5.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Merge Tool and Resource Updates",
+      "status": "pending",
+      "parent": "5",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/5-plan.yaml"
+    },
+    "5.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Merge Tool and Resource Updates",
+      "status": "pending",
+      "parent": "5",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "6.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Run Integration Tests",
+      "status": "pending",
+      "parent": "6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/6-plan.yaml"
+    },
+    "6.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Run Integration Tests",
+      "status": "pending",
+      "parent": "6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/6-plan.yaml"
+    },
+    "6.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Run Integration Tests",
+      "status": "pending",
+      "parent": "6",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "7.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update Documentation and Migration Guide",
+      "status": "pending",
+      "parent": "7",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/7-plan.yaml"
+    },
+    "7.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update Documentation and Migration Guide",
+      "status": "pending",
+      "parent": "7",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/7-plan.yaml"
+    },
+    "7.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update Documentation and Migration Guide",
+      "status": "pending",
+      "parent": "7",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    }
+  },
+  "execution_queue": [
+    "1.d",
+    "1.i",
+    "1.t",
+    "2.d",
+    "2.i",
+    "2.t",
+    "3.d",
+    "3.i",
+    "3.t",
+    "4.d",
+    "4.i",
+    "4.t",
+    "5.d",
+    "5.i",
+    "5.t",
+    "6.d",
+    "6.i",
+    "6.t",
+    "7.d",
+    "7.i",
+    "7.t"
+  ]
+}
