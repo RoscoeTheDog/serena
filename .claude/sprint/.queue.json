@@ -1123,7 +1123,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Generate Test Evidence for Story 6",
-      "status": "pending",
+      "status": "in_progress",
       "parent": "6",
       "children": [
         "R2.d",
@@ -1146,7 +1146,7 @@
       "type": "discovery",
       "story_type": "discovery",
       "title": "Discovery: Generate Test Evidence for Story 6",
-      "status": "pending",
+      "status": "completed",
       "parent": "R2",
       "phase": "discovery",
       "phase_order": 1,
@@ -1158,13 +1158,16 @@
       "type": "implementation",
       "story_type": "implementation",
       "title": "Implementation: Generate Test Evidence for Story 6",
-      "status": "pending",
+      "status": "unassigned",
       "parent": "R2",
       "phase": "implementation",
       "phase_order": 2,
       "children": [],
       "blocks": [],
-      "file": null
+      "file": null,
+      "metadata": {
+        "requires_artifact": "plans/R2-plan.yaml"
+      }
     },
     "R2.t": {
       "type": "testing",
