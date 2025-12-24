@@ -2,12 +2,14 @@
 The Serena Model Context Protocol (MCP) Server
 """
 
+import dataclasses
 import os
 import shutil
 from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum
 from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional, Self, TypeVar
@@ -48,9 +50,38 @@ class SerenaPaths:
     """
 
     def __init__(self) -> None:
-        self.user_config_dir: str = SERENA_MANAGED_DIR_IN_HOME
+        # UPSTREAM ENHANCEMENT: Support SERENA_HOME env var
+        home_dir = os.getenv("SERENA_HOME")
+        if home_dir is None or home_dir.strip() == "":
+            home_dir = SERENA_MANAGED_DIR_IN_HOME  # FORK: Use our constant
+        else:
+            home_dir = home_dir.strip()
+
+        # FORK: Keep our attribute name
+        self.user_config_dir: str = home_dir
         """
         the path to the user's Serena configuration directory, which is typically ~/.serena
+        """
+
+        # UPSTREAM ENHANCEMENT: Add new properties
+        self.user_prompt_templates_dir: str = os.path.join(self.user_config_dir, "prompt_templates")
+        """
+        directory containing prompt templates defined by the user.
+        Prompts defined by the user take precedence over Serena's built-in prompt templates.
+        """
+
+        self.user_contexts_dir: str = os.path.join(self.user_config_dir, "contexts")
+        """
+        directory containing contexts defined by the user.
+        If a name of a context matches a name of a context in SERENAS_OWN_CONTEXT_YAMLS_DIR,
+        the user context will override the default context definition.
+        """
+
+        self.user_modes_dir: str = os.path.join(self.user_config_dir, "modes")
+        """
+        directory containing modes defined by the user.
+        If a name of a mode matches a name of a mode in SERENAS_OWN_MODES_YAML_DIR,
+        the user mode will override the default mode definition.
         """
 
     def get_next_log_file_path(self, prefix: str) -> str:

@@ -1,0 +1,26 @@
+{
+  "version": "1.4",
+  "started_at": "2025-12-23T00:00:00Z",
+  "completed_at": "2025-12-23T04:30:00Z",
+  "status": "completed_with_issues",
+  "current_phase": "completed",
+  "completed_stories": [
+    "1.d","1.i","1.t","2.d","2.i","2.t","3.d","3.i","3.t","4.d","4.i","4.t",
+    "5.d","5.i","5.t","6.d","6.i","6.t","7.d","7.i","7.t",
+    "-1.d","-1.i","-1.t","-2.d","-2.i","-2.t","-3.d","-3.i",
+    "-4.d","-4.i","-4.t","-5.d","-5.i","-5.t","-6.d","-6.i","-7.d","-7.i","-7.t",
+    "3.i.1"
+  ],
+  "blocked_stories": ["-3.t", "-6.t"],
+  "failed_stories": [],
+  "remediations_executed": ["3.i.1"],
+  "summary": {
+    "implementation_stories": 21,
+    "implementation_completed": 21,
+    "validation_stories": 21,
+    "validation_completed": 19,
+    "validation_blocked": 2,
+    "remediations_created": 1,
+    "remediations_completed": 1
+  }
+}

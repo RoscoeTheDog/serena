@@ -708,6 +708,11 @@ class Tool(Component):
         future = self.agent.issue_task(task, name=self.__class__.__name__)
         return future.result(timeout=self.agent.serena_config.tool_timeout)
 
+    @staticmethod
+    def _to_json(x: Any) -> str:
+        """Convert object to JSON string with non-ASCII characters preserved."""
+        return json.dumps(x, ensure_ascii=False)
+
 
 class EditedFileContext:
     """

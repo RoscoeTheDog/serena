@@ -1,0 +1,1238 @@
+{
+  "version": "4.0.0",
+  "sprint": {
+    "id": "upstream-sync-v0.2.0",
+    "name": "Upstream Sync",
+    "version": "0.2.0",
+    "status": "active",
+    "branch": "dev",
+    "created": "2025-12-23 14:16",
+    "queue_version": "2.0.0",
+    "queue_strategy": "interleaved"
+  },
+  "stories": {
+    "1": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "1.d",
+        "1.i",
+        "1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "2"
+      ],
+      "file": "stories/1-analyze-upstream-conflicts.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "2": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Rename ide-assistant to claude-code Context",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "2.d",
+        "2.i",
+        "2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "3",
+        "4"
+      ],
+      "file": "stories/2-rename-ide-assistant-to-claude-code.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "3": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Merge Upstream Config Module Changes",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "3.d",
+        "3.i",
+        "3.t",
+        "R1"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "5"
+      ],
+      "file": "stories/3-merge-upstream-config-module.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "4": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Update Context YAML Files",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "4.d",
+        "4.i",
+        "4.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/4-update-context-yaml-files.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "5": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Merge Tool and Resource Updates",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "5.d",
+        "5.i",
+        "5.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "6"
+      ],
+      "file": "stories/5-merge-tool-and-resource-updates.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "6": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Run Integration Tests",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "6.d",
+        "6.i",
+        "6.t",
+        "R2"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [
+        "7"
+      ],
+      "file": "stories/6-run-integration-tests.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "7": {
+      "type": "feature",
+      "story_type": "feature",
+      "title": "Update Documentation and Migration Guide",
+      "status": "completed",
+      "parent": null,
+      "children": [
+        "7.d",
+        "7.i",
+        "7.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/7-update-documentation.md",
+      "advisories": [],
+      "_migrated_from": "implementation",
+      "_migration_version": "v4.0.0"
+    },
+    "1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "completed",
+      "parent": "1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/1-plan.yaml"
+    },
+    "1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "completed",
+      "parent": "1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/1-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/1-plan.yaml"
+      }
+    },
+    "1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "completed",
+      "parent": "1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/1-plan.yaml"
+      }
+    },
+    "2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Rename ide-assistant to claude-code Context",
+      "status": "completed",
+      "parent": "2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/2-plan.yaml"
+    },
+    "2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Rename ide-assistant to claude-code Context",
+      "status": "completed",
+      "parent": "2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/2-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/2-plan.yaml"
+      }
+    },
+    "2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Rename ide-assistant to claude-code Context",
+      "status": "completed",
+      "parent": "2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/2-plan.yaml"
+      }
+    },
+    "3.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Merge Upstream Config Module Changes",
+      "status": "completed",
+      "parent": "3",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/3-plan.yaml"
+    },
+    "3.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Merge Upstream Config Module Changes",
+      "status": "completed",
+      "parent": "3",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [
+        "3.i.1"
+      ],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/3-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/3-plan.yaml"
+      }
+    },
+    "3.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Merge Upstream Config Module Changes",
+      "status": "completed",
+      "parent": "3",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ],
+      "metadata": {
+        "test_requirements_from": "plans/3-plan.yaml"
+      }
+    },
+    "4.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update Context YAML Files",
+      "status": "completed",
+      "parent": "4",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/4-plan.yaml"
+    },
+    "4.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update Context YAML Files",
+      "status": "completed",
+      "parent": "4",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/4-plan.yaml",
+      "metadata": {
+        "requires_artifact": "plans/4-plan.yaml"
+      }
+    },
+    "4.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update Context YAML Files",
+      "status": "completed",
+      "parent": "4",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "5.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Merge Tool and Resource Updates",
+      "status": "completed",
+      "parent": "5",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/5-plan.yaml"
+    },
+    "5.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Merge Tool and Resource Updates",
+      "status": "completed",
+      "parent": "5",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/5-plan.yaml"
+    },
+    "5.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Merge Tool and Resource Updates",
+      "status": "completed",
+      "parent": "5",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "6.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Run Integration Tests",
+      "status": "completed",
+      "parent": "6",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/6-plan.yaml"
+    },
+    "6.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Run Integration Tests",
+      "status": "completed",
+      "parent": "6",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/6-plan.yaml"
+    },
+    "6.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Run Integration Tests",
+      "status": "completed",
+      "parent": "6",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "7.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Update Documentation and Migration Guide",
+      "status": "completed",
+      "parent": "7",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "artifact": "plans/7-plan.yaml"
+    },
+    "7.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Update Documentation and Migration Guide",
+      "status": "completed",
+      "parent": "7",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "requires_artifact": "plans/7-plan.yaml"
+    },
+    "7.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Update Documentation and Migration Guide",
+      "status": "completed",
+      "parent": "7",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "test_categories": [
+        "unit",
+        "integration",
+        "security"
+      ]
+    },
+    "-1": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "completed",
+      "validates": "1",
+      "children": [
+        "-1.d",
+        "-1.i",
+        "-1.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-1.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-1.i"
+      ],
+      "file": null
+    },
+    "-1.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-1.t"
+      ],
+      "file": null
+    },
+    "-1.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-2": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Rename ide-assistant to claude-code Context",
+      "status": "completed",
+      "validates": "2",
+      "children": [
+        "-2.d",
+        "-2.i",
+        "-2.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-2.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Rename ide-assistant to claude-code Context",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.i"
+      ],
+      "file": null
+    },
+    "-2.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Rename ide-assistant to claude-code Context",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.t"
+      ],
+      "file": null
+    },
+    "-2.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Rename ide-assistant to claude-code Context",
+      "status": "completed",
+      "parent": "-2",
+      "validates": "2.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-3": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Merge Upstream Config Module Changes",
+      "status": "completed",
+      "validates": "3",
+      "children": [
+        "-3.d",
+        "-3.i",
+        "-3.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-3.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Merge Upstream Config Module Changes",
+      "status": "completed",
+      "parent": "-3",
+      "validates": "3.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-3.i"
+      ],
+      "file": null
+    },
+    "-3.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Merge Upstream Config Module Changes",
+      "status": "completed",
+      "parent": "-3",
+      "validates": "3.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-3.t"
+      ],
+      "file": null
+    },
+    "-3.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Merge Upstream Config Module Changes",
+      "status": "completed",
+      "parent": "-3",
+      "validates": "3.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-4": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Update Context YAML Files",
+      "status": "completed",
+      "validates": "4",
+      "children": [
+        "-4.d",
+        "-4.i",
+        "-4.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-4.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Update Context YAML Files",
+      "status": "completed",
+      "parent": "-4",
+      "validates": "4.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-4.i"
+      ],
+      "file": null
+    },
+    "-4.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Update Context YAML Files",
+      "status": "completed",
+      "parent": "-4",
+      "validates": "4.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-4.t"
+      ],
+      "file": null
+    },
+    "-4.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Update Context YAML Files",
+      "status": "completed",
+      "parent": "-4",
+      "validates": "4.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-5": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Merge Tool and Resource Updates",
+      "status": "completed",
+      "validates": "5",
+      "children": [
+        "-5.d",
+        "-5.i",
+        "-5.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-5.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Merge Tool and Resource Updates",
+      "status": "completed",
+      "parent": "-5",
+      "validates": "5.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-5.i"
+      ],
+      "file": null
+    },
+    "-5.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Merge Tool and Resource Updates",
+      "status": "completed",
+      "parent": "-5",
+      "validates": "5.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-5.t"
+      ],
+      "file": null
+    },
+    "-5.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Merge Tool and Resource Updates",
+      "status": "completed",
+      "parent": "-5",
+      "validates": "5.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-6": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Run Integration Tests",
+      "status": "completed",
+      "validates": "6",
+      "children": [
+        "-6.d",
+        "-6.i",
+        "-6.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-6.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Run Integration Tests",
+      "status": "completed",
+      "parent": "-6",
+      "validates": "6.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-6.i"
+      ],
+      "file": null
+    },
+    "-6.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Run Integration Tests",
+      "status": "completed",
+      "parent": "-6",
+      "validates": "6.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-6.t"
+      ],
+      "file": null
+    },
+    "-6.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Run Integration Tests",
+      "status": "completed",
+      "parent": "-6",
+      "validates": "6.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-7": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Update Documentation and Migration Guide",
+      "status": "completed",
+      "validates": "7",
+      "children": [
+        "-7.d",
+        "-7.i",
+        "-7.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-7.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Update Documentation and Migration Guide",
+      "status": "completed",
+      "parent": "-7",
+      "validates": "7.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-7.i"
+      ],
+      "file": null
+    },
+    "-7.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Update Documentation and Migration Guide",
+      "status": "completed",
+      "parent": "-7",
+      "validates": "7.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-7.t"
+      ],
+      "file": null
+    },
+    "-7.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Update Documentation and Migration Guide",
+      "status": "completed",
+      "parent": "-7",
+      "validates": "7.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "3.i.1": {
+      "type": "remediation",
+      "status": "completed",
+      "parent": "3.i",
+      "children": [],
+      "blocks": [],
+      "file": "stories/3.i.1-execute-config-module-merge.md",
+      "metadata": {
+        "source_validation": "-3.i"
+      }
+    },
+    "R1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Generate Test Evidence for Story 3",
+      "status": "completed",
+      "parent": "3",
+      "children": [
+        "R1.d",
+        "R1.i",
+        "R1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R1-test-evidence-story-3.md",
+      "validates": "-3",
+      "priority": "P0",
+      "remediation_type": "validation_failure",
+      "created": "2025-12-23T22:46:15.619567"
+    },
+    "R1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Generate Test Evidence for Story 3",
+      "status": "completed",
+      "parent": "R1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "R1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Generate Test Evidence for Story 3",
+      "status": "completed",
+      "parent": "R1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "metadata": {
+        "requires_artifact": "plans/R1-plan.yaml"
+      }
+    },
+    "R1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Generate Test Evidence for Story 3",
+      "status": "completed",
+      "parent": "R1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "R2": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Generate Test Evidence for Story 6",
+      "status": "completed",
+      "parent": "6",
+      "children": [
+        "R2.d",
+        "R2.i",
+        "R2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R2-test-evidence-story-6.md",
+      "validates": "-6",
+      "priority": "P0",
+      "remediation_type": "validation_failure",
+      "created": "2025-12-23T22:46:15.619620"
+    },
+    "R2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Generate Test Evidence for Story 6",
+      "status": "completed",
+      "parent": "R2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "R2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Generate Test Evidence for Story 6",
+      "status": "completed",
+      "parent": "R2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "metadata": {
+        "requires_artifact": "plans/R2-plan.yaml"
+      }
+    },
+    "R2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Generate Test Evidence for Story 6",
+      "status": "completed",
+      "parent": "R2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null
+    }
+  },
+  "execution_queue": [
+    "R1.d",
+    "R1.i",
+    "R1.t",
+    "R2.d",
+    "R2.i",
+    "R2.t",
+    "-1.d",
+    "-1.i",
+    "-1.t",
+    "-2.d",
+    "-2.i",
+    "-2.t",
+    "-3.d",
+    "-3.i",
+    "-3.t",
+    "-4.d",
+    "-4.i",
+    "-4.t",
+    "-5.d",
+    "-5.i",
+    "-5.t",
+    "-6.d",
+    "-6.i",
+    "-6.t",
+    "-7.d",
+    "-7.i",
+    "-7.t",
+    "1.d",
+    "1.i",
+    "1.t",
+    "2.d",
+    "2.i",
+    "2.t",
+    "3.d",
+    "3.i",
+    "3.t",
+    "4.d",
+    "4.i",
+    "4.t",
+    "5.d",
+    "5.i",
+    "5.t",
+    "6.d",
+    "6.i",
+    "6.t",
+    "7.d",
+    "7.i",
+    "7.t",
+    "3.i.1"
+  ]
+}

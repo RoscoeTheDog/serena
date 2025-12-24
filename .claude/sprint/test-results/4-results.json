@@ -1,0 +1,117 @@
+{
+  "story_id": "4",
+  "title": "Update Context YAML Files",
+  "test_phase": "4.t",
+  "executed_at": "2025-12-23T16:05:00Z",
+  "test_file": "test/serena/test_context_mode.py",
+  "results": {
+    "total": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 0.57
+  },
+  "test_categories": {
+    "unit": {
+      "tests": [
+        "test_claude_code_context_loads",
+        "test_ide_assistant_context_loads_with_deprecation",
+        "test_claude_code_enum_exists",
+        "test_ide_assistant_enum_exists_but_deprecated",
+        "test_claude_code_has_fork_customizations",
+        "test_claude_code_has_single_project_flag"
+      ],
+      "passed": 6,
+      "failed": 0
+    },
+    "integration": {
+      "tests": [
+        "test_enum_load_method_works",
+        "test_ide_assistant_enum_load_redirects",
+        "test_context_list_includes_claude_code",
+        "test_context_files_exist"
+      ],
+      "passed": 4,
+      "failed": 0
+    },
+    "security": {
+      "tests": [
+        "test_no_security_tools_accidentally_enabled",
+        "test_excluded_tools_properly_configured"
+      ],
+      "passed": 2,
+      "failed": 0
+    },
+    "new_ide_context": {
+      "tests": [
+        "test_ide_context_loads",
+        "test_ide_context_has_single_project",
+        "test_ide_context_excluded_tools"
+      ],
+      "passed": 3,
+      "failed": 0
+    },
+    "deprecation": {
+      "tests": [
+        "test_deprecation_message_format"
+      ],
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "acceptance_criteria_verified": {
+    "AC-4.1": {
+      "status": "PASSED",
+      "description": "List all context YAML changes between fork and upstream",
+      "evidence": "All 8 context files identified and processed"
+    },
+    "AC-4.2": {
+      "status": "PASSED",
+      "description": "GATE: Human approval for fork customizations",
+      "evidence": "Human approved replace_content (upstream) over replace_regex (fork)"
+    },
+    "AC-4.3": {
+      "status": "PASSED",
+      "description": "Add new ide.yml context file from upstream",
+      "evidence": "test_ide_context_loads, test_ide_context_has_single_project, test_ide_context_excluded_tools"
+    },
+    "AC-4.4": {
+      "status": "PASSED",
+      "description": "Update claude-code.yml with upstream prompt improvements",
+      "evidence": "test_claude_code_has_fork_customizations, test_excluded_tools_properly_configured"
+    },
+    "AC-4.5": {
+      "status": "PASSED",
+      "description": "Update desktop-app.yml, agent.yml, chatgpt.yml, codex.yml from upstream",
+      "evidence": "Files updated successfully, no parsing errors"
+    },
+    "AC-4.6": {
+      "status": "PASSED",
+      "description": "Update context.template.yml with single_project field documentation",
+      "evidence": "File updated with single_project field and documentation"
+    },
+    "AC-4.7": {
+      "status": "PASSED",
+      "description": "Archive ide-assistant.yml (replaced by claude-code.yml)",
+      "evidence": "test_context_files_exist verifies archive location"
+    }
+  },
+  "files_changed": [
+    "src/serena/resources/config/contexts/ide.yml (created)",
+    "src/serena/resources/config/contexts/claude-code.yml (updated)",
+    "src/serena/resources/config/contexts/desktop-app.yml (updated)",
+    "src/serena/resources/config/contexts/agent.yml (updated)",
+    "src/serena/resources/config/contexts/chatgpt.yml (updated)",
+    "src/serena/resources/config/contexts/codex.yml (updated)",
+    "src/serena/resources/config/contexts/context.template.yml (updated)",
+    "src/serena/resources/config/contexts/archive/ide-assistant.yml (archived)",
+    "test/serena/test_context_mode.py (updated)"
+  ],
+  "notes": [
+    "Human gate AC-4.2 resolved: Accepted upstream replace_content (tool was renamed)",
+    "All context files synced with upstream",
+    "ide-assistant.yml successfully archived to archive/ subdirectory",
+    "New ide.yml context added from upstream",
+    "Tests updated to reflect replace_regex -> replace_content change"
+  ]
+}

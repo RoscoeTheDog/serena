@@ -36,6 +36,13 @@ Status of the `main` branch. Changes prior to the next official version change w
 * Client support:
   * New mode `oaicompat-agent` and extensions in the openai tool compatibility, **permitting Serena to work with llama.cpp**
 
+* Upstream Sync (Fork):
+  * **`replace_regex` renamed to `replace_content`**: New tool supports both literal and regex modes via `mode` parameter
+  * **New `edit_memory` tool**: Edit memory files using literal or regex replacement (reuses `replace_content` logic)
+  * **`get_symbols_overview` depth parameter**: Control depth of symbol tree retrieval (default: 0 for top-level only)
+  * **Non-ASCII JSON support**: `Tool._to_json()` preserves Unicode characters with `ensure_ascii=False`
+  * **Context renamed**: `ide-assistant` deprecated in favor of `claude-code` (backward compatible)
+
 * General:
   * Various fixes related to indexing, special paths and determation of ignored paths
   * Decreased `TOOL_DEFAULT_MAX_ANSWER_LENGTH` to be in accordance with (below) typical max-tokens configurations

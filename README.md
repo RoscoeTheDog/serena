@@ -396,14 +396,14 @@ Serena is a great way to make Claude Code both cheaper and more powerful!
 From your project directory, add serena with a command like this,
 
 ```shell
-claude mcp add serena -- <serena-mcp-server> --context ide-assistant --project $(pwd)
+claude mcp add serena -- <serena-mcp-server> --context claude-code --project $(pwd)
 ```
 
 where `<serena-mcp-server>` is your way of [running the Serena MCP server](#running-the-serena-mcp-server).
 For example, when using `uvx`, you would run
 
 ```shell
-claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project $(pwd)
+claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context claude-code --project $(pwd)
 ```
 
 ℹ️ Serena comes with an instruction text, and Claude needs to read it to properly use Serena's tools.
@@ -522,7 +522,7 @@ For more information on MCP servers with Claude Desktop, see [the official quick
 Being an MCP Server, Serena can be included in any MCP Client. The same configuration as above,
 perhaps with small client-specific modifications, should work. Most of the popular
 existing coding assistants (IDE extensions or VSCode-like IDEs) support connections
-to MCP Servers. It is **recommended to use the `ide-assistant` context** for these integrations by adding `"--context", "ide-assistant"` to the `args` in your MCP client's configuration. Including Serena generally boosts their performance
+to MCP Servers. It is **recommended to use the `claude-code` context** for these integrations by adding `"--context", "claude-code"` to the `args` in your MCP client's configuration. Including Serena generally boosts their performance
 by providing them tools for symbolic operations.
 
 In this case, the billing for the usage continues to be controlled by the client of your choice
@@ -585,8 +585,12 @@ Serena comes with pre-defined contexts:
 
 * `desktop-app`: Tailored for use with desktop applications like Claude Desktop. This is the default.
 * `agent`: Designed for scenarios where Serena acts as a more autonomous agent, for example, when used with Agno.
-* `ide-assistant`: Optimized for integration into IDEs like VSCode, Cursor, or Cline, focusing on in-editor coding assistance.
+* `claude-code`: Optimized for integration into Claude Code and similar IDE assistants with built-in file/shell tools.
+* `ide-assistant`: **DEPRECATED** - Use `claude-code` instead. Kept for backwards compatibility.
+
 Choose the context that best matches the type of integration you are using.
+
+> **Note**: The `ide-assistant` context is deprecated in favor of `claude-code` to align with upstream naming conventions. The old name will continue to work with a deprecation warning for backwards compatibility.
 
 When launching Serena, specify the context using `--context <context-name>`.
 Note that for cases where parameter lists are specified (e.g. Claude Desktop), you must add two parameters to the list.
@@ -902,6 +906,7 @@ Here is the list of Serena's default tools with a short description (output of `
 * `check_onboarding_performed`: Checks whether project onboarding was already performed.
 * `create_text_file`: Creates/overwrites a file in the project directory.
 * `delete_memory`: Deletes a memory from Serena's project-specific memory store.
+* `edit_memory`: Edits content in a memory file using literal or regex replacement.
 * `execute_shell_command`: Executes a shell command.
 * `find_file`: Finds files in the given relative paths
 * `find_referencing_symbols`: Finds symbols that reference the symbol at the given location (optionally filtered by type).
@@ -915,7 +920,7 @@ Here is the list of Serena's default tools with a short description (output of `
 * `prepare_for_new_conversation`: Provides instructions for preparing for a new conversation (in order to continue with the necessary context).
 * `read_file`: Reads a file within the project directory.
 * `read_memory`: Reads the memory with the given name from Serena's project-specific memory store.
-* `replace_regex`: Replaces content in a file by using regular expressions.
+* `replace_content`: Replaces content in a file using literal or regex matching.
 * `replace_symbol_body`: Replaces the full definition of a symbol.
 * `search_for_pattern`: Performs a search for a pattern in the project.
 * `think_about_collected_information`: Thinking tool for pondering the completeness of collected information.

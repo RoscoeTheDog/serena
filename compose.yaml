@@ -16,8 +16,8 @@ services:
       - SERENA_DOCKER=1
     command:
       - "uv run --directory . serena-mcp-server --transport sse --port 9121 --host 0.0.0.0"
-      # Add the context for the IDE assistant
-      # - "uv run --directory . serena-mcp-server --transport sse --port 9121 --host 0.0.0.0 --context ide-assistant"
+      # Add the context for Claude Code integration
+      # - "uv run --directory . serena-mcp-server --transport sse --port 9121 --host 0.0.0.0 --context claude-code"
 
   serena-dev:
     image: serena:dev
