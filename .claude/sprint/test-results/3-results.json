@@ -1,0 +1,167 @@
+{
+  "story_id": "3",
+  "phase": "testing",
+  "executed_at": "2025-12-24T07:00:00.308445+00:00",
+  "test_command": "PYTHONPATH=src python -m pytest test/serena/config/test_serena_config.py test/serena/test_context_mode.py -v --tb=short -o addopts=",
+  "summary": {
+    "total": 28,
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0
+  },
+  "pass_rate": 1.0,
+  "tests": [
+    {
+      "name": "test_autogenerate_empty_directory",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_autogenerate_with_python_files",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_autogenerate_with_multiple_languages",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_autogenerate_saves_to_disk",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_autogenerate_nonexistent_path",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_autogenerate_with_gitignored_files_only",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_autogenerate_custom_project_name",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_autogenerate_error_message_format",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_load_from_centralized_location",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_load_with_autogenerate_creates_centralized",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_error_message_shows_centralized_location",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_load_fails_cleanly_when_config_missing",
+      "file": "test/serena/config/test_serena_config.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_claude_code_context_loads",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_ide_assistant_context_loads_with_deprecation",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_claude_code_enum_exists",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_ide_assistant_enum_exists_but_deprecated",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_claude_code_has_fork_customizations",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_claude_code_has_single_project_flag",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_enum_load_method_works",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_ide_assistant_enum_load_redirects",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_context_list_includes_claude_code",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_context_files_exist",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_no_security_tools_accidentally_enabled",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_excluded_tools_properly_configured",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_deprecation_message_format",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_ide_context_loads",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_ide_context_has_single_project",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    },
+    {
+      "name": "test_ide_context_excluded_tools",
+      "file": "test/serena/test_context_mode.py",
+      "status": "passed"
+    }
+  ],
+  "coverage": {
+    "files_tested": [
+      "src/serena/config/serena_config.py",
+      "src/serena/config/context_mode.py"
+    ],
+    "test_categories": [
+      "unit",
+      "integration",
+      "security"
+    ]
+  }
+}

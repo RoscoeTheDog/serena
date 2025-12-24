@@ -1,0 +1,40 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0 -- C:\python313\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.7', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.12.0', 'langsmith': '0.4.37', 'asyncio': '0.20.3', 'cov': '7.0.0', 'json-report': '1.5.0', 'metadata': '3.1.1'}}
+rootdir: C:\Users\Admin\Documents\GitHub\serena
+configfile: pyproject.toml
+plugins: anyio-4.12.0, langsmith-0.4.37, asyncio-0.20.3, cov-7.0.0, json-report-1.5.0, metadata-3.1.1
+asyncio: mode=Mode.STRICT
+collecting ... collected 28 items
+
+test/serena/config/test_serena_config.py::TestProjectConfigAutogenerate::test_autogenerate_empty_directory PASSED [  3%]
+test/serena/config/test_serena_config.py::TestProjectConfigAutogenerate::test_autogenerate_with_python_files PASSED [  7%]
+test/serena/config/test_serena_config.py::TestProjectConfigAutogenerate::test_autogenerate_with_multiple_languages PASSED [ 10%]
+test/serena/config/test_serena_config.py::TestProjectConfigAutogenerate::test_autogenerate_saves_to_disk PASSED [ 14%]
+test/serena/config/test_serena_config.py::TestProjectConfigAutogenerate::test_autogenerate_nonexistent_path PASSED [ 17%]
+test/serena/config/test_serena_config.py::TestProjectConfigAutogenerate::test_autogenerate_with_gitignored_files_only PASSED [ 21%]
+test/serena/config/test_serena_config.py::TestProjectConfigAutogenerate::test_autogenerate_custom_project_name PASSED [ 25%]
+test/serena/config/test_serena_config.py::TestProjectConfigAutogenerate::test_autogenerate_error_message_format PASSED [ 28%]
+test/serena/config/test_serena_config.py::TestProjectConfigCentralizedStorage::test_load_from_centralized_location PASSED [ 32%]
+test/serena/config/test_serena_config.py::TestProjectConfigCentralizedStorage::test_load_with_autogenerate_creates_centralized PASSED [ 35%]
+test/serena/config/test_serena_config.py::TestProjectConfigCentralizedStorage::test_error_message_shows_centralized_location PASSED [ 39%]
+test/serena/config/test_serena_config.py::TestProjectConfigCentralizedStorage::test_load_fails_cleanly_when_config_missing PASSED [ 42%]
+test/serena/test_context_mode.py::TestContextModeLoading::test_claude_code_context_loads PASSED [ 46%]
+test/serena/test_context_mode.py::TestContextModeLoading::test_ide_assistant_context_loads_with_deprecation PASSED [ 50%]
+test/serena/test_context_mode.py::TestContextModeLoading::test_claude_code_enum_exists PASSED [ 53%]
+test/serena/test_context_mode.py::TestContextModeLoading::test_ide_assistant_enum_exists_but_deprecated PASSED [ 57%]
+test/serena/test_context_mode.py::TestContextModeLoading::test_claude_code_has_fork_customizations PASSED [ 60%]
+test/serena/test_context_mode.py::TestContextModeLoading::test_claude_code_has_single_project_flag PASSED [ 64%]
+test/serena/test_context_mode.py::TestContextModeIntegration::test_enum_load_method_works PASSED [ 67%]
+test/serena/test_context_mode.py::TestContextModeIntegration::test_ide_assistant_enum_load_redirects PASSED [ 71%]
+test/serena/test_context_mode.py::TestContextModeIntegration::test_context_list_includes_claude_code PASSED [ 75%]
+test/serena/test_context_mode.py::TestContextModeIntegration::test_context_files_exist PASSED [ 78%]
+test/serena/test_context_mode.py::TestContextModeSecurity::test_no_security_tools_accidentally_enabled PASSED [ 82%]
+test/serena/test_context_mode.py::TestContextModeSecurity::test_excluded_tools_properly_configured PASSED [ 85%]
+test/serena/test_context_mode.py::TestDeprecationWarningContent::test_deprecation_message_format PASSED [ 89%]
+test/serena/test_context_mode.py::TestNewIdeContext::test_ide_context_loads PASSED [ 92%]
+test/serena/test_context_mode.py::TestNewIdeContext::test_ide_context_has_single_project PASSED [ 96%]
+test/serena/test_context_mode.py::TestNewIdeContext::test_ide_context_excluded_tools PASSED [100%]
+
+============================= 28 passed in 0.95s ==============================
