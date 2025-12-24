@@ -1,0 +1,821 @@
+.................s...................................................... [  7%]
+..................................F...FF.F.F..FFFFFsFFFFFFsFFFFFFFFF.... [ 14%]
+...................................................................F.... [ 21%]
+...........s.........................................................FFF [ 29%]
+.....EEEEEEEE............F.......................FF.FF.FFFFF............ [ 36%]
+......................EEFFFFFFFFFFFFFFFF......F.......F.EEEEEEEEEEEEEEEE [ 43%]
+EEEFFFFFFFFFFFFFFFFFF................................FFFF..F.F...FF..F.E [ 51%]
+EEEEEEEEEEEEEE.FFEEEEEEEEEEEEEEEEEEEEEEF.F.............F..........F..... [ 58%]
+...........F............F...s..................................FF....... [ 65%]
+....................F..........F........................................ [ 73%]
+...F..........................F..............F...................sssssss [ 80%]
+sss....F..............EEs............sssssssssssssssssssss.............s [ 87%]
+ssssssssss.........................EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEssss [ 95%]
+sssEEE..sssssssssss..ss..s.........ssss..........                        [100%]
+=================================== ERRORS ====================================
+____ ERROR at setup of TestCacheIntegration.test_find_symbol_caches_result ____
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_ ERROR at setup of TestCacheIntegration.test_get_symbols_overview_caches_result _
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_ ERROR at setup of TestCacheIntegration.test_replace_symbol_invalidates_cache _
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_ ERROR at setup of TestCacheIntegration.test_insert_after_invalidates_cache __
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_ ERROR at setup of TestCacheIntegration.test_insert_before_invalidates_cache _
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_ ERROR at setup of TestCacheIntegration.test_cache_with_different_query_params _
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____ ERROR at setup of TestCacheIntegration.test_cache_performance_benefit ____
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_ ERROR at setup of TestCacheIntegration.test_multiple_file_edits_invalidate_correctly _
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+__________________ ERROR at setup of test_summary_mode_basic __________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____________ ERROR at setup of test_summary_mode_with_many_matches ____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____________ ERROR at setup of test_output_format_metadata_default ____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______________ ERROR at setup of test_output_format_signature ________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+__________________ ERROR at setup of test_output_format_body __________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____________ ERROR at setup of test_output_format_metadata_no_body ____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+______________ ERROR at setup of test_workflow_explore_then_read ______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_____________ ERROR at setup of test_include_body_true_deprecated _____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____________ ERROR at setup of test_include_body_false_deprecated _____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+__________ ERROR at setup of test_detail_level_signature_deprecated ___________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_____________ ERROR at setup of test_detail_level_full_deprecated _____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+______________ ERROR at setup of test_combined_deprecated_params ______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+__ ERROR at setup of test_migration_include_body_true_to_output_format_body ___
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_ ERROR at setup of test_migration_include_body_false_to_output_format_metadata _
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+___________ ERROR at setup of test_migration_detail_level_signature ___________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+______________ ERROR at setup of test_docstring_example_default _______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_____________ ERROR at setup of test_docstring_example_signature ______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+________________ ERROR at setup of test_docstring_example_body ________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______________ ERROR at setup of test_output_format_with_depth _______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_________ ERROR at setup of test_output_format_signature_without_body _________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______________ ERROR at setup of test_cache_with_output_format _______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+___________ ERROR at setup of test_find_symbol_default_search_scope ___________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_____________ ERROR at setup of test_find_symbol_search_scope_all _____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______ ERROR at setup of test_find_symbol_search_scope_source_explicit _______
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____ ERROR at setup of test_find_symbol_exclude_generated_true_deprecated _____
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____ ERROR at setup of test_find_symbol_exclude_generated_false_deprecated ____
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_________ ERROR at setup of test_search_pattern_default_search_scope __________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+___________ ERROR at setup of test_search_pattern_search_scope_all ____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_____ ERROR at setup of test_search_pattern_exclude_generated_deprecated ______
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____________ ERROR at setup of test_list_dir_default_search_scope _____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+______________ ERROR at setup of test_list_dir_search_scope_all _______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+______ ERROR at setup of test_list_dir_search_scope_source_with_metadata ______
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+______ ERROR at setup of test_list_dir_exclude_generated_true_deprecated ______
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_____ ERROR at setup of test_list_dir_exclude_generated_false_deprecated ______
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+______________ ERROR at setup of test_exclusion_metadata_format _______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____________ ERROR at setup of test_exclusion_instruction_updated _____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______________ ERROR at setup of test_match_mode_exact_default _______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+______________ ERROR at setup of test_match_mode_exact_explicit _______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_________________ ERROR at setup of test_match_mode_substring _________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______________ ERROR at setup of test_match_mode_glob_asterisk _______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____________ ERROR at setup of test_match_mode_glob_question_mark _____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______________ ERROR at setup of test_match_mode_regex_simple ________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______________ ERROR at setup of test_match_mode_regex_complex _______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______ ERROR at setup of test_backward_compat_substring_matching_true ________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______ ERROR at setup of test_backward_compat_substring_matching_false _______
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+__________ ERROR at setup of test_backward_compat_parameter_priority __________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+________________ ERROR at setup of test_invalid_regex_pattern _________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+________________ ERROR at setup of test_match_mode_with_depth _________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____________________ ERROR at setup of test_glob_no_match _____________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_________________ ERROR at setup of test_regex_case_sensitive _________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_________________ ERROR at setup of test_glob_with_functions __________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+__________ ERROR at setup of test_match_mode_with_output_format_body __________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____________ ERROR at setup of test_match_mode_with_include_kinds _____________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+___________ ERROR at setup of test_migration_example_from_docstring ___________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______________ ERROR at setup of test_docstring_example_exact ________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_____________ ERROR at setup of test_docstring_example_substring ______________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+________________ ERROR at setup of test_docstring_example_glob ________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+_______________ ERROR at setup of test_docstring_example_regex ________________
+E   TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+____ ERROR at setup of TestRLanguageServer.test_server_initialization[r-r] ____
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+During handling of the above exception, another exception occurred:
+E   RuntimeError: R is not installed. Please install R from https://www.r-project.org/
+---------------------------- Captured stdout setup ----------------------------
+INFO  2025-12-23 23:34:06,641 serena.util.file_system:start:329 - Loading of .gitignore files starting ...
+INFO  2025-12-23 23:34:06,643 serena.util.file_system:stop:336 - Loading of .gitignore files completed in 0.002 seconds
+----------------------------- Captured log setup ------------------------------
+INFO     serena.util.file_system:logging.py:329 Loading of .gitignore files starting ...
+INFO     serena.util.file_system:logging.py:336 Loading of .gitignore files completed in 0.002 seconds
+_ ERROR at setup of TestRubyLanguageServer.test_find_definition_across_files[ruby-ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+---------------------------- Captured stdout setup ----------------------------
+INFO  2025-12-23 23:34:06,717 serena.util.file_system:start:329 - Loading of .gitignore files starting ...
+INFO  2025-12-23 23:34:06,719 serena.util.file_system:stop:336 - Loading of .gitignore files completed in 0.002 seconds
+----------------------------- Captured log setup ------------------------------
+INFO     serena.util.file_system:logging.py:329 Loading of .gitignore files starting ...
+INFO     serena.util.file_system:logging.py:336 Loading of .gitignore files completed in 0.002 seconds
+_______ ERROR at setup of TestRLanguageServer.test_symbol_retrieval[r] ________
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+During handling of the above exception, another exception occurred:
+E   RuntimeError: R is not installed. Please install R from https://www.r-project.org/
+---------------------------- Captured stdout setup ----------------------------
+INFO  2025-12-23 23:35:29,391 serena.util.file_system:start:329 - Loading of .gitignore files starting ...
+INFO  2025-12-23 23:35:29,393 serena.util.file_system:stop:336 - Loading of .gitignore files completed in 0.002 seconds
+----------------------------- Captured log setup ------------------------------
+INFO     serena.util.file_system:logging.py:329 Loading of .gitignore files starting ...
+INFO     serena.util.file_system:logging.py:336 Loading of .gitignore files completed in 0.002 seconds
+_ ERROR at setup of TestRLanguageServer.test_find_definition_across_files[r] __
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+During handling of the above exception, another exception occurred:
+E   RuntimeError: R is not installed. Please install R from https://www.r-project.org/
+_ ERROR at setup of TestRLanguageServer.test_find_references_across_files[r] __
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+During handling of the above exception, another exception occurred:
+E   RuntimeError: R is not installed. Please install R from https://www.r-project.org/
+_______ ERROR at setup of TestRubyLanguageServer.test_find_symbol[ruby] _______
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+---------------------------- Captured stdout setup ----------------------------
+INFO  2025-12-23 23:35:29,455 serena.util.file_system:start:329 - Loading of .gitignore files starting ...
+INFO  2025-12-23 23:35:29,455 serena.util.file_system:stop:336 - Loading of .gitignore files completed in 0.000 seconds
+----------------------------- Captured log setup ------------------------------
+INFO     serena.util.file_system:logging.py:329 Loading of .gitignore files starting ...
+INFO     serena.util.file_system:logging.py:336 Loading of .gitignore files completed in 0.000 seconds
+_ ERROR at setup of TestRubyLanguageServer.test_find_referencing_symbols[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_containing_symbol_method[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_containing_symbol_class[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_containing_symbol_module[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_containing_symbol_nested_class[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_containing_symbol_none[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_referencing_symbols_method[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_referencing_symbols_class[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_defining_symbol_variable[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_defining_symbol_class[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_defining_symbol_none[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_defining_symbol_nested_class[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_symbol_methods_integration[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_symbol_tree_structure_basic[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_document_symbols_detailed[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_module_and_class_hierarchy[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_references_to_variables[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_referencing_symbols_parameter[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_referencing_symbols_none[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_dir_overview[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_document_overview[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_containing_symbol_variable[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_containing_symbol_function[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_containing_symbol_nested[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_symbol_tree_structure_subdir[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_defining_symbol_imported_class[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_defining_symbol_method_call[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_request_defining_symbol_nested_function[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestRubyLanguageServerSymbols.test_containing_symbol_of_var_is_file[ruby] _
+E   FileNotFoundError: [WinError 2] The system cannot find the file specified
+
+The above exception was the direct cause of the following exception:
+E   RuntimeError: Ruby is not installed or not found in PATH. Please install Ruby using one of these methods:
+      - Using rbenv: rbenv install 3.0.0 && rbenv global 3.0.0
+      - Using RVM: rvm install 3.0.0 && rvm use 3.0.0 --default
+      - Using asdf: asdf install ruby 3.0.0 && asdf global ruby 3.0.0
+      - System package manager (brew install ruby, apt install ruby, etc.)
+_ ERROR at setup of TestLanguageServerBasics.test_basic_definition[terraform] _
+E   RuntimeError: Terraform executable not found, please ensure Terraform is installed.See https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli for instructions.
+---------------------------- Captured stdout setup ----------------------------
+INFO  2025-12-23 23:35:29,776 serena.util.file_system:start:329 - Loading of .gitignore files starting ...
+INFO  2025-12-23 23:35:29,778 serena.util.file_system:stop:336 - Loading of .gitignore files completed in 0.002 seconds
+----------------------------- Captured log setup ------------------------------
+INFO     serena.util.file_system:logging.py:329 Loading of .gitignore files starting ...
+INFO     serena.util.file_system:logging.py:336 Loading of .gitignore files completed in 0.002 seconds
+_ ERROR at setup of TestLanguageServerBasics.test_request_references_aws_instance[terraform] _
+E   RuntimeError: Terraform executable not found, please ensure Terraform is installed.See https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli for instructions.
+_ ERROR at setup of TestLanguageServerBasics.test_request_references_variable[terraform] _
+E   RuntimeError: Terraform executable not found, please ensure Terraform is installed.See https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli for instructions.
+================================== FAILURES ===================================
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_memories_manager_centralized.py:50: AttributeError: 'MemoriesManager' object has no attribute '_project_memory_dir'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_memories_manager_centralized.py:84: Failed: DID NOT RAISE <class 'FileNotFoundError'>
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_memories_manager_centralized.py:96: AssertionError: assert 'memory1' in [{'estimated_tokens': 2, 'last_modified': '1766561076', 'lines': 1, 'name': 'memory1', ...}, {'estimated_tokens': 2, 'last_modified': '1766561076', 'lines': 1, 'name': 'memory2', ...}]
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_memories_manager_centralized.py:111: AssertionError: assert 'size' in {'estimated_tokens': 1, 'last_modified': '1766561076', 'lines': 1, 'name': 'test', ...}
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_memories_manager_centralized.py:129: AssertionError: assert 'Memory file nonexistent not found.' is False
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:93: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:93: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\AppData\Roaming\uv\python\cpython-3.11.13-windows-x86_64-none\Lib\concurrent\futures\_base.py:458: TimeoutError
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:93: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:93: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:93: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:146: KeyError: 0
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:146: KeyError: 0
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:146: KeyError: 0
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:146: KeyError: 0
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:146: KeyError: 0
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:146: KeyError: 0
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:247: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:247: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:247: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:247: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:247: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:247: TypeError: string indices must be integers, not 'str'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:286: AssertionError: Expected to find no symbols for /NestedClass. Symbols found: {'_schema': 'structured_v1', 'symbols': [], '_deprecated': [{'parameter': 'substring_matching', 'value': True, 'replacement': 'match_mode', 'migration': "Use match_mode='substring' instead of substring_matching=True", 'removal_version': '2.0.0'}]}
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_serena_agent.py:286: AssertionError: Expected to find no symbols for /NoSuchParent/NestedClass. Symbols found: {'_schema': 'structured_v1', 'symbols': [], '_deprecated': [{'parameter': 'substring_matching', 'value': True, 'replacement': 'match_mode', 'migration': "Use match_mode='substring' instead of substring_matching=True", 'removal_version': '2.0.0'}]}
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_symbol_cache.py:290: assert 1766590320.0 <= (1766561520.7107072 + 2)
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_tool_parameter_types.py:39: AssertionError: Tool 'get_symbol_body' parameter 'symbol_id' missing 'type'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_tool_parameter_types.py:39: AssertionError: Tool 'get_symbol_body' parameter 'symbol_id' missing 'type'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\test_tool_parameter_types.py:39: AssertionError: Tool 'get_symbol_body' parameter 'symbol_id' missing 'type'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_memory_metadata.py:66: assert False
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_on_demand_body_retrieval.py:149: assert 0 == 1
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_on_demand_body_retrieval.py:177: assert 0 == 2
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_on_demand_body_retrieval.py:220: AssertionError: assert 'Symbol not found' in 'Unexpected error: '
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_on_demand_body_retrieval.py:236: assert 0 == 2
+C:\Users\Admin\Documents\GitHub\serena\src\serena\tools\tools_base.py:60: AssertionError
+C:\Users\Admin\Documents\GitHub\serena\src\serena\tools\tools_base.py:60: AssertionError
+C:\Users\Admin\Documents\GitHub\serena\src\serena\tools\tools_base.py:60: AssertionError
+C:\Users\Admin\Documents\GitHub\serena\src\serena\tools\tools_base.py:60: AssertionError
+C:\Users\Admin\Documents\GitHub\serena\src\serena\tools\tools_base.py:60: AssertionError
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:134: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:159: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:175: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:206: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:233: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:254: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:273: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:290: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:308: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:338: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_pattern_search_summaries.py:362: NameError: name 'MockProject' is not defined
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_reference_count_mode.py:82: TypeError: SerenaAgent.__init__() got an unexpected keyword argument 'project_root'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_reference_count_mode.py:179: TypeError: SerenaAgent.__init__() got an unexpected keyword argument 'project_root'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_reference_count_mode.py:264: TypeError: SerenaAgent.__init__() got an unexpected keyword argument 'project_root'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_reference_count_mode.py:343: TypeError: SerenaAgent.__init__() got an unexpected keyword argument 'project_root'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_reference_count_mode.py:395: TypeError: SerenaAgent.__init__() got an unexpected keyword argument 'project_root'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_signature_mode.py:157: TypeError: Can't instantiate abstract class TokenCountEstimator with abstract method estimate_token_count
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_signature_mode.py:320: TypeError: Can't instantiate abstract class TokenCountEstimator with abstract method estimate_token_count
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:60: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:79: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:96: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:114: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:135: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:157: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:176: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:198: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:219: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:244: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:268: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:294: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:313: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:335: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:362: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:378: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:398: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story2_result_format.py:418: TypeError: Component.__init__() got an unexpected keyword argument 'project'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story4_include_metadata_default.py:47: assert 0 == 3
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story4_include_metadata_default.py:65: assert 0 == 3
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story4_include_metadata_default.py:74: assert 0 == 3
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story4_include_metadata_default.py:104: AssertionError: assert 'memories' in []
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story4_include_metadata_default.py:175: StopIteration
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story4_include_metadata_default.py:217: TypeError: list indices must be integers or slices, not str
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story4_include_metadata_default.py:283: assert 0 == 1
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story4_include_metadata_default.py:295: assert 0 == 1
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story4_include_metadata_default.py:354: assert 0 < 0
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story5_search_scope.py:398: TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_story5_search_scope.py:429: TypeError: Project.__init__() missing 1 required positional argument: 'project_config'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_token_estimation_integration.py:77: assert 0.6068111455108359 >= 0.7
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_token_estimation_integration.py:111: assert 323 > (127 * 3)
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_token_estimation_integration.py:341: AttributeError: 'FastTokenEstimator' object has no attribute '_estimate_tokens'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\tools\test_verbosity_control.py:152: AssertionError: assert 'minimal' == 'normal'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\util\test_complexity_analyzer.py:85: assert False is True
+C:\Users\Admin\Documents\GitHub\serena\test\serena\util\test_complexity_analyzer.py:340: AssertionError: assert 'low' in ['medium', 'high']
+C:\Users\Admin\Documents\GitHub\serena\test\serena\util\test_file_system.py:822: AssertionError: assert 5 == 2
+C:\Users\Admin\Documents\GitHub\serena\test\serena\util\test_file_system.py:843: AssertionError: assert 3 == 2
+C:\Users\Admin\Documents\GitHub\serena\test\serena\util\test_pattern_extraction.py:178: AssertionError: assert 'authenticate(' in 'authenticate'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\util\test_pattern_extraction.py:253: AssertionError: assert 'login(auth: authenticate)' == 'authenticate'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\util\test_session_tracker.py:216: AssertionError: assert 'focused_work' in 'exploration_phase (searches=0, reads=6, edits=0)'
+C:\Users\Admin\Documents\GitHub\serena\test\serena\util\test_token_estimator.py:98: assert 100 > 100
+C:\Users\Admin\Documents\GitHub\serena\test\serena\util\test_token_estimator.py:229: assert (0)
+C:\Users\Admin\Documents\GitHub\serena\test\solidlsp\csharp\test_csharp_basic.py:120: AssertionError: Should find reference in Models/Person.cs where Calculator.Subtract is called
+============================== warnings summary ===============================
+test\solidlsp\erlang\test_erlang_ignored_dirs.py:40
+  C:\Users\Admin\Documents\GitHub\serena\test\solidlsp\erlang\test_erlang_ignored_dirs.py:40: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.timeout(60)  # Add 60 second timeout
+
+test\solidlsp\erlang\test_erlang_ignored_dirs.py:57
+  C:\Users\Admin\Documents\GitHub\serena\test\solidlsp\erlang\test_erlang_ignored_dirs.py:57: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.timeout(60)  # Add 60 second timeout
+
+test\solidlsp\erlang\test_erlang_ignored_dirs.py:84
+  C:\Users\Admin\Documents\GitHub\serena\test\solidlsp\erlang\test_erlang_ignored_dirs.py:84: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.timeout(90)  # Longer timeout for this complex test
+
+test\solidlsp\erlang\test_erlang_symbol_retrieval.py:309
+  C:\Users\Admin\Documents\GitHub\serena\test\solidlsp\erlang\test_erlang_symbol_retrieval.py:309: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.timeout(120)  # Add explicit timeout for this complex test
+
+test\solidlsp\erlang\test_erlang_symbol_retrieval.py:408
+  C:\Users\Admin\Documents\GitHub\serena\test\solidlsp\erlang\test_erlang_symbol_retrieval.py:408: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.timeout(90)  # Add explicit timeout
+
+test/serena/config/test_serena_config.py::TestProjectConfigAutogenerate::test_autogenerate_empty_directory
+  C:\Users\Admin\AppData\Roaming\uv\python\cpython-3.11.13-windows-x86_64-none\Lib\contextlib.py:137: UserWarning: Failed to patch PyCharm's diff tools. Skipping patch.
+    return next(self.gen)
+
+test/solidlsp/python/test_symbol_retrieval.py::TestLanguageServerSymbols::test_request_defining_symbol_method_call[python]
+  C:\Users\Admin\Documents\GitHub\serena\test\solidlsp\python\test_symbol_retrieval.py:242: UserWarning: Could not verify method call definition - file structure may differ from expected
+    warnings.warn("Could not verify method call definition - file structure may differ from expected")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------------- snapshot report summary ---------------------------
+14 snapshots passed.
+=========================== short test summary info ===========================
+FAILED test/serena/test_memories_manager_centralized.py::TestMemoriesManagerCentralizedStorage::test_init_stores_correct_paths
+FAILED test/serena/test_memories_manager_centralized.py::TestMemoriesManagerCentralizedStorage::test_load_memory_not_found
+FAILED test/serena/test_memories_manager_centralized.py::TestMemoriesManagerCentralizedStorage::test_list_memories_from_centralized_only
+FAILED test/serena/test_memories_manager_centralized.py::TestMemoriesManagerCentralizedStorage::test_list_memories_with_metadata
+FAILED test/serena/test_memories_manager_centralized.py::TestMemoriesManagerCentralizedStorage::test_delete_memory_not_found
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol[python-User-Class-models.py]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol[go-Helper-Function-main.go]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol[kotlin-Model-Struct-Model.kt]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol[typescript-DemoClass-Class-index.ts]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol[php-helperFunction-Function-helper.php]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol[csharp-Calculator-Class-Program.cs]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_references[python-User-test_repo\\models.py-test_repo\\services.py]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_references[go-Helper-main.go-main.go]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_references[kotlin-Model-src\\main\\kotlin\\test_repo\\Model.kt-src\\main\\kotlin\\test_repo\\Main.kt]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_references[typescript-helperFunction-index.ts-use_helper.ts]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_references[php-helperFunction-helper.php-index.php]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_references[csharp-Calculator-Program.cs-Program.cs]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_name_path[exact_qualname_class]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_name_path[exact_qualname_method]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_name_path[substring_qualname_class]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_name_path[substring_qualname_method]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_name_path[absolute_qualname_class]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_name_path[absolute_substring_qualname_method]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_name_path_no_match[absolute_path_non_top_level_no_match]
+FAILED test/serena/test_serena_agent.py::TestSerenaAgent::test_find_symbol_name_path_no_match[absolute_path_non_existent_parent_no_match]
+FAILED test/serena/test_symbol_cache.py::test_cache_timestamp - assert 176659...
+FAILED test/serena/test_tool_parameter_types.py::test_all_tool_parameters_have_type[chatgpt]
+FAILED test/serena/test_tool_parameter_types.py::test_all_tool_parameters_have_type[codex]
+FAILED test/serena/test_tool_parameter_types.py::test_all_tool_parameters_have_type[oaicompat-agent]
+FAILED test/serena/tools/test_memory_metadata.py::TestMemoryMetadata::test_list_memories_backward_compatible
+FAILED test/serena/tools/test_on_demand_body_retrieval.py::TestGetSymbolBodyTool::test_get_symbol_body_single
+FAILED test/serena/tools/test_on_demand_body_retrieval.py::TestGetSymbolBodyTool::test_get_symbol_body_batch
+FAILED test/serena/tools/test_on_demand_body_retrieval.py::TestGetSymbolBodyTool::test_get_symbol_body_not_found
+FAILED test/serena/tools/test_on_demand_body_retrieval.py::TestGetSymbolBodyTool::test_get_symbol_body_batch_partial_failure
+FAILED test/serena/tools/test_on_demand_body_retrieval.py::TestFindSymbolWithSymbolIds::test_find_symbol_includes_symbol_ids
+FAILED test/serena/tools/test_on_demand_body_retrieval.py::TestFindSymbolWithSymbolIds::test_symbol_id_stability
+FAILED test/serena/tools/test_on_demand_body_retrieval.py::TestFindSymbolWithSymbolIds::test_symbol_id_with_depth
+FAILED test/serena/tools/test_on_demand_body_retrieval.py::TestEndToEndWorkflow::test_workflow_search_then_retrieve
+FAILED test/serena/tools/test_on_demand_body_retrieval.py::TestEndToEndWorkflow::test_token_savings_calculation
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_detailed_mode_backward_compatible
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_default_mode_is_detailed
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_summary_mode_counts_by_file
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_summary_mode_preview_structure
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_summary_mode_with_zero_matches
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_summary_mode_with_one_match
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_summary_mode_with_file_filter
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_summary_mode_with_context_lines
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_token_savings_summary_vs_detailed
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_summary_mode_sorted_by_match_count
+FAILED test/serena/tools/test_pattern_search_summaries.py::test_summary_mode_with_many_files
+FAILED test/serena/tools/test_reference_count_mode.py::TestReferenceCountMode::test_count_mode_basic
+FAILED test/serena/tools/test_reference_count_mode.py::TestReferenceCountMode::test_summary_mode_basic
+FAILED test/serena/tools/test_reference_count_mode.py::TestReferenceCountMode::test_full_mode_backward_compatible
+FAILED test/serena/tools/test_reference_count_mode.py::TestReferenceCountMode::test_count_mode_empty_references
+FAILED test/serena/tools/test_reference_count_mode.py::TestReferenceCountMode::test_summary_mode_less_than_10_refs
+FAILED test/serena/tools/test_signature_mode.py::TestSignatureMode::test_token_estimation_comparison
+FAILED test/serena/tools/test_signature_mode.py::TestSignatureModeBenefits::test_token_savings_calculation
+FAILED test/serena/tools/test_story2_result_format.py::test_result_format_summary_mode
+FAILED test/serena/tools/test_story2_result_format.py::test_result_format_detailed_mode
+FAILED test/serena/tools/test_story2_result_format.py::test_default_is_summary_mode
+FAILED test/serena/tools/test_story2_result_format.py::test_summary_includes_token_estimate
+FAILED test/serena/tools/test_story2_result_format.py::test_summary_includes_expansion_hint_when_truncated
+FAILED test/serena/tools/test_story2_result_format.py::test_summary_no_expansion_hint_when_few_results
+FAILED test/serena/tools/test_story2_result_format.py::test_output_mode_deprecated_but_works_summary
+FAILED test/serena/tools/test_story2_result_format.py::test_output_mode_deprecated_but_works_detailed
+FAILED test/serena/tools/test_story2_result_format.py::test_result_format_takes_precedence_over_output_mode
+FAILED test/serena/tools/test_story2_result_format.py::test_migration_output_mode_summary_to_result_format
+FAILED test/serena/tools/test_story2_result_format.py::test_migration_output_mode_detailed_to_result_format
+FAILED test/serena/tools/test_story2_result_format.py::test_migration_default_behavior_changed
+FAILED test/serena/tools/test_story2_result_format.py::test_summary_output_structure_documented
+FAILED test/serena/tools/test_story2_result_format.py::test_detailed_output_structure_documented
+FAILED test/serena/tools/test_story2_result_format.py::test_zero_matches_summary_mode
+FAILED test/serena/tools/test_story2_result_format.py::test_zero_matches_detailed_mode
+FAILED test/serena/tools/test_story2_result_format.py::test_exactly_10_matches_no_expansion_hint
+FAILED test/serena/tools/test_story2_result_format.py::test_11_matches_triggers_expansion_hint
+FAILED test/serena/tools/test_story4_include_metadata_default.py::test_default_returns_metadata
+FAILED test/serena/tools/test_story4_include_metadata_default.py::test_explicit_true_returns_metadata
+FAILED test/serena/tools/test_story4_include_metadata_default.py::test_explicit_false_returns_names_only
+FAILED test/serena/tools/test_story4_include_metadata_default.py::test_tool_output_with_default
+FAILED test/serena/tools/test_story4_include_metadata_default.py::test_preview_contains_first_lines
+FAILED test/serena/tools/test_story4_include_metadata_default.py::test_token_savings_calculations
+FAILED test/serena/tools/test_story4_include_metadata_default.py::test_single_memory
+FAILED test/serena/tools/test_story4_include_metadata_default.py::test_very_short_file
+FAILED test/serena/tools/test_story4_include_metadata_default.py::test_metadata_mode_is_efficient
+FAILED test/serena/tools/test_story5_search_scope.py::test_parameter_priority
+FAILED test/serena/tools/test_story5_search_scope.py::test_search_scope_custom_fallback
+FAILED test/serena/tools/test_token_estimation_integration.py::TestStory5Integration::test_signature_vs_full_body_estimate
+FAILED test/serena/tools/test_token_estimation_integration.py::TestStory5Integration::test_token_estimates_in_response_metadata
+FAILED test/serena/tools/test_token_estimation_integration.py::TestAcceptanceCriteria::test_all_tools_can_return_estimates
+FAILED test/serena/tools/test_verbosity_control.py::TestVerbosityControlIntegration::test_resolve_verbosity_no_session_tracker
+FAILED test/serena/util/test_complexity_analyzer.py::TestComplexityAnalyzer::test_nested_functions
+FAILED test/serena/util/test_complexity_analyzer.py::TestComplexityLevels::test_medium_complexity_examples
+FAILED test/serena/util/test_file_system.py::TestGeneratedCodeExclusion::test_exclude_generated_code_directories
+FAILED test/serena/util/test_file_system.py::TestGeneratedCodeExclusion::test_exclude_generated_code_mixed
+FAILED test/serena/util/test_pattern_extraction.py::TestExtractUsagePattern::test_extract_multiline_context
+FAILED test/serena/util/test_pattern_extraction.py::TestPatternExtractionIntegration::test_extract_from_type_annotation
+FAILED test/serena/util/test_session_tracker.py::TestSessionTracker::test_get_phase_reason_focused
+FAILED test/serena/util/test_token_estimator.py::TestFastTokenEstimator::test_estimate_symbol_full_mode
+FAILED test/serena/util/test_token_estimator.py::TestFastTokenEstimator::test_estimate_with_verbosity_breakdown_detailed
+FAILED test/solidlsp/csharp/test_csharp_basic.py::TestCSharpLanguageServer::test_find_referencing_symbols_across_files[csharp]
+ERROR test/serena/tools/test_cache_integration.py::TestCacheIntegration::test_find_symbol_caches_result
+ERROR test/serena/tools/test_cache_integration.py::TestCacheIntegration::test_get_symbols_overview_caches_result
+ERROR test/serena/tools/test_cache_integration.py::TestCacheIntegration::test_replace_symbol_invalidates_cache
+ERROR test/serena/tools/test_cache_integration.py::TestCacheIntegration::test_insert_after_invalidates_cache
+ERROR test/serena/tools/test_cache_integration.py::TestCacheIntegration::test_insert_before_invalidates_cache
+ERROR test/serena/tools/test_cache_integration.py::TestCacheIntegration::test_cache_with_different_query_params
+ERROR test/serena/tools/test_cache_integration.py::TestCacheIntegration::test_cache_performance_benefit
+ERROR test/serena/tools/test_cache_integration.py::TestCacheIntegration::test_multiple_file_edits_invalidate_correctly
+ERROR test/serena/tools/test_pattern_search_summaries.py::test_summary_mode_basic
+ERROR test/serena/tools/test_pattern_search_summaries.py::test_summary_mode_with_many_matches
+ERROR test/serena/tools/test_story1_output_format.py::test_output_format_metadata_default
+ERROR test/serena/tools/test_story1_output_format.py::test_output_format_signature
+ERROR test/serena/tools/test_story1_output_format.py::test_output_format_body
+ERROR test/serena/tools/test_story1_output_format.py::test_output_format_metadata_no_body
+ERROR test/serena/tools/test_story1_output_format.py::test_workflow_explore_then_read
+ERROR test/serena/tools/test_story1_output_format.py::test_include_body_true_deprecated
+ERROR test/serena/tools/test_story1_output_format.py::test_include_body_false_deprecated
+ERROR test/serena/tools/test_story1_output_format.py::test_detail_level_signature_deprecated
+ERROR test/serena/tools/test_story1_output_format.py::test_detail_level_full_deprecated
+ERROR test/serena/tools/test_story1_output_format.py::test_combined_deprecated_params
+ERROR test/serena/tools/test_story1_output_format.py::test_migration_include_body_true_to_output_format_body
+ERROR test/serena/tools/test_story1_output_format.py::test_migration_include_body_false_to_output_format_metadata
+ERROR test/serena/tools/test_story1_output_format.py::test_migration_detail_level_signature
+ERROR test/serena/tools/test_story1_output_format.py::test_docstring_example_default
+ERROR test/serena/tools/test_story1_output_format.py::test_docstring_example_signature
+ERROR test/serena/tools/test_story1_output_format.py::test_docstring_example_body
+ERROR test/serena/tools/test_story1_output_format.py::test_output_format_with_depth
+ERROR test/serena/tools/test_story1_output_format.py::test_output_format_signature_without_body
+ERROR test/serena/tools/test_story1_output_format.py::test_cache_with_output_format
+ERROR test/serena/tools/test_story5_search_scope.py::test_find_symbol_default_search_scope
+ERROR test/serena/tools/test_story5_search_scope.py::test_find_symbol_search_scope_all
+ERROR test/serena/tools/test_story5_search_scope.py::test_find_symbol_search_scope_source_explicit
+ERROR test/serena/tools/test_story5_search_scope.py::test_find_symbol_exclude_generated_true_deprecated
+ERROR test/serena/tools/test_story5_search_scope.py::test_find_symbol_exclude_generated_false_deprecated
+ERROR test/serena/tools/test_story5_search_scope.py::test_search_pattern_default_search_scope
+ERROR test/serena/tools/test_story5_search_scope.py::test_search_pattern_search_scope_all
+ERROR test/serena/tools/test_story5_search_scope.py::test_search_pattern_exclude_generated_deprecated
+ERROR test/serena/tools/test_story5_search_scope.py::test_list_dir_default_search_scope
+ERROR test/serena/tools/test_story5_search_scope.py::test_list_dir_search_scope_all
+ERROR test/serena/tools/test_story5_search_scope.py::test_list_dir_search_scope_source_with_metadata
+ERROR test/serena/tools/test_story5_search_scope.py::test_list_dir_exclude_generated_true_deprecated
+ERROR test/serena/tools/test_story5_search_scope.py::test_list_dir_exclude_generated_false_deprecated
+ERROR test/serena/tools/test_story5_search_scope.py::test_exclusion_metadata_format
+ERROR test/serena/tools/test_story5_search_scope.py::test_exclusion_instruction_updated
+ERROR test/serena/tools/test_story6_match_mode.py::test_match_mode_exact_default
+ERROR test/serena/tools/test_story6_match_mode.py::test_match_mode_exact_explicit
+ERROR test/serena/tools/test_story6_match_mode.py::test_match_mode_substring
+ERROR test/serena/tools/test_story6_match_mode.py::test_match_mode_glob_asterisk
+ERROR test/serena/tools/test_story6_match_mode.py::test_match_mode_glob_question_mark
+ERROR test/serena/tools/test_story6_match_mode.py::test_match_mode_regex_simple
+ERROR test/serena/tools/test_story6_match_mode.py::test_match_mode_regex_complex
+ERROR test/serena/tools/test_story6_match_mode.py::test_backward_compat_substring_matching_true
+ERROR test/serena/tools/test_story6_match_mode.py::test_backward_compat_substring_matching_false
+ERROR test/serena/tools/test_story6_match_mode.py::test_backward_compat_parameter_priority
+ERROR test/serena/tools/test_story6_match_mode.py::test_invalid_regex_pattern
+ERROR test/serena/tools/test_story6_match_mode.py::test_match_mode_with_depth
+ERROR test/serena/tools/test_story6_match_mode.py::test_glob_no_match - TypeE...
+ERROR test/serena/tools/test_story6_match_mode.py::test_regex_case_sensitive
+ERROR test/serena/tools/test_story6_match_mode.py::test_glob_with_functions
+ERROR test/serena/tools/test_story6_match_mode.py::test_match_mode_with_output_format_body
+ERROR test/serena/tools/test_story6_match_mode.py::test_match_mode_with_include_kinds
+ERROR test/serena/tools/test_story6_match_mode.py::test_migration_example_from_docstring
+ERROR test/serena/tools/test_story6_match_mode.py::test_docstring_example_exact
+ERROR test/serena/tools/test_story6_match_mode.py::test_docstring_example_substring
+ERROR test/serena/tools/test_story6_match_mode.py::test_docstring_example_glob
+ERROR test/serena/tools/test_story6_match_mode.py::test_docstring_example_regex
+ERROR test/solidlsp/r/test_r_basic.py::TestRLanguageServer::test_server_initialization[r-r]
+ERROR test/solidlsp/ruby/test_ruby_basic.py::TestRubyLanguageServer::test_find_definition_across_files[ruby-ruby]
+ERROR test/solidlsp/r/test_r_basic.py::TestRLanguageServer::test_symbol_retrieval[r]
+ERROR test/solidlsp/r/test_r_basic.py::TestRLanguageServer::test_find_definition_across_files[r]
+ERROR test/solidlsp/r/test_r_basic.py::TestRLanguageServer::test_find_references_across_files[r]
+ERROR test/solidlsp/ruby/test_ruby_basic.py::TestRubyLanguageServer::test_find_symbol[ruby]
+ERROR test/solidlsp/ruby/test_ruby_basic.py::TestRubyLanguageServer::test_find_referencing_symbols[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_containing_symbol_method[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_containing_symbol_class[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_containing_symbol_module[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_containing_symbol_nested_class[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_containing_symbol_none[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_referencing_symbols_method[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_referencing_symbols_class[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_defining_symbol_variable[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_defining_symbol_class[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_defining_symbol_none[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_defining_symbol_nested_class[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_symbol_methods_integration[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_symbol_tree_structure_basic[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_document_symbols_detailed[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_module_and_class_hierarchy[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_references_to_variables[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_referencing_symbols_parameter[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_referencing_symbols_none[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_dir_overview[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_document_overview[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_containing_symbol_variable[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_containing_symbol_function[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_containing_symbol_nested[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_symbol_tree_structure_subdir[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_defining_symbol_imported_class[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_defining_symbol_method_call[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_request_defining_symbol_nested_function[ruby]
+ERROR test/solidlsp/ruby/test_ruby_symbol_retrieval.py::TestRubyLanguageServerSymbols::test_containing_symbol_of_var_is_file[ruby]
+ERROR test/solidlsp/terraform/test_terraform_basic.py::TestLanguageServerBasics::test_basic_definition[terraform]
+ERROR test/solidlsp/terraform/test_terraform_basic.py::TestLanguageServerBasics::test_request_references_aws_instance[terraform]
+ERROR test/solidlsp/terraform/test_terraform_basic.py::TestLanguageServerBasics::test_request_references_variable[terraform]
+100 failed, 708 passed, 73 skipped, 45 deselected, 7 warnings, 104 errors in 667.33s (0:11:07)
