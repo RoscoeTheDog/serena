@@ -1,6 +1,7 @@
 import json
+from typing import Literal
 
-from serena.tools import Tool
+from serena.tools import ReplaceContentTool, Tool
 
 
 class WriteMemoryTool(Tool):
@@ -130,3 +131,31 @@ class DeleteMemoryTool(Tool):
         or no longer relevant for the project.
         """
         return self.memories_manager.delete_memory(memory_file_name)
+
+
+class EditMemoryTool(Tool):
+    """
+    Edits a memory by replacing content matching a pattern.
+    """
+
+    def apply(
+        self,
+        memory_file_name: str,
+        needle: str,
+        repl: str,
+        mode: Literal["literal", "regex"],
+    ) -> str:
+        r"""
+        Replaces content matching a regular expression in a memory.
+
+        :param memory_file_name: the name of the memory
+        :param needle: the string or regex pattern to search for.
+            If `mode` is "literal", this string will be matched exactly.
+            If `mode` is "regex", this string will be treated as a regular expression (syntax of Python's `re` module,
+            with flags DOTALL and MULTILINE enabled).
+        :param repl: the replacement string (verbatim).
+        :param mode: either "literal" or "regex", specifying how the `needle` parameter is to be interpreted.
+        """
+        replace_content_tool = self.agent.get_tool(ReplaceContentTool)
+        rel_path = self.memories_manager.get_memory_file_path(memory_file_name).relative_to(self.get_project_root())
+        return replace_content_tool.replace_content(str(rel_path), needle, repl, mode=mode)
