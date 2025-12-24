@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 19:49:58
+**Generated**: 2025-12-23 19:56:42
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 57
-- **Completion**: 70.2%
+- **Completion**: 71.9%
 
 ### By Status
 
 - blocked: 2
-- completed: 40
+- completed: 41
 - in_progress: 1
-- unassigned: 14
+- unassigned: 13
 
 ### By Type
 
@@ -88,7 +88,7 @@
   - Blocks: Story -4.i
 
   ### Story -4.i: Validate Implementation: Update Context YAML Files
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed | **Type**: validation_implementation
   - Dependencies: Story -4, Story -4.d
   - Blocks: Story -4.t
 
