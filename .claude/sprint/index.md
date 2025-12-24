@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 22:30:32
+**Generated**: 2025-12-23 22:54:08
 
 ---
 
@@ -14,21 +14,24 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 57
-- **Completion**: 93.0%
+- **Total Stories**: 65
+- **Completion**: 83.1%
 
 ### By Status
 
 - blocked: 4
-- completed: 53
+- completed: 54
+- in_progress: 1
+- pending: 5
+- unassigned: 1
 
 ### By Type
 
-- discovery: 7
+- discovery: 9
 - feature: 7
-- implementation: 7
-- remediation: 1
-- testing: 7
+- implementation: 9
+- remediation: 3
+- testing: 9
 - validation: 7
 - validation_discovery: 7
 - validation_implementation: 7
@@ -37,6 +40,30 @@
 ---
 
 ## Stories (Execution Order)
+
+    ### Story R1.d: Discovery: Generate Test Evidence for Story 3
+    **Status**: completed | **Type**: discovery
+    - Dependencies: Story R1
+
+    ### Story R1.i: Implementation: Generate Test Evidence for Story 3
+    **Status**: unassigned | **Type**: implementation
+    - Dependencies: Story R1
+
+    ### Story R1.t: Testing: Generate Test Evidence for Story 3
+    **Status**: pending | **Type**: testing
+    - Dependencies: Story R1
+
+    ### Story R2.d: Discovery: Generate Test Evidence for Story 6
+    **Status**: pending | **Type**: discovery
+    - Dependencies: Story R2
+
+    ### Story R2.i: Implementation: Generate Test Evidence for Story 6
+    **Status**: pending | **Type**: implementation
+    - Dependencies: Story R2
+
+    ### Story R2.t: Testing: Generate Test Evidence for Story 6
+    **Status**: pending | **Type**: testing
+    - Dependencies: Story R2
 
   ### Story -1.d: Validate Discovery: Analyze Upstream Conflicts with Fork Enhancements
   **Status**: completed | **Type**: validation_discovery

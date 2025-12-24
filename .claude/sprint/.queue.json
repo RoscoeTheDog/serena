@@ -1056,9 +1056,136 @@
       "metadata": {
         "source_validation": "-3.i"
       }
+    },
+    "R1": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Generate Test Evidence for Story 3",
+      "status": "in_progress",
+      "parent": "3",
+      "children": [
+        "R1.d",
+        "R1.i",
+        "R1.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R1-test-evidence-story-3.md",
+      "validates": "-3",
+      "priority": "P0",
+      "remediation_type": "validation_failure",
+      "created": "2025-12-23T22:46:15.619567"
+    },
+    "R1.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Generate Test Evidence for Story 3",
+      "status": "completed",
+      "parent": "R1",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "R1.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Generate Test Evidence for Story 3",
+      "status": "unassigned",
+      "parent": "R1",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null,
+      "metadata": {
+        "requires_artifact": "plans/R1-plan.yaml"
+      }
+    },
+    "R1.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Generate Test Evidence for Story 3",
+      "status": "pending",
+      "parent": "R1",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "R2": {
+      "type": "remediation",
+      "story_type": "remediation",
+      "title": "Generate Test Evidence for Story 6",
+      "status": "pending",
+      "parent": "6",
+      "children": [
+        "R2.d",
+        "R2.i",
+        "R2.t"
+      ],
+      "phase_status": {
+        "discovery": "pending",
+        "implementation": "pending",
+        "testing": "pending"
+      },
+      "blocks": [],
+      "file": "stories/R2-test-evidence-story-6.md",
+      "validates": "-6",
+      "priority": "P0",
+      "remediation_type": "validation_failure",
+      "created": "2025-12-23T22:46:15.619620"
+    },
+    "R2.d": {
+      "type": "discovery",
+      "story_type": "discovery",
+      "title": "Discovery: Generate Test Evidence for Story 6",
+      "status": "pending",
+      "parent": "R2",
+      "phase": "discovery",
+      "phase_order": 1,
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "R2.i": {
+      "type": "implementation",
+      "story_type": "implementation",
+      "title": "Implementation: Generate Test Evidence for Story 6",
+      "status": "pending",
+      "parent": "R2",
+      "phase": "implementation",
+      "phase_order": 2,
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "R2.t": {
+      "type": "testing",
+      "story_type": "testing",
+      "title": "Testing: Generate Test Evidence for Story 6",
+      "status": "pending",
+      "parent": "R2",
+      "phase": "testing",
+      "phase_order": 3,
+      "children": [],
+      "blocks": [],
+      "file": null
     }
   },
   "execution_queue": [
+    "R1.d",
+    "R1.i",
+    "R1.t",
+    "R2.d",
+    "R2.i",
+    "R2.t",
     "-1.d",
     "-1.i",
     "-1.t",
