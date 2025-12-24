@@ -502,7 +502,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Analyze Upstream Conflicts with Fork Enhancements",
-      "status": "in_progress",
+      "status": "completed",
       "validates": "1",
       "children": [
         "-1.d",
@@ -560,7 +560,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Analyze Upstream Conflicts with Fork Enhancements",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-1",
       "validates": "1.t",
       "phase": "validation_testing",
