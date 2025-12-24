@@ -1061,7 +1061,7 @@
       "type": "remediation",
       "story_type": "remediation",
       "title": "Generate Test Evidence for Story 3",
-      "status": "in_progress",
+      "status": "completed",
       "parent": "3",
       "children": [
         "R1.d",
@@ -1111,7 +1111,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Generate Test Evidence for Story 3",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "R1",
       "phase": "testing",
       "phase_order": 3,
