@@ -906,6 +906,7 @@ Here is the list of Serena's default tools with a short description (output of `
 * `check_onboarding_performed`: Checks whether project onboarding was already performed.
 * `create_text_file`: Creates/overwrites a file in the project directory.
 * `delete_memory`: Deletes a memory from Serena's project-specific memory store.
+* `edit_memory`: Edits content in a memory file using literal or regex replacement.
 * `execute_shell_command`: Executes a shell command.
 * `find_file`: Finds files in the given relative paths
 * `find_referencing_symbols`: Finds symbols that reference the symbol at the given location (optionally filtered by type).
@@ -919,7 +920,7 @@ Here is the list of Serena's default tools with a short description (output of `
 * `prepare_for_new_conversation`: Provides instructions for preparing for a new conversation (in order to continue with the necessary context).
 * `read_file`: Reads a file within the project directory.
 * `read_memory`: Reads the memory with the given name from Serena's project-specific memory store.
-* `replace_regex`: Replaces content in a file by using regular expressions.
+* `replace_content`: Replaces content in a file using literal or regex matching.
 * `replace_symbol_body`: Replaces the full definition of a symbol.
 * `search_for_pattern`: Performs a search for a pattern in the project.
 * `think_about_collected_information`: Thinking tool for pondering the completeness of collected information.

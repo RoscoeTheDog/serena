@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 15:45:02
+**Generated**: 2025-12-23 18:04:57
 
 ---
 
@@ -15,14 +15,11 @@
 ## Sprint Statistics
 
 - **Total Stories**: 28
-- **Completion**: 39.3%
+- **Completion**: 100.0%
 
 ### By Status
 
-- completed: 11
-- in_progress: 3
-- pending: 10
-- unassigned: 4
+- completed: 28
 
 ### By Type
 
@@ -68,7 +65,7 @@
   - Dependencies: Story 3
 
   ### Story 3.t: Testing: Merge Upstream Config Module Changes
-  **Status**: unassigned | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 3
 
   ### Story 4.d: Discovery: Update Context YAML Files
@@ -76,47 +73,47 @@
   - Dependencies: Story 4
 
   ### Story 4.i: Implementation: Update Context YAML Files
-  **Status**: in_progress | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 4
 
   ### Story 4.t: Testing: Update Context YAML Files
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 4
 
   ### Story 5.d: Discovery: Merge Tool and Resource Updates
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 5
 
   ### Story 5.i: Implementation: Merge Tool and Resource Updates
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 5
 
   ### Story 5.t: Testing: Merge Tool and Resource Updates
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 5
 
   ### Story 6.d: Discovery: Run Integration Tests
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 6
 
   ### Story 6.i: Implementation: Run Integration Tests
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 6
 
   ### Story 6.t: Testing: Run Integration Tests
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 6
 
   ### Story 7.d: Discovery: Update Documentation and Migration Guide
-  **Status**: pending | **Type**: discovery
+  **Status**: completed | **Type**: discovery
   - Dependencies: Story 7
 
   ### Story 7.i: Implementation: Update Documentation and Migration Guide
-  **Status**: pending | **Type**: implementation
+  **Status**: completed | **Type**: implementation
   - Dependencies: Story 7
 
   ### Story 7.t: Testing: Update Documentation and Migration Guide
-  **Status**: pending | **Type**: testing
+  **Status**: completed | **Type**: testing
   - Dependencies: Story 7
 
 ---
