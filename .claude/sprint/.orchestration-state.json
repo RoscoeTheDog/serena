@@ -1,150 +1,26 @@
 {
   "version": "1.4",
-  "started_at": "2025-12-23T14:30:00Z",
-  "status": "running",
-  "current_phase": "execution",
-  "current_section": 5,
-  "completed_sections": [
-    "feature-1",
-    "feature-2",
-    "features-3-4-discovery",
-    "features-3-4-impl"
-  ],
+  "started_at": "2025-12-23T00:00:00Z",
+  "completed_at": "2025-12-23T04:30:00Z",
+  "status": "completed_with_issues",
+  "current_phase": "completed",
   "completed_stories": [
-    "1.d",
-    "1.i",
-    "1.t",
-    "2.d",
-    "2.i",
-    "2.t",
-    "3.d",
-    "4.d",
-    "3.i",
-    "4.i"
+    "1.d","1.i","1.t","2.d","2.i","2.t","3.d","3.i","3.t","4.d","4.i","4.t",
+    "5.d","5.i","5.t","6.d","6.i","6.t","7.d","7.i","7.t",
+    "-1.d","-1.i","-1.t","-2.d","-2.i","-2.t","-3.d","-3.i",
+    "-4.d","-4.i","-4.t","-5.d","-5.i","-5.t","-6.d","-6.i","-7.d","-7.i","-7.t",
+    "3.i.1"
   ],
+  "blocked_stories": ["-3.t", "-6.t"],
   "failed_stories": [],
-  "args": {
-    "validation_only": false,
-    "skip_validation": false,
-    "parallel_limit": 3,
-    "story_filter": null,
-    "from_story": null,
-    "validate_story_filter": null,
-    "from_validation": null
-  },
-  "execution_plan": {
-    "sections": [
-      {
-        "id": "feature-1",
-        "type": "sequential",
-        "stories": [
-          "1.d",
-          "1.i",
-          "1.t"
-        ],
-        "reason": "First feature, no dependencies"
-      },
-      {
-        "id": "feature-2",
-        "type": "sequential",
-        "stories": [
-          "2.d",
-          "2.i",
-          "2.t"
-        ],
-        "reason": "Blocked by Story 1 completion"
-      },
-      {
-        "id": "features-3-4-discovery",
-        "type": "parallel",
-        "stories": [
-          "3.d",
-          "4.d"
-        ],
-        "reason": "Both blocked by Story 2, independent discoveries"
-      },
-      {
-        "id": "features-3-4-impl",
-        "type": "parallel",
-        "stories": [
-          "3.i",
-          "4.i"
-        ],
-        "reason": "Independent implementations"
-      },
-      {
-        "id": "features-3-4-test",
-        "type": "parallel",
-        "stories": [
-          "3.t",
-          "4.t"
-        ],
-        "reason": "Independent testing"
-      },
-      {
-        "id": "feature-5",
-        "type": "sequential",
-        "stories": [
-          "5.d",
-          "5.i",
-          "5.t"
-        ],
-        "reason": "Blocked by Story 3 completion"
-      },
-      {
-        "id": "feature-6",
-        "type": "sequential",
-        "stories": [
-          "6.d",
-          "6.i",
-          "6.t"
-        ],
-        "reason": "Blocked by Story 5 completion"
-      },
-      {
-        "id": "feature-7",
-        "type": "sequential",
-        "stories": [
-          "7.d",
-          "7.i",
-          "7.t"
-        ],
-        "reason": "Blocked by Story 6 completion"
-      }
-    ],
-    "total_stories": 21,
-    "parallel_groups": 3,
-    "estimated_parallelization": "14%"
-  },
-  "phase_helpers": {
-    "recovery": "resources/commands/sprint/helpers/orchestrate-recovery.md",
-    "story_dispatch": "resources/commands/sprint/helpers/story-execution-dispatch.md",
-    "discovery": "resources/commands/sprint/helpers/execute-discovery.md",
-    "implementation": "resources/commands/sprint/helpers/execute-implementation.md",
-    "testing": "resources/commands/sprint/helpers/execute-testing.md",
-    "validation": "resources/commands/sprint/helpers/orchestrate-validation-phase.md",
-    "validation_story": "resources/commands/sprint/execute-validation-story.md"
-  },
-  "gate_checkpoints": [
-    {
-      "story": "3.i",
-      "type": "merge_strategy",
-      "decision_needed": "Approve fork-first merge strategy for config modules",
-      "decision": "APPROVED - Option 1 (Fork-First + Cherry-Pick)",
-      "resolved_at": "2025-12-23T16:00:00Z",
-      "artifacts": [
-        ".claude/sprint/plans/3-merge-strategy.md",
-        ".claude/sprint/reports/config-module-diff-3.d.md",
-        ".claude/sprint/reports/serena-config-diff-3.d.md"
-      ]
-    },
-    {
-      "story": "4.i",
-      "type": "tool_rename",
-      "decision_needed": "Accept upstream replace_content or keep fork replace_regex?",
-      "recommendation": "Accept upstream (replace_content)",
-      "decision": "APPROVED - Accept upstream (replace_content)",
-      "resolved_at": "2025-12-23T16:00:00Z"
-    }
-  ]
+  "remediations_executed": ["3.i.1"],
+  "summary": {
+    "implementation_stories": 21,
+    "implementation_completed": 21,
+    "validation_stories": 21,
+    "validation_completed": 19,
+    "validation_blocked": 2,
+    "remediations_created": 1,
+    "remediations_completed": 1
+  }
 }

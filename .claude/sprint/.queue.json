@@ -69,7 +69,8 @@
       "children": [
         "3.d",
         "3.i",
-        "3.t"
+        "3.t",
+        "R1"
       ],
       "phase_status": {
         "discovery": "pending",
@@ -139,7 +140,8 @@
       "children": [
         "6.d",
         "6.i",
-        "6.t"
+        "6.t",
+        "R2"
       ],
       "phase_status": {
         "discovery": "pending",
