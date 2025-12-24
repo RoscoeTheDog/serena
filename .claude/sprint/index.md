@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 19:20:14
+**Generated**: 2025-12-23 19:36:04
 
 ---
 
@@ -15,14 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 57
-- **Completion**: 64.9%
+- **Completion**: 66.7%
 
 ### By Status
 
-- completed: 37
+- completed: 38
 - completed_with_remediations: 1
 - in_progress: 1
-- unassigned: 18
+- unassigned: 17
 
 ### By Type
 
@@ -222,8 +222,8 @@
   **Status**: completed | **Type**: testing
   - Dependencies: Story 7
 
-    ### Story 3.i.1: Fix Implementation_Missing
-    **Status**: unassigned | **Type**: remediation
+    ### Story 3.i.1: Execute Config Module Merge
+    **Status**: completed | **Type**: remediation
     - Dependencies: Story 3.i
 
 ---

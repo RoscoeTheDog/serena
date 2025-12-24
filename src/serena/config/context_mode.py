@@ -12,7 +12,7 @@ import yaml
 from sensai.util import logging
 from sensai.util.string import ToStringMixin
 
-from serena.config.serena_config import ToolInclusionDefinition
+from serena.config.serena_config import SerenaPaths, ToolInclusionDefinition
 from serena.constants import (
     DEFAULT_CONTEXT,
     DEFAULT_MODES,
