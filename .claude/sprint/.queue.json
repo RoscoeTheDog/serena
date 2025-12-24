@@ -1012,7 +1012,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Update Documentation and Migration Guide",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-7",
       "validates": "7.i",
       "phase": "validation_implementation",
