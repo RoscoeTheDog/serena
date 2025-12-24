@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 23:38:04
+**Generated**: 2025-12-23 23:42:50
 
 ---
 
@@ -15,14 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 65
-- **Completion**: 90.8%
+- **Completion**: 93.8%
 
 ### By Status
 
 - blocked: 4
-- completed: 59
-- in_progress: 1
-- pending: 1
+- completed: 61
 
 ### By Type
 
@@ -61,7 +59,7 @@
     - Dependencies: Story R2
 
     ### Story R2.t: Testing: Generate Test Evidence for Story 6
-    **Status**: pending | **Type**: testing
+    **Status**: completed | **Type**: testing
     - Dependencies: Story R2
 
   ### Story -1.d: Validate Discovery: Analyze Upstream Conflicts with Fork Enhancements
