@@ -738,7 +738,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Update Context YAML Files",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "4",
       "children": [
         "-4.d",
@@ -758,7 +758,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Update Context YAML Files",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-4",
       "validates": "4.d",
       "phase": "validation_discovery",
