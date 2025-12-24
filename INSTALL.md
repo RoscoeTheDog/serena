@@ -167,6 +167,114 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
+## Local Development Installation (Fork/Clone)
+
+When working with a local clone or fork of Serena (e.g., for development, testing merged changes, or custom modifications), use the local venv approach instead of the remote git URL.
+
+### Step 1: Create and Install to Local Virtual Environment
+
+```bash
+# Navigate to your local Serena repository
+cd /path/to/serena
+
+# Create virtual environment with uv
+uv venv .venv
+
+# Install Serena in editable mode (includes all dependencies)
+uv pip install -e .
+```
+
+### Step 2: Configure Claude Code CLI
+
+Edit `~/.claude.json` and add/update the `mcpServers.serena` entry to use the local venv executable:
+
+**Windows:**
+```json
+{
+  "mcpServers": {
+    "serena": {
+      "type": "stdio",
+      "command": "C:/Users/YourUsername/path/to/serena/.venv/Scripts/serena.exe",
+      "args": [
+        "start-mcp-server",
+        "--context",
+        "ide-assistant"
+      ],
+      "env": {}
+    }
+  }
+}
+```
+
+**macOS/Linux:**
+```json
+{
+  "mcpServers": {
+    "serena": {
+      "type": "stdio",
+      "command": "/path/to/serena/.venv/bin/serena",
+      "args": [
+        "start-mcp-server",
+        "--context",
+        "ide-assistant"
+      ],
+      "env": {}
+    }
+  }
+}
+```
+
+### Step 3: Restart Claude Code
+
+After updating the configuration, restart Claude Code to apply the changes. Verify with:
+```bash
+claude mcp list
+```
+
+You should see `serena` listed as connected.
+
+### Updating After Code Changes
+
+When you pull new changes or modify the Serena codebase locally, reinstall to update the venv:
+
+```bash
+cd /path/to/serena
+uv pip install -e .
+```
+
+Then restart Claude Code to pick up the changes.
+
+### Why Local Venv Instead of uvx?
+
+- **Immediate updates**: Code changes are reflected immediately after reinstall (no uvx cache issues)
+- **Development workflow**: Editable install (`-e .`) allows live code changes without full reinstall
+- **Reliability**: Direct executable path avoids uvx path resolution issues on Windows
+- **Debugging**: Easier to debug with local source code and venv
+
+### Switching Back to Remote
+
+To switch back to the upstream remote version:
+
+```json
+{
+  "mcpServers": {
+    "serena": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "ide-assistant"
+      ],
+      "env": {}
+    }
+  }
+}
+```
+
 ## Configuration Options
 
 The installation script supports optional configuration via `scripts/install-config.json`:
@@ -238,6 +346,44 @@ The Serena project requires Python 3.11.x, but uvx handles this automatically. Y
 - **Claude Desktop**: Restart Claude Desktop after installation
 - **Claude Code CLI**: The server should be available immediately
 - **Permissions**: Ensure you have write permissions to the Claude configuration directories
+
+### Local Development Issues
+
+If using a local fork/clone and the server won't connect:
+
+1. **Verify the venv exists and has serena installed**:
+   ```bash
+   # Windows
+   ls /path/to/serena/.venv/Scripts/serena.exe
+
+   # macOS/Linux
+   ls /path/to/serena/.venv/bin/serena
+   ```
+
+2. **Reinstall to ensure latest code**:
+   ```bash
+   cd /path/to/serena
+   uv pip install -e .
+   ```
+
+3. **Test the server starts manually**:
+   ```bash
+   # Windows
+   /path/to/serena/.venv/Scripts/serena.exe start-mcp-server --context ide-assistant
+
+   # macOS/Linux
+   /path/to/serena/.venv/bin/serena start-mcp-server --context ide-assistant
+   ```
+   The server should start and wait for input (Ctrl+C to stop).
+
+4. **Check path format in ~/.claude.json**:
+   - Windows paths should use forward slashes: `C:/Users/...` (not backslashes)
+   - Paths must be absolute (not relative like `./serena`)
+
+5. **Verify the JSON is valid**:
+   ```bash
+   python -m json.tool ~/.claude.json > /dev/null && echo "Valid JSON" || echo "Invalid JSON"
+   ```
 
 ## Uninstallation
 
