@@ -497,9 +497,576 @@
         "integration",
         "security"
       ]
+    },
+    "-1": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "in_progress",
+      "validates": "1",
+      "children": [
+        "-1.d",
+        "-1.i",
+        "-1.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-1.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "completed",
+      "parent": "-1",
+      "validates": "1.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-1.i"
+      ],
+      "file": null
+    },
+    "-1.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "unassigned",
+      "parent": "-1",
+      "validates": "1.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-1.t"
+      ],
+      "file": null
+    },
+    "-1.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Analyze Upstream Conflicts with Fork Enhancements",
+      "status": "unassigned",
+      "parent": "-1",
+      "validates": "1.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-2": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Rename ide-assistant to claude-code Context",
+      "status": "unassigned",
+      "validates": "2",
+      "children": [
+        "-2.d",
+        "-2.i",
+        "-2.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-2.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Rename ide-assistant to claude-code Context",
+      "status": "unassigned",
+      "parent": "-2",
+      "validates": "2.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.i"
+      ],
+      "file": null
+    },
+    "-2.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Rename ide-assistant to claude-code Context",
+      "status": "unassigned",
+      "parent": "-2",
+      "validates": "2.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-2.t"
+      ],
+      "file": null
+    },
+    "-2.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Rename ide-assistant to claude-code Context",
+      "status": "unassigned",
+      "parent": "-2",
+      "validates": "2.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-3": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Merge Upstream Config Module Changes",
+      "status": "unassigned",
+      "validates": "3",
+      "children": [
+        "-3.d",
+        "-3.i",
+        "-3.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-3.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Merge Upstream Config Module Changes",
+      "status": "unassigned",
+      "parent": "-3",
+      "validates": "3.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-3.i"
+      ],
+      "file": null
+    },
+    "-3.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Merge Upstream Config Module Changes",
+      "status": "unassigned",
+      "parent": "-3",
+      "validates": "3.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-3.t"
+      ],
+      "file": null
+    },
+    "-3.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Merge Upstream Config Module Changes",
+      "status": "unassigned",
+      "parent": "-3",
+      "validates": "3.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-4": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Update Context YAML Files",
+      "status": "unassigned",
+      "validates": "4",
+      "children": [
+        "-4.d",
+        "-4.i",
+        "-4.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-4.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Update Context YAML Files",
+      "status": "unassigned",
+      "parent": "-4",
+      "validates": "4.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-4.i"
+      ],
+      "file": null
+    },
+    "-4.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Update Context YAML Files",
+      "status": "unassigned",
+      "parent": "-4",
+      "validates": "4.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-4.t"
+      ],
+      "file": null
+    },
+    "-4.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Update Context YAML Files",
+      "status": "unassigned",
+      "parent": "-4",
+      "validates": "4.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-5": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Merge Tool and Resource Updates",
+      "status": "unassigned",
+      "validates": "5",
+      "children": [
+        "-5.d",
+        "-5.i",
+        "-5.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-5.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Merge Tool and Resource Updates",
+      "status": "unassigned",
+      "parent": "-5",
+      "validates": "5.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-5.i"
+      ],
+      "file": null
+    },
+    "-5.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Merge Tool and Resource Updates",
+      "status": "unassigned",
+      "parent": "-5",
+      "validates": "5.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-5.t"
+      ],
+      "file": null
+    },
+    "-5.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Merge Tool and Resource Updates",
+      "status": "unassigned",
+      "parent": "-5",
+      "validates": "5.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-6": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Run Integration Tests",
+      "status": "unassigned",
+      "validates": "6",
+      "children": [
+        "-6.d",
+        "-6.i",
+        "-6.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-6.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Run Integration Tests",
+      "status": "unassigned",
+      "parent": "-6",
+      "validates": "6.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-6.i"
+      ],
+      "file": null
+    },
+    "-6.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Run Integration Tests",
+      "status": "unassigned",
+      "parent": "-6",
+      "validates": "6.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-6.t"
+      ],
+      "file": null
+    },
+    "-6.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Run Integration Tests",
+      "status": "unassigned",
+      "parent": "-6",
+      "validates": "6.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
+    },
+    "-7": {
+      "type": "validation",
+      "story_type": "validation",
+      "title": "Validate: Update Documentation and Migration Guide",
+      "status": "unassigned",
+      "validates": "7",
+      "children": [
+        "-7.d",
+        "-7.i",
+        "-7.t"
+      ],
+      "phase_status": {
+        "validation_discovery": "pending",
+        "validation_implementation": "pending",
+        "validation_testing": "pending"
+      },
+      "target_has_phases": true,
+      "blocks": [],
+      "file": null
+    },
+    "-7.d": {
+      "type": "validation_discovery",
+      "story_type": "validation_discovery",
+      "title": "Validate Discovery: Update Documentation and Migration Guide",
+      "status": "unassigned",
+      "parent": "-7",
+      "validates": "7.d",
+      "phase": "validation_discovery",
+      "phase_order": 1,
+      "checks": [
+        "A",
+        "B",
+        "C"
+      ],
+      "children": [],
+      "blocks": [
+        "-7.i"
+      ],
+      "file": null
+    },
+    "-7.i": {
+      "type": "validation_implementation",
+      "story_type": "validation_implementation",
+      "title": "Validate Implementation: Update Documentation and Migration Guide",
+      "status": "unassigned",
+      "parent": "-7",
+      "validates": "7.i",
+      "phase": "validation_implementation",
+      "phase_order": 2,
+      "checks": [
+        "I"
+      ],
+      "children": [],
+      "blocks": [
+        "-7.t"
+      ],
+      "file": null
+    },
+    "-7.t": {
+      "type": "validation_testing",
+      "story_type": "validation_testing",
+      "title": "Validate Testing: Update Documentation and Migration Guide",
+      "status": "unassigned",
+      "parent": "-7",
+      "validates": "7.t",
+      "phase": "validation_testing",
+      "phase_order": 3,
+      "checks": [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "children": [],
+      "blocks": [],
+      "file": null
     }
   },
   "execution_queue": [
+    "-1.d",
+    "-1.i",
+    "-1.t",
+    "-2.d",
+    "-2.i",
+    "-2.t",
+    "-3.d",
+    "-3.i",
+    "-3.t",
+    "-4.d",
+    "-4.i",
+    "-4.t",
+    "-5.d",
+    "-5.i",
+    "-5.t",
+    "-6.d",
+    "-6.i",
+    "-6.t",
+    "-7.d",
+    "-7.i",
+    "-7.t",
     "1.d",
     "1.i",
     "1.t",
