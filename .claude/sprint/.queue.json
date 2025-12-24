@@ -295,7 +295,9 @@
       "parent": "3",
       "phase": "implementation",
       "phase_order": 2,
-      "children": [],
+      "children": [
+        "3.i.1"
+      ],
       "blocks": [],
       "file": null,
       "requires_artifact": "plans/3-plan.yaml",
@@ -698,7 +700,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Merge Upstream Config Module Changes",
-      "status": "unassigned",
+      "status": "completed_with_remediations",
       "parent": "-3",
       "validates": "3.i",
       "phase": "validation_implementation",
@@ -1043,6 +1045,17 @@
       "children": [],
       "blocks": [],
       "file": null
+    },
+    "3.i.1": {
+      "type": "remediation",
+      "status": "unassigned",
+      "parent": "3.i",
+      "children": [],
+      "blocks": [],
+      "file": "stories/3.i.1-fix-implementation_missing.md",
+      "metadata": {
+        "source_validation": "-3.i"
+      }
     }
   },
   "execution_queue": [
@@ -1087,6 +1100,7 @@
     "6.t",
     "7.d",
     "7.i",
-    "7.t"
+    "7.t",
+    "3.i.1"
   ]
 }

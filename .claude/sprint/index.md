@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 19:12:32
+**Generated**: 2025-12-23 19:20:14
 
 ---
 
@@ -14,12 +14,13 @@
 
 ## Sprint Statistics
 
-- **Total Stories**: 56
-- **Completion**: 66.1%
+- **Total Stories**: 57
+- **Completion**: 64.9%
 
 ### By Status
 
 - completed: 37
+- completed_with_remediations: 1
 - in_progress: 1
 - unassigned: 18
 
@@ -28,6 +29,7 @@
 - discovery: 7
 - feature: 7
 - implementation: 7
+- remediation: 1
 - testing: 7
 - validation: 7
 - validation_discovery: 7
@@ -72,7 +74,7 @@
   - Blocks: Story -3.i
 
   ### Story -3.i: Validate Implementation: Merge Upstream Config Module Changes
-  **Status**: unassigned | **Type**: validation_implementation
+  **Status**: completed_with_remediations | **Type**: validation_implementation
   - Dependencies: Story -3, Story -3.d
   - Blocks: Story -3.t
 
@@ -219,6 +221,10 @@
   ### Story 7.t: Testing: Update Documentation and Migration Guide
   **Status**: completed | **Type**: testing
   - Dependencies: Story 7
+
+    ### Story 3.i.1: Fix Implementation_Missing
+    **Status**: unassigned | **Type**: remediation
+    - Dependencies: Story 3.i
 
 ---
 
