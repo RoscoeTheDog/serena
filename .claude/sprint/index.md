@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 19:05:22
+**Generated**: 2025-12-23 19:12:32
 
 ---
 
@@ -15,12 +15,13 @@
 ## Sprint Statistics
 
 - **Total Stories**: 56
-- **Completion**: 64.3%
+- **Completion**: 66.1%
 
 ### By Status
 
-- completed: 36
-- unassigned: 20
+- completed: 37
+- in_progress: 1
+- unassigned: 18
 
 ### By Type
 
@@ -66,7 +67,7 @@
   - Dependencies: Story -2, Story -2.i
 
   ### Story -3.d: Validate Discovery: Merge Upstream Config Module Changes
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -3
   - Blocks: Story -3.i
 
