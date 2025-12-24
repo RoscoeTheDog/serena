@@ -934,7 +934,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Run Integration Tests",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-6",
       "validates": "6.i",
       "phase": "validation_implementation",
