@@ -64,13 +64,13 @@ class TestContextModeLoading:
         """Test that claude-code.yml contains all fork customizations."""
         context = SerenaAgentContext.from_name("claude-code")
 
-        # Verify excluded tools preserved from ide-assistant
+        # Verify excluded tools preserved from ide-assistant (replace_regex -> replace_content after upstream sync)
         expected_excluded_tools = {
             "create_text_file",
             "read_file",
             "execute_shell_command",
             "prepare_for_new_conversation",
-            "replace_regex",
+            "replace_content",
         }
         assert expected_excluded_tools.issubset(set(context.excluded_tools))
 
@@ -116,23 +116,29 @@ class TestContextModeIntegration:
         # Should log deprecation warning
         assert any("deprecated" in record.message.lower() for record in caplog.records)
 
-    def test_context_list_includes_both_names(self):
-        """Test that context listing includes both claude-code and ide-assistant."""
+    def test_context_list_includes_claude_code(self):
+        """Test that context listing includes claude-code."""
         context_names = SerenaAgentContext.list_registered_context_names(include_user_contexts=False)
 
         assert "claude-code" in context_names
-        # ide-assistant.yml should still exist for backwards compatibility
-        assert "ide-assistant" in context_names
+        # ide-assistant.yml is now archived (no longer in main contexts directory)
+        # but should still be loadable via deprecation redirect
 
     def test_context_files_exist(self):
-        """Test that both context YAML files exist."""
+        """Test that context YAML files exist."""
         from serena.config.context_mode import SERENAS_OWN_CONTEXT_YAMLS_DIR
 
         claude_code_path = Path(SERENAS_OWN_CONTEXT_YAMLS_DIR) / "claude-code.yml"
-        ide_assistant_path = Path(SERENAS_OWN_CONTEXT_YAMLS_DIR) / "ide-assistant.yml"
+        ide_path = Path(SERENAS_OWN_CONTEXT_YAMLS_DIR) / "ide.yml"
 
         assert claude_code_path.exists(), "claude-code.yml should exist"
-        assert ide_assistant_path.exists(), "ide-assistant.yml should exist for backwards compatibility"
+        assert ide_path.exists(), "ide.yml should exist (new from upstream)"
+
+        # ide-assistant.yml is now archived
+        ide_assistant_path = Path(SERENAS_OWN_CONTEXT_YAMLS_DIR) / "ide-assistant.yml"
+        archive_path = Path(SERENAS_OWN_CONTEXT_YAMLS_DIR) / "archive" / "ide-assistant.yml"
+        assert not ide_assistant_path.exists(), "ide-assistant.yml should be archived"
+        assert archive_path.exists(), "ide-assistant.yml should exist in archive"
 
 
 class TestContextModeSecurity:
@@ -143,25 +149,31 @@ class TestContextModeSecurity:
         context = SerenaAgentContext.from_name("claude-code")
 
         # These tools should remain excluded for security
+        # Note: replace_regex was renamed to replace_content in upstream sync
         dangerous_tools = {
             "execute_shell_command",
             "create_text_file",  # Prevents arbitrary file creation
-            "replace_regex",     # Prevents uncontrolled regex operations
+            "replace_content",   # Prevents uncontrolled content replacement
         }
 
         for tool in dangerous_tools:
             assert tool in context.excluded_tools, f"{tool} should remain excluded"
 
-    def test_excluded_tools_list_preserved_exactly(self):
-        """Test that excluded_tools list is preserved exactly from ide-assistant to claude-code."""
-        # Load both contexts
+    def test_excluded_tools_properly_configured(self):
+        """Test that excluded_tools are properly configured for claude-code context."""
         claude_code = SerenaAgentContext.from_name("claude-code")
-        ide_assistant_raw = SerenaAgentContext.from_yaml(
-            SerenaAgentContext.get_path("ide-assistant")
-        )
 
-        # Excluded tools should be identical
-        assert set(claude_code.excluded_tools) == set(ide_assistant_raw.excluded_tools)
+        # Expected excluded tools after upstream sync
+        expected_excluded = {
+            "create_text_file",
+            "read_file",
+            "execute_shell_command",
+            "prepare_for_new_conversation",
+            "replace_content",  # Note: renamed from replace_regex in upstream
+        }
+
+        # Verify all expected tools are excluded
+        assert expected_excluded.issubset(set(claude_code.excluded_tools))
 
 
 class TestDeprecationWarningContent:
@@ -185,7 +197,45 @@ class TestDeprecationWarningContent:
         assert "backwards compatibility" in warning or "automatically redirecting" in warning.lower()
 
 
+class TestNewIdeContext:
+    """Tests for the new ide.yml context from upstream."""
+
+    def test_ide_context_loads(self):
+        """Test that ide context loads successfully."""
+        context = SerenaAgentContext.from_name("ide")
+
+        assert context is not None
+        assert context.name == "ide"
+        assert context.description is not None
+        assert len(context.excluded_tools) > 0
+
+    def test_ide_context_has_single_project(self):
+        """Test that ide context has single_project: true."""
+        import yaml
+        from serena.config.context_mode import SERENAS_OWN_CONTEXT_YAMLS_DIR
+
+        ide_path = Path(SERENAS_OWN_CONTEXT_YAMLS_DIR) / "ide.yml"
+        with open(ide_path, encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        assert "single_project" in data
+        assert data["single_project"] is True
+
+    def test_ide_context_excluded_tools(self):
+        """Test that ide context excludes appropriate tools."""
+        context = SerenaAgentContext.from_name("ide")
+
+        expected_excluded = {
+            "create_text_file",
+            "read_file",
+            "execute_shell_command",
+            "prepare_for_new_conversation",
+        }
+
+        assert expected_excluded.issubset(set(context.excluded_tools))
+
+
 # Test metadata
-__test_story__ = "2"
+__test_story__ = "4"
 __test_phase__ = "testing"
 __test_categories__ = ["unit", "integration", "security"]

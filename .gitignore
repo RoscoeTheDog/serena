@@ -247,3 +247,5 @@ tmp/
 # Generated Claude MCP Installer Documentation (platform-specific)
 claude-mcp-installer/
 .test_venv/
+.serena/
+.claude-context/
