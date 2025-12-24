@@ -972,7 +972,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Update Documentation and Migration Guide",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "7",
       "children": [
         "-7.d",
@@ -992,7 +992,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Update Documentation and Migration Guide",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-7",
       "validates": "7.d",
       "phase": "validation_discovery",
