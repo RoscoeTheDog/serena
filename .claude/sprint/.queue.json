@@ -110,7 +110,7 @@
       "type": "feature",
       "story_type": "feature",
       "title": "Merge Tool and Resource Updates",
-      "status": "in_progress",
+      "status": "completed",
       "parent": null,
       "children": [
         "5.d",
@@ -399,7 +399,7 @@
       "type": "testing",
       "story_type": "testing",
       "title": "Testing: Merge Tool and Resource Updates",
-      "status": "pending",
+      "status": "completed",
       "parent": "5",
       "phase": "testing",
       "phase_order": 3,
