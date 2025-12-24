@@ -816,7 +816,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Merge Tool and Resource Updates",
-      "status": "unassigned",
+      "status": "in_progress",
       "validates": "5",
       "children": [
         "-5.d",
@@ -836,7 +836,7 @@
       "type": "validation_discovery",
       "story_type": "validation_discovery",
       "title": "Validate Discovery: Merge Tool and Resource Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-5",
       "validates": "5.d",
       "phase": "validation_discovery",

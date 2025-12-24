@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 20:02:29
+**Generated**: 2025-12-23 20:07:21
 
 ---
 
@@ -15,13 +15,14 @@
 ## Sprint Statistics
 
 - **Total Stories**: 57
-- **Completion**: 75.4%
+- **Completion**: 77.2%
 
 ### By Status
 
 - blocked: 2
-- completed: 43
-- unassigned: 12
+- completed: 44
+- in_progress: 1
+- unassigned: 10
 
 ### By Type
 
@@ -96,7 +97,7 @@
   - Dependencies: Story -4, Story -4.i
 
   ### Story -5.d: Validate Discovery: Merge Tool and Resource Updates
-  **Status**: unassigned | **Type**: validation_discovery
+  **Status**: completed | **Type**: validation_discovery
   - Dependencies: Story -5
   - Blocks: Story -5.i
 
