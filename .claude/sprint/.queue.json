@@ -856,7 +856,7 @@
       "type": "validation_implementation",
       "story_type": "validation_implementation",
       "title": "Validate Implementation: Merge Tool and Resource Updates",
-      "status": "unassigned",
+      "status": "completed",
       "parent": "-5",
       "validates": "5.i",
       "phase": "validation_implementation",
