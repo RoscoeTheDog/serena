@@ -2,7 +2,7 @@
 
 **DO NOT EDIT**: This file is auto-generated. Edit .queue.json instead.
 
-**Generated**: 2025-12-23 23:42:50
+**Generated**: 2025-12-23 23:47:11
 
 ---
 
@@ -15,12 +15,12 @@
 ## Sprint Statistics
 
 - **Total Stories**: 65
-- **Completion**: 93.8%
+- **Completion**: 96.9%
 
 ### By Status
 
-- blocked: 4
-- completed: 61
+- blocked: 2
+- completed: 63
 
 ### By Type
 
@@ -101,7 +101,7 @@
   - Blocks: Story -3.t
 
   ### Story -3.t: Validate Testing: Merge Upstream Config Module Changes
-  **Status**: blocked | **Type**: validation_testing
+  **Status**: completed | **Type**: validation_testing
   - Dependencies: Story -3, Story -3.i
 
   ### Story -4.d: Validate Discovery: Update Context YAML Files

@@ -660,7 +660,7 @@
       "type": "validation",
       "story_type": "validation",
       "title": "Validate: Merge Upstream Config Module Changes",
-      "status": "blocked",
+      "status": "completed",
       "validates": "3",
       "children": [
         "-3.d",
@@ -718,7 +718,7 @@
       "type": "validation_testing",
       "story_type": "validation_testing",
       "title": "Validate Testing: Merge Upstream Config Module Changes",
-      "status": "blocked",
+      "status": "completed",
       "parent": "-3",
       "validates": "3.t",
       "phase": "validation_testing",
