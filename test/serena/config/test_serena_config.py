@@ -121,6 +121,26 @@ class TestProjectConfigAutogenerate:
         assert config.project_name == custom_name
         assert config.language == Language.TYPESCRIPT
 
+    def test_autogenerate_markdown_deprioritized(self):
+        """Test that markdown is deprioritized when real programming languages are present."""
+        # Create many markdown files and fewer Python files
+        for i in range(5):
+            (self.project_path / f"doc{i}.md").write_text(f"# Document {i}\n")
+        (self.project_path / "main.py").write_text("print('hello')")
+        (self.project_path / "util.py").write_text("def util(): pass")
+
+        # Even though markdown files outnumber Python files, Python should be detected
+        config = ProjectConfig.autogenerate(self.project_path, save_to_disk=False)
+        assert config.language == Language.PYTHON
+
+    def test_autogenerate_markdown_only_project(self):
+        """Test that a project with only markdown files is correctly detected as markdown."""
+        for i in range(3):
+            (self.project_path / f"doc{i}.md").write_text(f"# Document {i}\n")
+
+        config = ProjectConfig.autogenerate(self.project_path, save_to_disk=False)
+        assert config.language == Language.MARKDOWN
+
     def test_autogenerate_error_message_format(self):
         """Test the specific format of the error message for better user experience."""
         with pytest.raises(ValueError) as exc_info:

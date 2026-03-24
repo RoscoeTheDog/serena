@@ -28,16 +28,13 @@ class ReadFileTool(Tool):
 
     def apply(self, relative_path: str, start_line: int = 0, end_line: int | None = None, max_answer_chars: int = -1) -> str:
         """
-        Reads the given file or a chunk of it. Generally, symbolic operations
-        like find_symbol or find_referencing_symbols should be preferred if you know which symbols you are looking for.
+        Reads a file or line range from the project.
 
-        :param relative_path: the relative path to the file to read
-        :param start_line: the 0-based index of the first line to be retrieved.
-        :param end_line: the 0-based index of the last line to be retrieved (inclusive). If None, read until the end of the file.
-        :param max_answer_chars: if the file (chunk) is longer than this number of characters,
-            no content will be returned. Don't adjust unless there is really no other way to get the content
-            required for the task.
-        :return: the full text of the file at the given relative path
+        :param relative_path: Relative path to the file.
+        :param start_line: 0-based first line.
+        :param end_line: 0-based last line (inclusive). None = read to end.
+        :param max_answer_chars: Char limit. -1=config default.
+        :return: File text content.
         """
         self.project.validate_relative_path(relative_path)
 
@@ -164,29 +161,15 @@ class ListDirTool(Tool):
 
     def apply(self, relative_path: str, recursive: bool, format: str = "list", exclude_generated: bool | None = None, search_scope: Literal["all", "source", "custom"] = "source", max_answer_chars: int = -1) -> str:
         """
-        Lists all non-gitignored files and directories in the given directory (optionally with recursion).
+        Lists non-gitignored files/directories. Returns JSON.
 
-        :param relative_path: the relative path to the directory to list; pass "." to scan the project root
-        :param recursive: whether to scan subdirectories recursively
-        :param format: output format - "list" (default, full listing) or "tree" (collapsed tree with file counts)
-        :param search_scope: Controls which files to list. Options:
-            - "source" (default): Exclude common generated/vendor patterns (node_modules, __pycache__, migrations,
-              dist, build, .venv, venv, target, .next, .nuxt, vendor, .git, .pytest_cache, .mypy_cache,
-              coverage, htmlcov, wheelhouse, *.egg-info)
-            - "all": Include all files (no exclusions)
-            - "custom": Use custom patterns from config (future feature)
-
-            Default is "source" which is what agents want 95% of the time. Use "all" to explicitly list everything.
-            When files are excluded, response includes exclusion metadata showing what was filtered.
-        :param exclude_generated: [DEPRECATED] Use search_scope instead. If provided, overrides search_scope.
-            This parameter will be removed in version 2.0.0.
-            - exclude_generated=True maps to search_scope="source"
-            - exclude_generated=False maps to search_scope="all"
-        :param max_answer_chars: if the output is longer than this number of characters,
-            no content will be returned. -1 means the default value from the config will be used.
-            Don't adjust unless there is really no other way to get the content required for the task.
-        :return: a JSON object with the names of directories and files within the given directory (format="list"),
-                 or a tree-formatted string showing collapsed directories with file counts (format="tree")
+        :param relative_path: "." for project root.
+        :param recursive: Scan subdirectories recursively.
+        :param format: list (default) | tree (collapsed with counts, requires recursive=true).
+        :param search_scope: source (default, excludes generated/vendor) | all.
+        :param exclude_generated: [DEPRECATED] Use search_scope instead.
+        :param max_answer_chars: Char limit. -1=config default.
+        :return: JSON with dirs and files.
         """
         # Check if the directory exists before validation
         if not self.project.relative_path_exists(relative_path):
@@ -539,81 +522,31 @@ class SearchForPatternTool(Tool):
         restrict_search_to_code_files: bool = False,
         exclude_generated: bool | None = None,  # DEPRECATED - use search_scope
         search_scope: Literal["all", "source", "custom"] = "source",
+        max_results: int = -1,
+        page_cursor: str | None = None,
         max_answer_chars: int = -1,
         result_format: Literal["summary", "detailed"] | None = None,
         output_mode: str | None = None,
     ) -> str:
         """
-        Offers a flexible search for arbitrary patterns in the codebase, including the
-        possibility to search in non-code files.
-        Generally, symbolic operations like find_symbol or find_referencing_symbols
-        should be preferred if you know which symbols you are looking for.
+        Regex search across project files. Uses DOTALL (dot matches newlines); prefer non-greedy .*? quantifiers.
+        Restrict scope with relative_path, paths_include_glob, paths_exclude_glob, or restrict_search_to_code_files.
 
-        Pattern Matching Logic:
-            For each match, the returned result will contain the full lines where the
-            substring pattern is found, as well as optionally some lines before and after it. The pattern will be compiled with
-            DOTALL, meaning that the dot will match all characters including newlines.
-            This also means that it never makes sense to have .* at the beginning or end of the pattern,
-            but it may make sense to have it in the middle for complex patterns.
-            If a pattern matches multiple lines, all those lines will be part of the match.
-            Be careful to not use greedy quantifiers unnecessarily, it is usually better to use non-greedy quantifiers like .*? to avoid
-            matching too much content.
-
-        File Selection Logic:
-            The files in which the search is performed can be restricted very flexibly.
-            Using `restrict_search_to_code_files` is useful if you are only interested in code symbols (i.e., those
-            symbols that can be manipulated with symbolic tools like find_symbol).
-            You can also restrict the search to a specific file or directory,
-            and provide glob patterns to include or exclude certain files on top of that.
-            The globs are matched against relative file paths from the project root (not to the `relative_path` parameter that
-            is used to further restrict the search).
-            Smartly combining the various restrictions allows you to perform very targeted searches.
-
-
-        :param substring_pattern: Regular expression for a substring pattern to search for
-        :param context_lines_before: Number of lines of context to include before each match
-        :param context_lines_after: Number of lines of context to include after each match
-        :param paths_include_glob: optional glob pattern specifying files to include in the search.
-            Matches against relative file paths from the project root (e.g., "*.py", "src/**/*.ts").
-            Only matches files, not directories. If left empty, all non-ignored files will be included.
-        :param paths_exclude_glob: optional glob pattern specifying files to exclude from the search.
-            Matches against relative file paths from the project root (e.g., "*test*", "**/*_generated.py").
-            Takes precedence over paths_include_glob. Only matches files, not directories. If left empty, no files are excluded.
-        :param relative_path: only subpaths of this path (relative to the repo root) will be analyzed. If a path to a single
-            file is passed, only that will be searched. The path must exist, otherwise a `FileNotFoundError` is raised.
-        :param max_answer_chars: if the output is longer than this number of characters,
-            no content will be returned.
-            -1 means the default value from the config will be used.
-            Don't adjust unless there is really no other way to get the content
-            required for the task. Instead, if the output is too long, you should
-            make a stricter query.
-        :param restrict_search_to_code_files: whether to restrict the search to only those files where
-            analyzed code symbols can be found. Otherwise, will search all non-ignored files.
-            Set this to True if your search is only meant to discover code that can be manipulated with symbolic tools.
-            For example, for finding classes or methods from a name pattern.
-            Setting to False is a better choice if you also want to search in non-code files, like in html or yaml files,
-            which is why it is the default.
-        :param search_scope: Controls which files to search. Options:
-            - "source" (default): Exclude common generated/vendor patterns (node_modules, __pycache__, migrations,
-              dist, build, .venv, venv, target, .next, .nuxt, vendor, .git, .pytest_cache, .mypy_cache,
-              coverage, htmlcov, wheelhouse, *.egg-info)
-            - "all": Include all files (no exclusions)
-            - "custom": Use custom patterns from config (future feature)
-
-            Default is "source" which is what agents want 95% of the time. Use "all" to explicitly search everything.
-            When files are excluded, response includes exclusion metadata showing what was filtered.
-        :param exclude_generated: [DEPRECATED] Use search_scope instead. If provided, overrides search_scope.
-            This parameter will be removed in version 2.0.0.
-            - exclude_generated=True maps to search_scope="source"
-            - exclude_generated=False maps to search_scope="all"
-        :param result_format: Controls the level of detail in the output. Options:
-            - "summary": Returns counts by file and first 10 matches (60-80% token savings, DEFAULT)
-            - "detailed": Returns all matches with full context (explicit opt-in for complete results)
-            Default is "summary" for optimal token efficiency. Use "detailed" when you need full match context.
-        :param output_mode: DEPRECATED. Use result_format instead. This parameter is maintained for backward
-            compatibility but will be removed in v2.0.0. If provided, shows deprecation warning.
-        :return: A mapping of file paths to lists of matched consecutive lines (detailed mode),
-                 or a JSON summary with counts and preview (summary mode).
+        :param substring_pattern: Regex pattern (DOTALL). Avoid leading/trailing .*
+        :param context_lines_before: Context lines before each match.
+        :param context_lines_after: Context lines after each match.
+        :param paths_include_glob: Include glob (e.g. "*.py"). Matches relative paths.
+        :param paths_exclude_glob: Exclude glob. Takes precedence over include.
+        :param relative_path: Restrict to file/directory.
+        :param restrict_search_to_code_files: True = only files with analyzable symbols.
+        :param search_scope: source (default, excludes generated/vendor) | all.
+        :param exclude_generated: [DEPRECATED] Use search_scope.
+        :param max_results: -1=config default, 0=unlimited. Paginate via page_cursor.
+        :param page_cursor: From previous _pagination.next_cursor.
+        :param result_format: summary (default, counts + preview) | detailed (all matches).
+        :param output_mode: [DEPRECATED] Use result_format.
+        :param max_answer_chars: Char limit. -1=config default.
+        :return: JSON summary or detailed match mapping.
         """
         abs_path = os.path.join(self.get_project_root(), relative_path)
         if not os.path.exists(abs_path):
@@ -716,10 +649,29 @@ class SearchForPatternTool(Tool):
                     "include_excluded_instruction": "Use search_scope='all' to include all files"
                 }
 
+        # Apply result limiting / pagination on the flat list of matches
+        all_matches_flat = [
+            (file_path, match_str)
+            for file_path, match_list in file_to_matches.items()
+            for match_str in match_list
+        ]
+        limited_flat, pagination_meta = self._apply_result_limit(all_matches_flat, max_results, page_cursor)
+
+        if pagination_meta is not None:
+            # Rebuild file_to_matches from limited flat list
+            limited_file_to_matches: dict[str, list[str]] = defaultdict(list)
+            for file_path, match_str in limited_flat:
+                limited_file_to_matches[file_path].append(match_str)
+            file_to_matches = dict(limited_file_to_matches)
+
         # Handle result format
         if actual_result_format == "summary":
             summary = self._generate_summary_output(file_to_matches, substring_pattern, max_answer_chars)
             summary_dict = json.loads(summary)
+
+            # Add pagination metadata if results were capped
+            if pagination_meta:
+                summary_dict["_pagination"] = pagination_meta
 
             # Add exclusion metadata if present
             if exclusion_metadata:
@@ -733,6 +685,10 @@ class SearchForPatternTool(Tool):
         else:
             # Detailed mode
             result_dict = file_to_matches.copy()
+
+            # Add pagination metadata if results were capped
+            if pagination_meta:
+                result_dict["_pagination"] = pagination_meta
 
             # Add exclusion metadata if present
             if exclusion_metadata:
@@ -805,22 +761,5 @@ class SearchForPatternTool(Tool):
                 "matches": remaining_matches
             }
         
-        # Add expansion hint if there are more results available
-        if total_matches > 10:
-            summary["_expansion_hint"] = (
-                f"Use result_format='detailed' to see all {total_matches} matches with full context"
-            )
-
-        # Add token estimates
-        # Estimate: preview is ~10 matches, detailed would be all matches
-        # Rough estimate: each match in preview ~100 chars, detailed ~300 chars per match
-        preview_tokens = min(10, total_matches) * 25  # ~100 chars / 4 = 25 tokens
-        detailed_tokens = total_matches * 75  # ~300 chars / 4 = 75 tokens
-        summary["_token_estimate"] = {
-            "current": preview_tokens,
-            "detailed": detailed_tokens,
-            "savings_pct": int((1 - preview_tokens / max(detailed_tokens, 1)) * 100) if detailed_tokens > 0 else 0
-        }
-
         result = json.dumps(summary, indent=2)
         return self._limit_length(result, max_answer_chars)

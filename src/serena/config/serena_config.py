@@ -152,6 +152,20 @@ class ToolSet:
                 tool_names.remove(tool_name)
         return ToolSet(tool_names)
 
+    def without_symbolic_tools(self) -> "ToolSet":
+        """
+        :return: a new tool set that excludes all tools that require language server support
+            for symbolic operations (both read and edit)
+        """
+        from serena.tools import ToolRegistry
+
+        registry = ToolRegistry()
+        tool_names = set(self._tool_names)
+        for tool_name in self._tool_names:
+            if registry.get_tool_class_by_name(tool_name).is_symbolic():
+                tool_names.remove(tool_name)
+        return ToolSet(tool_names)
+
     def get_tool_names(self) -> set[str]:
         """
         Returns the names of the tools that are currently included in the tool set.
@@ -237,8 +251,13 @@ class ProjectConfig(ToolInclusionDefinition, ToStringMixin):
                         f"  project_name: {project_name}\n"
                         f"  language: python  # or typescript, java, csharp, rust, go, ruby, cpp, php, swift, elixir, terraform, bash, markdown\n"
                     )
-                # find the language with the highest percentage
-                dominant_language = max(language_composition.keys(), key=lambda lang: language_composition[lang])
+                # Prefer non-markdown languages if available, since markdown files (READMEs, docs, changelogs)
+                # are common in code projects and should not cause misdetection
+                non_markdown = {k: v for k, v in language_composition.items() if k != "markdown"}
+                if non_markdown:
+                    dominant_language = max(non_markdown.keys(), key=lambda lang: non_markdown[lang])
+                else:
+                    dominant_language = max(language_composition.keys(), key=lambda lang: language_composition[lang])
             else:
                 dominant_language = project_language.value
             config_with_comments = load_yaml(PROJECT_TEMPLATE_FILE, preserve_comments=True)
@@ -409,8 +428,12 @@ class SerenaConfig(ToolInclusionDefinition, ToStringMixin):
     """
     default_max_tool_answer_chars: int = 150_000
     """Used as default for tools where the apply method has a default maximal answer length.
-    Even though the value of the max_answer_chars can be changed when calling the tool, it may make sense to adjust this default 
+    Even though the value of the max_answer_chars can be changed when calling the tool, it may make sense to adjust this default
     through the global configuration.
+    """
+    default_max_tool_results: int = 20
+    """Default maximum number of results returned by tools that produce lists (e.g. find_symbol, find_referencing_symbols).
+    Individual tool calls can override this via the max_results parameter (-1 = use this default, 0 = unlimited).
     """
 
     CONFIG_FILE = "serena_config.yml"
@@ -522,6 +545,7 @@ class SerenaConfig(ToolInclusionDefinition, ToStringMixin):
             "token_count_estimator", RegisteredTokenCountEstimator.TIKTOKEN_GPT4O.name
         )
         instance.default_max_tool_answer_chars = loaded_commented_yaml.get("default_max_tool_answer_chars", 150_000)
+        instance.default_max_tool_results = loaded_commented_yaml.get("default_max_tool_results", 20)
 
         # re-save the configuration file if any migrations were performed
         if num_project_migrations > 0:

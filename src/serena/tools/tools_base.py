@@ -158,6 +158,15 @@ class Tool(Component):
         return issubclass(cls, ToolMarkerCanEdit)
 
     @classmethod
+    def is_symbolic(cls) -> bool:
+        """
+        Returns whether this tool requires language server support for symbolic operations.
+
+        :return: True if the tool performs symbolic read or edit operations, False otherwise
+        """
+        return issubclass(cls, (ToolMarkerSymbolicRead, ToolMarkerSymbolicEdit))
+
+    @classmethod
     def get_tool_description(cls) -> str:
         docstring = cls.__doc__
         if docstring is None:
@@ -304,6 +313,49 @@ class Tool(Component):
             + "Please try a more specific tool query or raise the max_answer_chars parameter."
         )
         return result
+
+    def _apply_result_limit(
+        self,
+        items: list,
+        max_results: int,
+        page_cursor: str | None = None,
+    ) -> tuple[list, dict | None]:
+        """
+        Apply result-count limiting with optional cursor-based pagination.
+
+        :param items: Full list of results
+        :param max_results: -1 for config default, 0 for unlimited, positive int for hard cap
+        :param page_cursor: Opaque cursor from a previous response's _pagination.next_cursor
+        :return: Tuple of (limited items, pagination metadata dict or None)
+        """
+        effective_limit = max_results if max_results != -1 else self.agent.serena_config.default_max_tool_results
+        if effective_limit <= 0:
+            return items, None
+
+        # Parse cursor for offset
+        offset = 0
+        if page_cursor:
+            try:
+                offset = int(page_cursor.split(":", 1)[1])
+            except (ValueError, IndexError):
+                offset = 0
+
+        total = len(items)
+        page_items = items[offset:offset + effective_limit]
+        end = offset + len(page_items)
+
+        if total <= effective_limit and offset == 0:
+            return items, None  # No pagination needed
+
+        pagination: dict = {
+            "returned": len(page_items),
+            "total_available": total,
+            "offset": offset,
+        }
+        if end < total:
+            pagination["next_cursor"] = f"offset:{end}"
+
+        return page_items, pagination
 
     def _resolve_max_tokens(
         self,
@@ -617,11 +669,6 @@ class Tool(Component):
         """
         metadata = {}
 
-        # Add token estimate if provided or auto-estimate
-        if token_estimate is None and truncation_metadata is None:
-            # Auto-estimate if neither is provided
-            token_estimate = self._estimate_tokens(result)
-
         if token_estimate is not None:
             metadata["_tokens"] = token_estimate.to_dict()
 
@@ -686,6 +733,31 @@ class Tool(Component):
 
                 # record tool usage
                 self.agent.record_tool_usage_if_enabled(kwargs, result, self)
+
+                # Record for session phase tracking
+                self._record_tool_call_for_session(
+                    is_edit=self.can_edit(),
+                    is_search=isinstance(self, ToolMarkerSymbolicRead),
+                    is_read=True,
+                )
+
+                # Token-aware response guard - skip for small results
+                if len(result) > 1000:
+                    try:
+                        max_tokens = self._resolve_max_tokens()
+                        if max_tokens is not None:
+                            result, truncation_meta = self._handle_truncation(
+                                result, max_tokens=max_tokens, truncation="summary"
+                            )
+                            if truncation_meta and truncation_meta.truncated:
+                                if isinstance(result, dict):
+                                    result["_truncation"] = truncation_meta.to_dict()
+                                    result = json.dumps(result)
+                                else:
+                                    result = self._add_token_metadata(result, truncation_metadata=truncation_meta)
+                    except Exception as e:
+                        log.warning(f"Token-aware truncation failed: {e}")
+                        # Fall through - better to return large result than crash
 
             except Exception as e:
                 if not catch_exceptions:

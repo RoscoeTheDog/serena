@@ -167,19 +167,16 @@ class GetSymbolsOverviewTool(Tool, ToolMarkerSymbolicRead):
     Gets an overview of the top-level symbols defined in a given file.
     """
 
-    def apply(self, relative_path: str, depth: int = 0, max_answer_chars: int = -1) -> str:
+    def apply(self, relative_path: str, depth: int = 0, max_results: int = -1, page_cursor: str | None = None, max_answer_chars: int = -1) -> str:
         """
-        Use this tool to get a high-level understanding of the code symbols in a file.
-        This should be the first tool to call when you want to understand a new file, unless you already know
-        what you are looking for.
+        High-level overview of code symbols in a file. Call first when exploring a new file.
 
-        :param relative_path: the relative path to the file to get the overview of
-        :param depth: depth up to which descendants of top-level symbols shall be retrieved
-            (e.g. 1 retrieves immediate children). Default 0.
-        :param max_answer_chars: if the overview is longer than this number of characters,
-            no content will be returned. -1 means the default value from the config will be used.
-            Don't adjust unless there is really no other way to get the content required for the task.
-        :return: a JSON object containing info about top-level symbols in the file
+        :param relative_path: Relative path to the file.
+        :param depth: Descendant depth (e.g. 1 for class methods). Default 0.
+        :param max_results: -1=config default, 0=unlimited. Paginate via page_cursor.
+        :param page_cursor: From previous _pagination.next_cursor.
+        :param max_answer_chars: Char limit. -1=config default.
+        :return: JSON with top-level symbols in the file.
         """
         # Use cache for symbol overview
         cache = get_global_cache(self.project.project_root)
@@ -206,16 +203,23 @@ class GetSymbolsOverviewTool(Tool, ToolMarkerSymbolicRead):
         result = symbol_retriever.get_symbol_overview(relative_path, depth=depth)[relative_path]
         # Optimize: since all symbols are from the same file, use structured format
         symbol_list = [dataclasses.asdict(i) for i in result]
+
+        # Apply result limiting / pagination
+        symbol_list, pagination_meta = self._apply_result_limit(symbol_list, max_results, page_cursor)
+
         optimized_result = {
             "_schema": "structured_v1",
             "file": relative_path,
             "symbols": symbol_list
         }
-        
+
+        if pagination_meta:
+            optimized_result["_pagination"] = pagination_meta
+
         # Cache the result
         cache_metadata = cache.put(relative_path, json.dumps(optimized_result), query_params)
         optimized_result["_cache"] = cache_metadata
-        
+
         result_json_str = json.dumps(optimized_result)
         return self._limit_length(result_json_str, max_answer_chars)
 
@@ -239,112 +243,34 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
         match_mode: Literal["exact", "substring", "glob", "regex"] = "exact",
         exclude_generated: bool | None = None,  # DEPRECATED - use search_scope
         search_scope: Literal["all", "source", "custom"] = "source",
+        max_results: int = -1,
+        page_cursor: str | None = None,
         max_answer_chars: int = -1,
     ) -> str:
         """
-        Retrieves information on all symbols/code entities (classes, methods, etc.) based on the given `name_path`,
-        which represents a pattern for the symbol's path within the symbol tree of a single file.
-        The returned symbol location can be used for edits or further queries.
-        Specify `depth > 0` to retrieve children (e.g., methods of a class).
+        Finds symbols by name_path pattern within the file's symbol tree. Returns locations usable for edits/queries.
+        Specify depth > 0 to retrieve children (e.g. methods of a class).
 
-        The matching behavior is determined by the structure of `name_path`, which can
-        either be a simple name (e.g. "method") or a name path like "class/method" (relative name path)
-        or "/class/method" (absolute name path). Note that the name path is not a path in the file system
-        but rather a path in the symbol tree **within a single file**. Thus, file or directory names should never
-        be included in the `name_path`. For restricting the search to a single file or directory,
-        the `within_relative_path` parameter should be used instead. The retrieved symbols' `name_path` attribute
-        will always be composed of symbol names, never file or directory names.
+        name_path matching: "method" matches anywhere in tree; "class/method" requires ancestor;
+        "/class/method" is absolute (must start at top-level). Trailing slashes ignored.
+        name_path is NOT a filesystem path -- use relative_path to restrict to a file/directory.
 
-        Key aspects of the name path matching behavior:
-        - Trailing slashes in `name_path` play no role and are ignored.
-        - The name of the retrieved symbols will match (either exactly or as a substring)
-          the last segment of `name_path`, while other segments will restrict the search to symbols that
-          have a desired sequence of ancestors.
-        - If there is no starting or intermediate slash in `name_path`, there is no
-          restriction on the ancestor symbols. For example, passing `method` will match
-          against symbols with name paths like `method`, `class/method`, `class/nested_class/method`, etc.
-        - If `name_path` contains a `/` but doesn't start with a `/`, the matching is restricted to symbols
-          with the same ancestors as the last segment of `name_path`. For example, passing `class/method` will match against
-          `class/method` as well as `nested_class/class/method` but not `method`.
-        - If `name_path` starts with a `/`, it will be treated as an absolute name path pattern, meaning
-          that the first segment of it must match the first segment of the symbol's name path.
-          For example, passing `/class` will match only against top-level symbols like `class` but not against `nested_class/class`.
-          Passing `/class/method` will match against `class/method` but not `nested_class/class/method` or `method`.
-
-
-        :param name_path: The name path pattern to search for, see above for details.
-        :param depth: Depth to retrieve descendants (e.g., 1 for class methods/attributes).
-        :param relative_path: Optional. Restrict search to this file or directory. If None, searches entire codebase.
-            If a directory is passed, the search will be restricted to the files in that directory.
-            If a file is passed, the search will be restricted to that file.
-            If you have some knowledge about the codebase, you should use this parameter, as it will significantly
-            speed up the search as well as reduce the number of results.
-        :param output_format: Level of detail to return. Options:
-            - "metadata" (default, recommended): Return symbol metadata only (name, kind, location) - fastest, most efficient
-            - "signature": Return signature + docstring + complexity analysis - useful for understanding symbols without reading full code
-            - "body": Return full source code - use sparingly, only when you need to read the actual implementation
-            
-            Examples:
-                # Default - get metadata to find symbols
-                find_symbol("UserService")  # Returns: name, kind, location, children
-                
-                # Get signature when you need to understand the API
-                find_symbol("UserService/authenticate", output_format="signature")
-                # Returns: signature, docstring, complexity metrics, token estimates
-                
-                # Get body only when you need to read implementation
-                find_symbol("UserService/authenticate", output_format="body")
-                # Returns: full source code
-
-        :param include_body: [DEPRECATED] Use output_format="body" instead. If provided, overrides output_format.
-            This parameter will be removed in version 2.0.0.
-        :param detail_level: [DEPRECATED] Use output_format instead. If provided, overrides output_format.
-            This parameter will be removed in version 2.0.0.
-        :param include_kinds: Optional. List of LSP symbol kind integers to include. (e.g., 5 for Class, 12 for Function).
-            Valid kinds: 1=file, 2=module, 3=namespace, 4=package, 5=class, 6=method, 7=property, 8=field, 9=constructor, 10=enum,
-            11=interface, 12=function, 13=variable, 14=constant, 15=string, 16=number, 17=boolean, 18=array, 19=object,
-            20=key, 21=null, 22=enum member, 23=struct, 24=event, 25=operator, 26=type parameter.
-            If not provided, all kinds are included.
-        :param exclude_kinds: Optional. List of LSP symbol kind integers to exclude. Takes precedence over `include_kinds`.
-            If not provided, no kinds are excluded.
-        :param match_mode: Match mode for the last segment of `name_path`. Options:
-            - "exact" (default): Exact match - use when you know the precise symbol name
-            - "substring": Match if pattern is substring of symbol name - use for exploratory searches
-            - "glob": Support wildcards (* and ?) - use for pattern-based searches (e.g., "User*Service")
-            - "regex": Full regex power - use for complex patterns (e.g., "User.*Service")
-
-            Examples:
-                # Exact match - when you know the precise name
-                find_symbol("UserService")  # Only matches "UserService"
-
-                # Substring match - for exploratory searches
-                find_symbol("Service", match_mode="substring")  # Matches "UserService", "AuthService", etc.
-
-                # Glob pattern - for simple wildcards
-                find_symbol("User*Service", match_mode="glob")  # Matches "UserAuthService", "UserApiService", etc.
-                find_symbol("User?Service", match_mode="glob")  # Matches "UserAService", "UserBService", etc.
-
-                # Regex pattern - for complex patterns
-                find_symbol("User.*Service", match_mode="regex")  # Matches "UserAuthService", "UserApiService", etc.
-                find_symbol("User[A-Z]+Service", match_mode="regex")  # More complex patterns
-        :param substring_matching: [DEPRECATED] Use match_mode="substring" instead. If provided, overrides match_mode.
-            This parameter will be removed in version 2.0.0.
-        :param search_scope: Controls which files to search. Options:
-            - "source" (default): Exclude common generated/vendor patterns (node_modules, __pycache__, migrations,
-              dist, build, .venv, venv, target, .next, .nuxt, vendor, .git, .pytest_cache, .mypy_cache,
-              coverage, htmlcov, wheelhouse, *.egg-info)
-            - "all": Include all files (no exclusions)
-            - "custom": Use custom patterns from config (future feature)
-
-            Default is "source" which is what agents want 95% of the time. Use "all" to explicitly search everything.
-            When files are excluded, response includes exclusion metadata showing what was filtered.
-        :param exclude_generated: [DEPRECATED] Use search_scope instead. If provided, overrides search_scope.
-            This parameter will be removed in version 2.0.0.
-            - exclude_generated=True maps to search_scope="source"
-            - exclude_generated=False maps to search_scope="all"
-        :param max_answer_chars: Max characters for the JSON result. If exceeded, no content is returned.
-            -1 means the default value from the config will be used.
-        :return: a list of symbols (with locations) matching the name.
+        :param name_path: Pattern to match. Simple: "method"; relative: "class/method"; absolute: "/class/method".
+        :param depth: Descendant depth (e.g. 1 for class methods).
+        :param relative_path: Restrict to file/directory. Speeds up search.
+        :param output_format: metadata (default, locations only) | signature (API + docstring) | body (full source).
+        :param include_body: [DEPRECATED] Use output_format instead.
+        :param detail_level: [DEPRECATED] Use output_format instead.
+        :param include_kinds: LSP symbol kind ints to include (5=class, 6=method, 12=function, etc.).
+        :param exclude_kinds: LSP symbol kind ints to exclude. Takes precedence over include_kinds.
+        :param match_mode: exact (default) | substring | glob | regex -- applied to final name_path segment.
+        :param substring_matching: [DEPRECATED] Use match_mode instead.
+        :param search_scope: source (default, excludes generated/vendor) | all.
+        :param exclude_generated: [DEPRECATED] Use search_scope instead.
+        :param max_results: -1=config default, 0=unlimited. Paginate via page_cursor.
+        :param page_cursor: From previous _pagination.next_cursor.
+        :param max_answer_chars: Char limit for JSON result. -1=config default.
+        :return: List of matching symbols with locations.
         """
         # Handle deprecated parameters and build deprecation warnings
         deprecation_warnings = []
@@ -576,7 +502,14 @@ class FindSymbolTool(Tool, ToolMarkerSymbolicRead):
             # TODO: Load custom patterns from config
             pass
 
+        # Apply result limiting / pagination
+        symbol_dicts, pagination_meta = self._apply_result_limit(symbol_dicts, max_results, page_cursor)
+
         optimized_result = _optimize_symbol_list(symbol_dicts)
+
+        # Add pagination metadata if results were capped
+        if pagination_meta:
+            optimized_result["_pagination"] = pagination_meta
 
         # Add exclusion metadata if present
         if exclusion_metadata:
@@ -608,26 +541,25 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
         exclude_kinds: list[int] = [],  # noqa: B006
         context_lines: int = 1,
         extract_pattern: bool = True,
-        mode: Literal["count", "summary", "full"] = "full",
+        mode: Literal["count", "summary", "full"] = "summary",
+        max_results: int = -1,
+        page_cursor: str | None = None,
         max_answer_chars: int = -1,
     ) -> str:
         """
-        Finds references to the symbol at the given `name_path`. The result will contain metadata about the referencing symbols
-        as well as a short code snippet around the reference.
+        Finds references to the symbol at name_path. Returns referencing symbol metadata and code snippets.
 
-        :param name_path: for finding the symbol to find references for, same logic as in the `find_symbol` tool.
-        :param relative_path: the relative path to the file containing the symbol for which to find references.
-            Note that here you can't pass a directory but must pass a file.
-        :param include_kinds: same as in the `find_symbol` tool.
-        :param exclude_kinds: same as in the `find_symbol` tool.
-        :param context_lines: number of lines of context to show before and after the reference (default: 1).
-            Set to 0 for just the reference line, or higher for more surrounding code.
-        :param extract_pattern: if True, extract the usage pattern (e.g., "foo.bar(x, y)") from the reference line
-            for more concise output. If False, shows full lines without pattern extraction (default: True).
-        :param mode: output mode - "count" (just counts by file/type), "summary" (counts + first 10 matches),
-            or "full" (all references with context, default). Count mode provides 90%+ token savings.
-        :param max_answer_chars: same as in the `find_symbol` tool.
-        :return: a list of JSON objects with the symbols referencing the requested symbol
+        :param name_path: Same as find_symbol.
+        :param relative_path: File containing the target symbol (must be a file, not directory).
+        :param include_kinds: Same as find_symbol.
+        :param exclude_kinds: Same as find_symbol.
+        :param context_lines: Lines of context before/after each reference (default: 1).
+        :param extract_pattern: Extract usage pattern from reference line for concise output (default: True).
+        :param mode: count | summary (default, counts + first 10) | full (all with context).
+        :param max_results: -1=config default, 0=unlimited. Paginate via page_cursor.
+        :param page_cursor: From previous _pagination.next_cursor.
+        :param max_answer_chars: Char limit. -1=config default.
+        :return: Referencing symbols with snippets.
         """
         include_body = False  # It is probably never a good idea to include the body of the referencing symbols
         parsed_include_kinds: Sequence[SymbolKind] | None = [SymbolKind(k) for k in include_kinds] if include_kinds else None
@@ -695,7 +627,14 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
             return self._generate_summary_output(reference_dicts, name_path, relative_path)
 
         # Full mode: Return all references (default)
+        # Apply result limiting / pagination
+        reference_dicts, pagination_meta = self._apply_result_limit(reference_dicts, max_results, page_cursor)
+
         optimized_result = _optimize_symbol_list(reference_dicts)
+
+        if pagination_meta:
+            optimized_result["_pagination"] = pagination_meta
+
         result = json.dumps(optimized_result)
         return self._limit_length(result, max_answer_chars)
 
@@ -898,15 +837,12 @@ class InsertAfterSymbolTool(Tool, ToolMarkerSymbolicEdit):
         response_format: str = "diff",
     ) -> str:
         """
-        Inserts the given body/content after the end of the definition of the given symbol (via the symbol's location).
-        A typical use case is to insert a new class, function, method, field or variable assignment.
+        Inserts content after the symbol's definition. Typical use: add a new class, function, or method.
 
-        :param name_path: name path of the symbol after which to insert content (definitions in the `find_symbol` tool apply)
-        :param relative_path: the relative path to the file containing the symbol
-        :param body: the body/content to be inserted. The inserted code shall begin with the next line after
-            the symbol.
-        :param response_format: output format - "diff" (default, concise unified diff), 
-            "summary" (brief confirmation), or "full" (complete file content)
+        :param name_path: Target symbol (find_symbol rules apply).
+        :param relative_path: File containing the symbol.
+        :param body: Content to insert after the symbol's definition.
+        :param response_format: diff (default) | summary | full.
         """
         import os
         
@@ -979,15 +915,12 @@ class InsertBeforeSymbolTool(Tool, ToolMarkerSymbolicEdit):
         response_format: str = "diff",
     ) -> str:
         """
-        Inserts the given content before the beginning of the definition of the given symbol (via the symbol's location).
-        A typical use case is to insert a new class, function, method, field or variable assignment; or
-        a new import statement before the first symbol in the file.
+        Inserts content before the symbol's definition. Typical use: add imports or new symbols above existing ones.
 
-        :param name_path: name path of the symbol before which to insert content (definitions in the `find_symbol` tool apply)
-        :param relative_path: the relative path to the file containing the symbol
-        :param body: the body/content to be inserted before the line in which the referenced symbol is defined
-        :param response_format: output format - "diff" (default, concise unified diff), 
-            "summary" (brief confirmation), or "full" (complete file content)
+        :param name_path: Target symbol (find_symbol rules apply).
+        :param relative_path: File containing the symbol.
+        :param body: Content to insert before the symbol's definition.
+        :param response_format: diff (default) | summary | full.
         """
         import os
         
@@ -1059,21 +992,11 @@ class GetSymbolBodyTool(Tool, ToolMarkerSymbolicRead):
         max_answer_chars: int = -1,
     ) -> str:
         """
-        Retrieve the body/source code for one or more symbols by their symbol IDs.
+        Retrieve source code for symbols by ID. Symbol ID format: name_path:relative_path:line_number.
 
-        This tool enables a two-phase workflow:
-        1. Search phase: Use find_symbol with include_body=false to get symbol metadata (~5 tokens/symbol)
-        2. Retrieval phase: Use this tool to get specific bodies you need (~450 tokens/symbol)
-
-        This provides 95%+ token savings compared to searching with include_body=true for all results.
-
-        Symbol ID format: {name_path}:{relative_path}:{line_number}
-        Example: "User/login:models.py:142"
-
-        :param symbol_id: A single symbol ID (string) or list of symbol IDs for batch retrieval.
-            Symbol IDs are returned by find_symbol in the "symbol_id" field.
-        :param max_answer_chars: Max characters for the result. -1 means default from config.
-        :return: JSON with symbol bodies, or error if symbol ID invalid/not found.
+        :param symbol_id: Single symbol ID or list. IDs come from find_symbol's "symbol_id" field.
+        :param max_answer_chars: Char limit. -1=config default.
+        :return: JSON with symbol bodies.
         """
         # Handle both single and batch retrieval
         symbol_ids = [symbol_id] if isinstance(symbol_id, str) else symbol_id

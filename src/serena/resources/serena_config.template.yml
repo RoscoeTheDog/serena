@@ -53,6 +53,11 @@ default_max_tool_answer_chars: 150000
 # Even though the value of the max_answer_chars can be changed when calling the tool, it may make sense to adjust this default
 # through the global configuration.
 
+default_max_tool_results: 20
+# Default maximum number of results returned by tools that produce lists (e.g. find_symbol, find_referencing_symbols).
+# Individual tool calls can override this via the max_results parameter (-1 = use this default, 0 = unlimited).
+# 20 results is enough to orient; use max_results=0 for unlimited or page with page_cursor for more.
+
 record_tool_usage_stats:  False
 # whether to record tool usage statistics, they will be shown in the web dashboard if recording is active.
 

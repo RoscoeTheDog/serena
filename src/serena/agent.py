@@ -469,6 +469,8 @@ class SerenaAgent:
             tool_set = tool_set.apply(self._active_project.project_config)
             if self._active_project.project_config.read_only:
                 tool_set = tool_set.without_editing_tools()
+            if not self.is_using_language_server():
+                tool_set = tool_set.without_symbolic_tools()
 
         self._active_tools = {
             tool_class: tool_instance
