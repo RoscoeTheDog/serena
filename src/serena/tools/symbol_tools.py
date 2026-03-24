@@ -200,7 +200,9 @@ class GetSymbolsOverviewTool(Tool, ToolMarkerSymbolicRead):
             raise FileNotFoundError(f"File or directory {relative_path} does not exist in the project.")
         if os.path.isdir(file_path):
             raise ValueError(f"Expected a file path, but got a directory path: {relative_path}. ")
-        result = symbol_retriever.get_symbol_overview(relative_path, depth=depth)[relative_path]
+        # Note: get_symbol_overview only returns top-level symbols; depth is not supported upstream.
+        # For depth > 0, users should use find_symbol with depth parameter instead.
+        result = symbol_retriever.get_symbol_overview(relative_path)[relative_path]
         # Optimize: since all symbols are from the same file, use structured format
         symbol_list = [dataclasses.asdict(i) for i in result]
 
@@ -654,8 +656,8 @@ class FindReferencingSymbolsTool(Tool, ToolMarkerSymbolicRead):
             file_path = ref.symbol.location.relative_path or "unknown"
             by_file[file_path] = by_file.get(file_path, 0) + 1
 
-            # Count by symbol kind/type
-            symbol_kind = ref.symbol.kind.name if ref.symbol.kind else "unknown"
+            # Count by symbol kind/type (kind is already a string)
+            symbol_kind = ref.symbol.kind if ref.symbol.kind else "unknown"
             by_type[symbol_kind] = by_type.get(symbol_kind, 0) + 1
 
         # Sort by count (descending)
@@ -1073,7 +1075,7 @@ class GetSymbolBodyTool(Tool, ToolMarkerSymbolicRead):
                     "line": line_number,
                     "kind": matching_symbol.kind,
                     "body": body,
-                    "body_lines": f"{matching_symbol.get_body_start_position()[0]}-{matching_symbol.get_body_end_position()[0]}",
+                    "body_lines": f"{matching_symbol.get_body_start_position().line}-{matching_symbol.get_body_end_position().line}",
                     "estimated_tokens": token_estimate
                 })
 
