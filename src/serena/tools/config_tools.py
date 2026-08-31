@@ -13,6 +13,7 @@ from serena.tools.onboarding_helpers import (
     generate_completion_checklist,
 )
 from serena.constants import (
+    SERENA_MANAGED_DIR_NAME,
     get_centralized_project_dir,
     get_project_config_path,
 )
@@ -66,6 +67,29 @@ class ActivateProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject):
         # Add onboarding status if onboarding was performed
         if onboarding_status["performed"]:
             result_str += "\n\n" + onboarding_status["message"]
+
+        # Surface it explicitly when language server-based analysis (and thus all symbolic tools) is unavailable
+        if not self.agent.is_using_language_server():
+            from solidlsp.ls_config import Language
+
+            if active_project.project_config.language == Language.MARKDOWN:
+                reason = "the language 'markdown' has no language server support"
+            else:
+                reason = "language server mode is disabled in the current configuration"
+            result_str += (
+                f"\nWARNING: Symbolic tools (find_symbol, get_symbols_overview, symbol-based editing, etc.) are DISABLED "
+                f"for this project because {reason}. Only file- and pattern-based tools are available. "
+                f"If the project language was misdetected, set the correct `language` in "
+                f"{active_project.path_to_project_yml()} and re-activate the project."
+            )
+
+        # Warn about a legacy in-project config file, which this Serena version no longer reads
+        legacy_config_path = Path(active_project.project_root) / SERENA_MANAGED_DIR_NAME / "project.yml"
+        if legacy_config_path.exists():
+            result_str += (
+                f"\nNOTE: A legacy configuration file exists at {legacy_config_path}, but it is NO LONGER read by this "
+                f"version of Serena. The active configuration is {active_project.path_to_project_yml()} — edit that file instead."
+            )
 
         if active_project.project_config.initial_prompt:
             result_str += f"\nAdditional project information:\n {active_project.project_config.initial_prompt}"

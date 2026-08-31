@@ -133,13 +133,19 @@ class TestProjectConfigAutogenerate:
         config = ProjectConfig.autogenerate(self.project_path, save_to_disk=False)
         assert config.language == Language.PYTHON
 
-    def test_autogenerate_markdown_only_project(self):
-        """Test that a project with only markdown files is correctly detected as markdown."""
+    def test_autogenerate_markdown_only_project_refused(self):
+        """Test that a project with only markdown files is refused with a transparent error
+        instead of being silently assigned the markdown language (which has no LSP support)."""
         for i in range(3):
             (self.project_path / f"doc{i}.md").write_text(f"# Document {i}\n")
 
-        config = ProjectConfig.autogenerate(self.project_path, save_to_disk=False)
-        assert config.language == Language.MARKDOWN
+        with pytest.raises(ValueError) as exc_info:
+            ProjectConfig.autogenerate(self.project_path, save_to_disk=False)
+
+        error_message = str(exc_info.value)
+        assert "Only Markdown files were detected" in error_message
+        assert "no symbol/language-server support for Markdown" in error_message
+        assert "language: python" in error_message
 
     def test_autogenerate_error_message_format(self):
         """Test the specific format of the error message for better user experience."""
@@ -250,3 +256,48 @@ class TestProjectConfigCentralizedStorage:
         # Should have a clear, helpful error message
         assert "not found" in error_message.lower()
         assert str(centralized_path) in error_message or "project.yml" in error_message
+
+
+class TestRegisteredProjectReload:
+    """Test class for reloading project configuration from disk on activation."""
+
+    def setup_method(self):
+        """Set up test environment before each test method."""
+        self.test_dir = tempfile.mkdtemp()
+        self.project_path = Path(self.test_dir) / "reload_project"
+        self.project_path.mkdir(parents=True, exist_ok=True)
+
+    def teardown_method(self):
+        """Clean up test environment after each test method."""
+        shutil.rmtree(self.test_dir)
+        # Also remove the centralized config created for the temp project
+        from serena.constants import get_centralized_project_dir
+
+        shutil.rmtree(get_centralized_project_dir(self.project_path), ignore_errors=True)
+
+    def test_reload_project_config_picks_up_language_change(self):
+        """A language change in project.yml must take effect on reload, without a server restart."""
+        from serena.config.serena_config import RegisteredProject
+        from serena.constants import get_project_config_path
+
+        (self.project_path / "main.py").write_text("print('hello')\n")
+        config = ProjectConfig.autogenerate(self.project_path, save_to_disk=True)
+        registered = RegisteredProject(project_root=str(self.project_path), project_config=config)
+
+        instance = registered.get_project_instance()
+        assert registered.get_project_instance() is instance  # instance is cached
+
+        # Reload without any change on disk: config and instance stay as they are
+        registered.reload_project_config()
+        assert registered.get_project_instance() is instance
+
+        # Edit the language on disk, as a user fixing a misdetected project would
+        config_path = get_project_config_path(self.project_path)
+        content = config_path.read_text(encoding="utf-8").replace("language: python", "language: typescript")
+        config_path.write_text(content, encoding="utf-8")
+
+        registered.reload_project_config()
+        assert registered.project_config.language == Language.TYPESCRIPT
+        new_instance = registered.get_project_instance()
+        assert new_instance is not instance
+        assert new_instance.project_config.language == Language.TYPESCRIPT

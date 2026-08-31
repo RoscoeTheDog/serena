@@ -244,12 +244,12 @@ class ProjectConfig(ToolInclusionDefinition, ToStringMixin):
                     raise ValueError(
                         f"No source files found in {project_root}\n\n"
                         f"To use Serena with this project, you need to either:\n"
-                        f"1. Add source files in one of the supported languages (Python, JavaScript/TypeScript, Java, C#, Rust, Go, Ruby, C++, PHP, Swift, Elixir, Terraform, Bash, Markdown)\n"
+                        f"1. Add source files in one of the supported languages (Python, JavaScript/TypeScript, Java, C#, Rust, Go, Ruby, C++, PHP, Swift, Elixir, Terraform, Bash)\n"
                         f"2. Create a project configuration file manually at:\n"
                         f"   {config_path_hint}\n\n"
                         f"Example project.yml:\n"
                         f"  project_name: {project_name}\n"
-                        f"  language: python  # or typescript, java, csharp, rust, go, ruby, cpp, php, swift, elixir, terraform, bash, markdown\n"
+                        f"  language: python  # or typescript, java, csharp, rust, go, ruby, cpp, php, swift, elixir, terraform, bash\n"
                     )
                 # Prefer non-markdown languages if available, since markdown files (READMEs, docs, changelogs)
                 # are common in code projects and should not cause misdetection
@@ -257,7 +257,21 @@ class ProjectConfig(ToolInclusionDefinition, ToStringMixin):
                 if non_markdown:
                     dominant_language = max(non_markdown.keys(), key=lambda lang: non_markdown[lang])
                 else:
-                    dominant_language = max(language_composition.keys(), key=lambda lang: language_composition[lang])
+                    # Markdown has no language server, so auto-assigning it silently disables all
+                    # symbolic tools; refuse instead so the user can make an explicit choice.
+                    config_path_hint = cls.rel_path_to_project_yml(project_root)
+                    raise ValueError(
+                        f"Only Markdown files were detected in {project_root}.\n"
+                        f"Serena has no symbol/language-server support for Markdown, so it is never "
+                        f"auto-assigned as a project language (it would silently disable all symbolic tools).\n\n"
+                        f"To use Serena with this project, you need to either:\n"
+                        f"1. Add source files in one of the supported languages (Python, JavaScript/TypeScript, Java, C#, Rust, Go, Ruby, C++, PHP, Swift, Elixir, Terraform, Bash)\n"
+                        f"2. Create a project configuration file with an explicit language at:\n"
+                        f"   {config_path_hint}\n\n"
+                        f"Example project.yml:\n"
+                        f"  project_name: {project_name}\n"
+                        f"  language: python  # or typescript, java, csharp, rust, go, ruby, cpp, php, swift, elixir, terraform, bash\n"
+                    )
             else:
                 dominant_language = project_language.value
             config_with_comments = load_yaml(PROJECT_TEMPLATE_FILE, preserve_comments=True)
@@ -388,6 +402,22 @@ class RegisteredProject(ToStringMixin):
             with LogTime(f"Loading project instance for {self}", logger=log):
                 self._project_instance = Project(project_root=str(self.project_root), project_config=self.project_config)
         return self._project_instance
+
+    def reload_project_config(self) -> None:
+        """
+        Re-reads the project configuration from disk, discarding the cached project instance if the
+        configuration changed. This allows edits to project.yml (e.g. changing `language`) to take
+        effect on the next project activation without restarting the server process.
+        """
+        try:
+            fresh_config = ProjectConfig.load(self.project_root)
+        except (FileNotFoundError, ValueError) as e:
+            log.warning(f"Could not reload project configuration for {self.project_name}: {e}; keeping in-memory configuration")
+            return
+        if fresh_config != self.project_config:
+            log.info(f"Project configuration for '{self.project_name}' changed on disk; reloading it")
+            self.project_config = fresh_config
+            self._project_instance = None
 
 
 @dataclass(kw_only=True)
@@ -597,6 +627,7 @@ class SerenaConfig(ToolInclusionDefinition, ToStringMixin):
             if project.project_config.project_name == project_root_or_name:
                 project_candidates.append(project)
         if len(project_candidates) == 1:
+            project_candidates[0].reload_project_config()
             return project_candidates[0].get_project_instance()
         elif len(project_candidates) > 1:
             raise ValueError(
@@ -607,6 +638,7 @@ class SerenaConfig(ToolInclusionDefinition, ToStringMixin):
         if os.path.isdir(project_root_or_name):
             for project in self.projects:
                 if project.matches_root_path(project_root_or_name):
+                    project.reload_project_config()
                     return project.get_project_instance()
         return None
 
