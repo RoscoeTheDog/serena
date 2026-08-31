@@ -83,13 +83,10 @@ class ActivateProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject):
                 f"{active_project.path_to_project_yml()} and re-activate the project."
             )
 
-        # Warn about a legacy in-project config file, which this Serena version no longer reads
-        legacy_config_path = Path(active_project.project_root) / SERENA_MANAGED_DIR_NAME / "project.yml"
-        if legacy_config_path.exists():
-            result_str += (
-                f"\nNOTE: A legacy configuration file exists at {legacy_config_path}, but it is NO LONGER read by this "
-                f"version of Serena. The active configuration is {active_project.path_to_project_yml()} — edit that file instead."
-            )
+        # Auto-migrate any legacy in-project .serena/ directory to centralized storage
+        migration_note = self._migrate_legacy_serena_dir(Path(active_project.project_root))
+        if migration_note:
+            result_str += f"\n{migration_note}"
 
         if active_project.project_config.initial_prompt:
             result_str += f"\nAdditional project information:\n {active_project.project_config.initial_prompt}"
@@ -106,9 +103,54 @@ class ActivateProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject):
         
         return result_str
 
+    def _migrate_legacy_serena_dir(self, project_root: Path) -> str | None:
+        """
+        Migrates a legacy in-project .serena/ directory to centralized storage: memories that do
+        not yet exist centrally are adopted (centralized copies win on name conflicts), the
+        regenerable cache and the legacy project.yml are discarded, and the directory is removed.
+
+        :param project_root: the root of the activated project
+        :return: a user-facing note describing what happened, or None if there was nothing to do
+        """
+        import shutil
+
+        from serena.constants import SERENA_MANAGED_DIR_IN_HOME, get_project_config_path, get_project_memories_path
+
+        legacy_dir = project_root / SERENA_MANAGED_DIR_NAME
+        if not legacy_dir.is_dir():
+            return None
+        # never touch the centralized storage itself (e.g. if the home directory was registered as a project)
+        if legacy_dir.resolve() == Path(SERENA_MANAGED_DIR_IN_HOME).resolve():
+            return None
+
+        adopted_memories = 0
+        try:
+            legacy_memories_dir = legacy_dir / "memories"
+            if legacy_memories_dir.is_dir():
+                central_memories_dir = get_project_memories_path(project_root)
+                central_memories_dir.mkdir(parents=True, exist_ok=True)
+                for memory_file in legacy_memories_dir.iterdir():
+                    if memory_file.is_file():
+                        target = central_memories_dir / memory_file.name
+                        if not target.exists():
+                            shutil.copy2(memory_file, target)
+                            adopted_memories += 1
+            shutil.rmtree(legacy_dir)
+        except Exception as e:
+            return (
+                f"NOTE: Could not fully migrate the legacy configuration directory {legacy_dir}: {e}. "
+                f"It is no longer read by Serena and can be removed manually; the active configuration "
+                f"is {get_project_config_path(project_root)}."
+            )
+
+        note = f"NOTE: Migrated legacy {legacy_dir} to centralized storage and removed it"
+        if adopted_memories:
+            note += f" (adopted {adopted_memories} memory file(s))"
+        return note + "."
+
     def _check_and_auto_onboard(self, project) -> dict:
         """
-        Check if project needs onboarding and perform it automatically if needed.
+        Check if project needs onboarding and schedule it in the background if needed.
 
         :param project: the activated project
         :return: dict with 'performed' (bool) and 'message' (str)
@@ -119,8 +161,15 @@ class ActivateProjectTool(Tool, ToolMarkerDoesNotRequireActiveProject):
         memories = json.loads(list_memories_tool.apply())
 
         if len(memories) == 0:
-            # No memories exist - perform auto-onboarding
-            return self._auto_onboard_project(project)
+            # No memories exist - onboard in the background so activation returns immediately
+            self.agent.issue_task(lambda: self._auto_onboard_project(project), name="AutoOnboarding")
+            return {
+                "performed": True,
+                "message": (
+                    "Auto-onboarding started in the background (tech stack, commands, and code style detection); "
+                    "project memories will become available shortly."
+                )
+            }
         else:
             return {
                 "performed": False,
@@ -326,6 +375,7 @@ class GetProjectConfigTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMark
 
             result = {
                 "project_name": config_data.get("project_name", project_root.name),
+                "project_root": config_data.get("project_root", str(project_root)),
                 "language": config_data.get("language", "unknown"),
                 "storage_location": storage_location,
                 "config_path": str(config_path),
@@ -403,6 +453,18 @@ class UpdateProjectConfigTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolM
             if key in ["project_name", "language", "ignored_paths", "read_only",
                       "ignore_all_files_in_gitignore", "initial_prompt", "encoding",
                       "excluded_tools", "included_optional_tools"]:
+                if key == "language":
+                    # validate against the Language enum so a typo cannot render the config unloadable
+                    from solidlsp.ls_config import Language
+
+                    try:
+                        Language(str(value).lower())
+                    except ValueError:
+                        return json.dumps({
+                            "error": f"Invalid language: {value}",
+                            "valid_languages": [lang.value for lang in Language]
+                        }, indent=2)
+                    value = str(value).lower()
                 config_data[key] = value
             else:
                 return json.dumps({
@@ -555,12 +617,14 @@ class ListProjectConfigsTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMa
                             with open(config_path, encoding="utf-8") as f:
                                 config_data = yaml.safe_load(f)
 
-                            # Try to resolve project path from registered projects
-                            project_root = None
-                            for registered in self.agent.serena_config.projects:
-                                if get_centralized_project_dir(Path(registered.path)).name == project_dir.name:
-                                    project_root = registered.path
-                                    break
+                            # Resolve the project path: prefer the project_root recorded in the
+                            # config itself, fall back to matching against registered projects
+                            project_root = config_data.get("project_root")
+                            if project_root is None:
+                                for registered in self.agent.serena_config.projects:
+                                    if get_centralized_project_dir(Path(registered.project_root)).name == project_dir.name:
+                                        project_root = str(registered.project_root)
+                                        break
 
                             projects.append({
                                 "project_name": config_data.get("project_name", "unknown"),

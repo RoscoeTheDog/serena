@@ -65,8 +65,9 @@ class MemoriesManager:
         from serena.constants import get_project_memories_path
 
         self._project_root = Path(project_root).resolve()
-        # Use centralized location for memories
+        # Use centralized location for memories (path getters are pure, so create the dir here)
         self._memory_dir = get_project_memories_path(self._project_root)
+        self._memory_dir.mkdir(parents=True, exist_ok=True)
 
     def _get_memory_file_path(self, name: str) -> Path:
         # strip all .md from the name. Models tend to get confused, sometimes passing the .md extension and sometimes not.
@@ -533,14 +534,16 @@ class SerenaAgent:
         self.lines_read = LinesRead()
 
         def init_language_server() -> None:
-            # start the language server
+            # start/reset the language server; this also stops any language server that is still
+            # running for a previously active project (even if the new project does not use one)
             with LogTime("Language server initialization", logger=log):
                 self.reset_language_server()
-                assert self.language_server is not None
+                if self.is_using_language_server():
+                    assert self.language_server is not None
 
-        # initialize the language server in the background (if in language server mode)
-        if self.is_using_language_server():
-            self.issue_task(init_language_server)
+        # reset the language server in the background (starts a new one if the project uses LSP,
+        # otherwise just ensures any previously running one is stopped)
+        self.issue_task(init_language_server)
 
         if self._project_activation_callback is not None:
             self._project_activation_callback()
@@ -552,7 +555,8 @@ class SerenaAgent:
         Detection strategy:
         1. Start from the requested path
         2. Traverse upward checking if each parent is registered in centralized storage
-        3. Return the topmost registered parent project (utmost ancestor)
+        3. Return the NEAREST registered parent project (most specific ancestor),
+           analogous to how .git discovery works
         4. Stop at filesystem root
 
         Note: Projects are registered in ~/.serena/serena_config.yml
@@ -575,9 +579,6 @@ class SerenaAgent:
         # On Unix: /
         root_parts = current_path.parts[0:1]  # First part is the root
 
-        # Track the utmost parent project found
-        utmost_parent = None
-
         # Traverse upward from parent of current_path
         current_path = current_path.parent
 
@@ -587,9 +588,8 @@ class SerenaAgent:
             # Check if this path is registered in centralized storage
             existing_project = self.serena_config.get_project(current_path_str)
             if existing_project is not None:
-                # Found a registered parent - keep going to find utmost parent
-                utmost_parent = current_path_str
                 log.info(f"Found registered parent Serena project at {current_path_str}")
+                return current_path_str
 
             # Move up one directory
             if current_path.parent == current_path:
@@ -597,10 +597,7 @@ class SerenaAgent:
                 break
             current_path = current_path.parent
 
-        if utmost_parent:
-            log.info(f"Returning utmost parent Serena project: {utmost_parent}")
-
-        return utmost_parent
+        return None
 
     def load_project_from_path_or_name(self, project_root_or_name: str, autogenerate: bool, local_only: bool = False) -> Project | None:
         """
@@ -743,10 +740,18 @@ class SerenaAgent:
         """
         Starts/resets the language server for the current project
         """
+        # stop the language server if it is running; this must happen BEFORE the language-support
+        # check below, so that switching to a project without language server support does not
+        # leave the previous project's language server running
+        if self.is_language_server_running():
+            assert self.language_server is not None
+            log.info(f"Stopping the current language server at {self.language_server.repository_root_path} ...")
+            self.language_server.stop()
+        self.language_server = None
+
         # Skip for non-LSP languages
         if not self.is_using_language_server():
             log.info("Language server not applicable for this language")
-            self.language_server = None
             return
 
         tool_timeout = self.serena_config.tool_timeout
@@ -756,13 +761,6 @@ class SerenaAgent:
             if tool_timeout < 10:
                 raise ValueError(f"Tool timeout must be at least 10 seconds, but is {tool_timeout} seconds")
             ls_timeout = tool_timeout - 5  # the LS timeout is for a single call, it should be smaller than the tool timeout
-
-        # stop the language server if it is running
-        if self.is_language_server_running():
-            assert self.language_server is not None
-            log.info(f"Stopping the current language server at {self.language_server.repository_root_path} ...")
-            self.language_server.stop()
-            self.language_server = None
 
         # instantiate and start the language server
         assert self._active_project is not None

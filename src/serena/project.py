@@ -27,7 +27,8 @@ class Project:
         # ~/.serena/projects/{project-id}/
 
         # gather ignored paths from the project configuration and gitignore files
-        ignored_patterns = project_config.ignored_paths
+        # (copy the list: extending it below must not mutate the shared ProjectConfig instance)
+        ignored_patterns = list(project_config.ignored_paths)
         if len(ignored_patterns) > 0:
             log.info(f"Using {len(ignored_patterns)} ignored paths from the explicit project configuration.")
             log.debug(f"Ignored paths: {ignored_patterns}")
@@ -298,11 +299,21 @@ class Project:
         )
         ls_logger = LanguageServerLogger(log_level=log_level)
 
+        # store project-specific LS data (e.g. the document symbol cache) in centralized storage,
+        # keeping the project directory itself free of Serena files
+        from serena.constants import get_centralized_project_dir
+
+        project_data_dir = str(get_centralized_project_dir(Path(self.project_root)))
+
         log.info(f"Creating language server instance for {self.project_root}.")
         return SolidLanguageServer.create(
             ls_config,
             ls_logger,
             self.project_root,
             timeout=ls_timeout,
-            solidlsp_settings=SolidLSPSettings(solidlsp_dir=SERENA_MANAGED_DIR_IN_HOME, project_data_relative_path=SERENA_MANAGED_DIR_NAME),
+            solidlsp_settings=SolidLSPSettings(
+                solidlsp_dir=SERENA_MANAGED_DIR_IN_HOME,
+                project_data_relative_path=SERENA_MANAGED_DIR_NAME,
+                project_data_dir=project_data_dir,
+            ),
         )

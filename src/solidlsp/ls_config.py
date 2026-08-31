@@ -136,6 +136,20 @@ class Language(str, Enum):
             case _:
                 raise ValueError(f"Unhandled language: {self}")
 
+    def get_detection_fn_matcher(self) -> FilenameMatcher:
+        """
+        Returns the filename matcher to use for automatic language DETECTION, which excludes
+        extensions that are too ambiguous to indicate the language (e.g. Erlang's `*.config` and
+        `*.app`, which commonly occur in projects of entirely unrelated languages).
+        The full matcher from get_source_fn_matcher() remains in effect for actual language
+        server operations once a language has been chosen.
+        """
+        match self:
+            case self.ERLANG:
+                return FilenameMatcher("*.erl", "*.hrl", "*.escript", "*.app.src")
+            case _:
+                return self.get_source_fn_matcher()
+
 
 @dataclass
 class LanguageServerConfig:

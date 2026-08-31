@@ -1729,13 +1729,11 @@ class SolidLanguageServer(ABC):
         """
         The path to the cache file for the document symbols.
         """
-        return (
-            Path(self.repository_root_path)
-            / self._solidlsp_settings.project_data_relative_path
-            / self.CACHE_FOLDER_NAME
-            / self.language_id
-            / "document_symbols_cache_v23-06-25.pkl"
-        )
+        if self._solidlsp_settings.project_data_dir is not None:
+            project_data_dir = Path(self._solidlsp_settings.project_data_dir)
+        else:
+            project_data_dir = Path(self.repository_root_path) / self._solidlsp_settings.project_data_relative_path
+        return project_data_dir / self.CACHE_FOLDER_NAME / self.language_id / "document_symbols_cache_v23-06-25.pkl"
 
     def save_cache(self):
         with self._cache_lock:

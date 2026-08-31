@@ -10,7 +10,6 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional, Self, TypeVar
 
@@ -277,6 +276,9 @@ class ProjectConfig(ToolInclusionDefinition, ToStringMixin):
             config_with_comments = load_yaml(PROJECT_TEMPLATE_FILE, preserve_comments=True)
             config_with_comments["project_name"] = project_name
             config_with_comments["language"] = dominant_language
+            # record the project root so the hashed centralized config dir is resolvable back
+            # to the project it belongs to (for humans and tools alike)
+            config_with_comments["project_root"] = str(project_root)
             if save_to_disk:
                 config_path = cls.rel_path_to_project_yml(project_root)
                 save_yaml(str(config_path), config_with_comments, preserve_comments=True)
@@ -612,12 +614,14 @@ class SerenaConfig(ToolInclusionDefinition, ToStringMixin):
             log.error(f"Error migrating configuration file: {e}")
             return None
 
-    @cached_property
+    @property
     def project_paths(self) -> list[str]:
+        # deliberately not cached: the project list changes when projects are added/removed
         return sorted(str(project.project_root) for project in self.projects)
 
-    @cached_property
+    @property
     def project_names(self) -> list[str]:
+        # deliberately not cached: the project list changes when projects are added/removed
         return sorted(project.project_config.project_name for project in self.projects)
 
     def get_project(self, project_root_or_name: str) -> Optional["Project"]:

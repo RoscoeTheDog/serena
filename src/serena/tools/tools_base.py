@@ -702,7 +702,22 @@ class Tool(Component):
 
             try:
                 if not self.is_active():
-                    return f"Error: Tool '{self.get_name_from_cls()}' is not active. Active tools: {self.agent.get_active_tool_names()}"
+                    reason = "it is excluded by the current configuration (context, modes, or project settings)"
+                    active_project = self.agent._active_project
+                    if active_project is not None:
+                        if self.is_symbolic() and not self.agent.is_using_language_server():
+                            reason = (
+                                f"symbolic tools are disabled: the project language "
+                                f"'{active_project.project_config.language.value}' has no language server support"
+                                if not self.agent.serena_config.jetbrains
+                                else "symbolic tools are disabled in JetBrains mode"
+                            )
+                        elif self.can_edit() and active_project.project_config.read_only:
+                            reason = "the project is configured as read-only"
+                    return (
+                        f"Error: Tool '{self.get_name_from_cls()}' is not active ({reason}). "
+                        f"Active tools: {self.agent.get_active_tool_names()}"
+                    )
             except Exception as e:
                 return f"RuntimeError while checking if tool {self.get_name_from_cls()} is active: {e}"
 

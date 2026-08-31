@@ -83,8 +83,11 @@ def get_centralized_project_dir(project_root: Path) -> Path:
     This directory is located at ~/.serena/projects/{project-id}/ and contains:
     - project.yml (project configuration)
     - memories/ (project-specific memories)
+    - cache/ (language server caches)
 
-    The directory is created lazily (only when first needed).
+    This is a pure path computation: the directory is NOT created here. Callers that
+    write into it are responsible for creating it (e.g. via mkdir(parents=True, exist_ok=True)),
+    so that read-only queries do not litter ~/.serena/projects/ with empty directories.
 
     Args:
         project_root: Absolute path to project root
@@ -97,12 +100,7 @@ def get_centralized_project_dir(project_root: Path) -> Path:
         Path("/home/user/.serena/projects/a1b2c3d4e5f6g7h8")
     """
     project_id = get_project_identifier(project_root)
-    centralized_dir = _serena_in_home_managed_dir / "projects" / project_id
-
-    # Lazy creation: create directory if it doesn't exist
-    centralized_dir.mkdir(parents=True, exist_ok=True)
-
-    return centralized_dir
+    return _serena_in_home_managed_dir / "projects" / project_id
 
 
 def get_project_config_path(project_root: Path) -> Path:
@@ -126,7 +124,8 @@ def get_project_memories_path(project_root: Path) -> Path:
     """
     Get path to centralized memories directory.
 
-    The memories directory is created lazily (only when first needed).
+    This is a pure path computation: the directory is NOT created here (see
+    get_centralized_project_dir); writers create it on demand.
 
     Args:
         project_root: Absolute path to project root
@@ -138,11 +137,6 @@ def get_project_memories_path(project_root: Path) -> Path:
         >>> get_project_memories_path(Path("/home/user/myapp"))
         Path("/home/user/.serena/projects/a1b2c3d4e5f6g7h8/memories")
     """
-    memories_dir = get_centralized_project_dir(project_root) / "memories"
-
-    # Lazy creation: create directory if it doesn't exist
-    memories_dir.mkdir(parents=True, exist_ok=True)
-
-    return memories_dir
+    return get_centralized_project_dir(project_root) / "memories"
 
 

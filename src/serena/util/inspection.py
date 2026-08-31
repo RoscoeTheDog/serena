@@ -37,7 +37,7 @@ def determine_programming_language_composition(repo_path: str) -> dict[str, floa
     total_files = len(all_files)
 
     for language in Language.iter_all(include_experimental=False):
-        matcher = language.get_source_fn_matcher()
+        matcher = language.get_detection_fn_matcher()
         count = 0
 
         for file_path in all_files:
@@ -54,11 +54,5 @@ def determine_programming_language_composition(repo_path: str) -> dict[str, floa
     for language_name, count in language_counts.items():
         percentage = (count / total_files) * 100
         language_percentages[language_name] = round(percentage, 2)
-
-    # Prioritize Markdown if it's dominant (>50% of files)
-    # This prevents false detection as Python/TypeScript due to config files
-    markdown_percentage = language_percentages.get("markdown", 0)
-    if markdown_percentage > 50:
-        log.info(f"Detected Markdown-dominant project: {markdown_percentage}% of files are Markdown")
 
     return language_percentages

@@ -249,3 +249,6 @@ claude-mcp-installer/
 .test_venv/
 .serena/
 .claude-context/
+
+# Gradle build metadata in test resource repos
+test/resources/repos/**/.gradle/

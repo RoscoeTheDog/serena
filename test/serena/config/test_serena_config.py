@@ -147,6 +147,41 @@ class TestProjectConfigAutogenerate:
         assert "no symbol/language-server support for Markdown" in error_message
         assert "language: python" in error_message
 
+    def test_autogenerate_ambiguous_config_files_not_erlang(self):
+        """Generic *.config/*.app files must not cause a docs repo to be detected as Erlang."""
+        (self.project_path / "README.md").write_text("# Docs\n")
+        (self.project_path / "web.config").write_text("<configuration/>\n")
+        (self.project_path / "app.config").write_text("[]\n")
+
+        # With ambiguous extensions excluded from detection, this is a markdown-only repo -> refused
+        with pytest.raises(ValueError) as exc_info:
+            ProjectConfig.autogenerate(self.project_path, save_to_disk=False)
+        assert "Only Markdown files were detected" in str(exc_info.value)
+
+    def test_autogenerate_real_erlang_project_detected(self):
+        """Actual Erlang sources still detect as Erlang."""
+        (self.project_path / "server.erl").write_text("-module(server).\n")
+        (self.project_path / "records.hrl").write_text("-record(state, {}).\n")
+
+        config = ProjectConfig.autogenerate(self.project_path, save_to_disk=False)
+        assert config.language == Language.ERLANG
+
+    def test_autogenerate_records_project_root(self):
+        """The generated config must record the project root, so the hashed centralized
+        config directory is resolvable back to the project it belongs to."""
+        from serena.constants import get_project_config_path
+
+        (self.project_path / "main.py").write_text("print('hello')\n")
+        ProjectConfig.autogenerate(self.project_path, save_to_disk=True)
+
+        config_path = get_project_config_path(self.project_path)
+        try:
+            content = config_path.read_text(encoding="utf-8")
+            assert str(self.project_path.resolve()) in content
+            assert "project_root" in content
+        finally:
+            shutil.rmtree(config_path.parent, ignore_errors=True)
+
     def test_autogenerate_error_message_format(self):
         """Test the specific format of the error message for better user experience."""
         with pytest.raises(ValueError) as exc_info:

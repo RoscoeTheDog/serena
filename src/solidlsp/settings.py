@@ -18,6 +18,13 @@ class SolidLSPSettings:
     Relative path within each project directory where Solid-LSP can store project-specific data, e.g. cache files.
     For instance, if this is ".solidlsp" and the project is located at "/home/user/myproject",
     then Solid-LSP will store project-specific data in "/home/user/myproject/.solidlsp".
+    Ignored if `project_data_dir` is set.
+    """
+    project_data_dir: str | None = None
+    """
+    Absolute path to the directory in which to store project-specific data (e.g. cache files).
+    If set, takes precedence over `project_data_relative_path`, keeping the project directory
+    itself free of Solid-LSP data.
     """
 
     def __post_init__(self):

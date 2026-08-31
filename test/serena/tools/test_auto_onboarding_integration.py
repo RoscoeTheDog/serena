@@ -57,6 +57,14 @@ class MockAgent:
         """Get list of active tool names."""
         return [tool_class.__name__ for tool_class in self._tools.keys()]
 
+    def is_using_language_server(self) -> bool:
+        """Language server mode is assumed active in these tests."""
+        return True
+
+    def issue_task(self, task, name=None):
+        """Execute background tasks synchronously in tests."""
+        task()
+
 
 class TestAutoOnboardingIntegration:
     """Integration tests for auto-onboarding during project activation."""
