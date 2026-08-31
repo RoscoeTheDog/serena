@@ -1,4 +1,7 @@
 import logging
+import os
+import shutil
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -13,6 +16,38 @@ from solidlsp.ls_logger import LanguageServerLogger
 from solidlsp.settings import SolidLSPSettings
 
 configure(level=logging.ERROR)
+
+# Redirect per-project storage (~/.serena/projects/<id>/) into a throwaway directory for the
+# duration of the test session. Without this, every test that loads a Project or constructs a
+# MemoriesManager writes into the user's real ~/.serena/projects/ using a hash of a random
+# tmpdir, so each run permanently leaks directories that nothing ever cleans up.
+#
+# This deliberately runs in pytest_configure, i.e. AFTER this module's `serena.constants` import
+# above has already bound the import-time constants. Only the lazily-resolved project-storage
+# paths follow SERENA_HOME, so the language-server binary cache under the real ~/.serena
+# (SERENA_MANAGED_DIR_IN_HOME, used by create_ls below) is still shared and not re-downloaded.
+_SERENA_HOME_TMP: str | None = None
+_SERENA_HOME_PREV: str | None = None
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    global _SERENA_HOME_TMP, _SERENA_HOME_PREV
+    _SERENA_HOME_PREV = os.environ.get("SERENA_HOME")
+    _SERENA_HOME_TMP = tempfile.mkdtemp(prefix="serena-test-home-")
+    # Mirror the production layout: the managed dir is literally named ".serena", so tests that
+    # assert on the shape of a storage path (e.g. that it contains ".serena/projects/") stay valid.
+    serena_home = Path(_SERENA_HOME_TMP) / SERENA_MANAGED_DIR_NAME
+    serena_home.mkdir(parents=True, exist_ok=True)
+    os.environ["SERENA_HOME"] = str(serena_home)
+
+
+def pytest_unconfigure(config: pytest.Config) -> None:
+    if _SERENA_HOME_PREV is None:
+        os.environ.pop("SERENA_HOME", None)
+    else:
+        os.environ["SERENA_HOME"] = _SERENA_HOME_PREV
+    if _SERENA_HOME_TMP:
+        shutil.rmtree(_SERENA_HOME_TMP, ignore_errors=True)
 
 
 @pytest.fixture(scope="session")

@@ -1,11 +1,32 @@
 import hashlib
+import os
 from pathlib import Path
 
 _repo_root_path = Path(__file__).parent.parent.parent.resolve()
 _serena_pkg_path = Path(__file__).parent.resolve()
 
 SERENA_MANAGED_DIR_NAME = ".serena"
-_serena_in_home_managed_dir = Path.home() / ".serena"
+
+
+def _resolve_serena_home() -> Path:
+    """
+    Resolve Serena's managed home directory, honouring the SERENA_HOME override.
+
+    SERENA_HOME is resolved on every call (not cached at import time) so that tests and
+    embedding applications can redirect all project storage to a scratch directory without
+    depending on module import order. Semantics match SerenaPaths: unset or blank means
+    "use the default location".
+
+    Returns:
+        Path to the managed home dir (``$SERENA_HOME`` if set, else ``~/.serena``)
+    """
+    home_dir = os.environ.get("SERENA_HOME")
+    if home_dir is None or home_dir.strip() == "":
+        return Path.home() / ".serena"
+    return Path(home_dir.strip()).expanduser()
+
+
+_serena_in_home_managed_dir = _resolve_serena_home()
 
 SERENA_MANAGED_DIR_IN_HOME = str(_serena_in_home_managed_dir)
 
@@ -76,6 +97,19 @@ def get_project_identifier(project_root: Path) -> str:
     return hash_obj.hexdigest()[:16]
 
 
+def get_centralized_projects_root() -> Path:
+    """
+    Get the root directory holding all per-project storage directories.
+
+    Resolved on every call so that a SERENA_HOME override applies regardless of when it was
+    set. This is a pure path computation: the directory is NOT created here.
+
+    Returns:
+        Path to ``$SERENA_HOME/projects`` (default ``~/.serena/projects``)
+    """
+    return _resolve_serena_home() / "projects"
+
+
 def get_centralized_project_dir(project_root: Path) -> Path:
     """
     Get the centralized directory for a project's Serena data.
@@ -100,7 +134,7 @@ def get_centralized_project_dir(project_root: Path) -> Path:
         Path("/home/user/.serena/projects/a1b2c3d4e5f6g7h8")
     """
     project_id = get_project_identifier(project_root)
-    return _serena_in_home_managed_dir / "projects" / project_id
+    return get_centralized_projects_root() / project_id
 
 
 def get_project_config_path(project_root: Path) -> Path:

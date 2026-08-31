@@ -604,8 +604,10 @@ class ListProjectConfigsTool(Tool, ToolMarkerDoesNotRequireActiveProject, ToolMa
         """
         import yaml
 
+        from serena.constants import get_centralized_projects_root
+
         projects = []
-        centralized_projects_dir = Path.home() / ".serena" / "projects"
+        centralized_projects_dir = get_centralized_projects_root()
 
         # Scan centralized projects directory
         if centralized_projects_dir.exists():
